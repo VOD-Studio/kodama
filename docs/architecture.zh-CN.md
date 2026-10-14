@@ -94,10 +94,11 @@ crates/service/pet-service/src/
 ├── http.rs     认证、请求体解析、作用域、把存储操作移出异步运行时
 ├── identity.rs 身份断言与访问令牌
 ├── activity.rs 活动事实：签名校验、奖励表、每日账本
+├── friends.rs  好友、拜访与联合探险
 ├── session.rs  登录会话：刷新令牌轮换，重用即撤销会话
 ├── device.rs   设备授权（CLI 登录）：用户码与授权记录
 ├── record.rs   存储契约上小 JSON 记录的读改写
-└── routes/     按资源分文件：meta、auth、births、pets、sessions、device、activity
+└── routes/     按资源分文件：meta、auth、births、pets、sessions、device、activity、memorials、friends
 ```
 
 公开路径不随内部结构变化：其他 crate 用到的一切都由 `pet_core` 再导出。
@@ -251,7 +252,7 @@ CAPABILITIES（pet-core::caps）────────────────
 | #16 Skill | 能力目录（已有） | — | — | `packages/pet-sdk/skill/`，可生成部分由能力目录产出 |
 | #17 装扮与家园 | **已完成**：`rules/wardrobe.rs`（升级解锁、穿脱、身体结构检查），`Pet.species` | **已完成**：`pet-term` 的 `outfit.rs` 与 `pixel/items.rs`，`assets/catalog/items.json`（[设计](design/outfits.md)） | 动作经 `POST /v1/pets/me/actions`，无需新接口 | `sprite`、`frame`、`mountPet` 与终端嵌入接受 `outfit` |
 | #18 主题探险 | **已完成**：`rules/expedition.rs`（出发、领取、召回，独立随机通道 `expedition/v1`，每天 2 次） | 见闻目录 `assets/catalog/souvenirs.json`（[设计](design/expeditions.md)） | 动作经 `POST /v1/pets/me/actions`，无需新接口 | `pet-cli act depart/return/recall` |
-| #19 好友 | 只有公开投影 | — | `routes/friends.rs`：双方确认与撤回，自有数据表 | — |
+| #19 好友 | 不变：联合探险复用探险规则 | — | **已完成**：`friends.rs` 与 `routes/friends.rs`（邀请码、双方记录、公开投影、拜访、联合探险），存在存储契约里，不新增表 | — |
 | #20 繁育与家谱 | `birth/inherit.rs`：遗传与变异用独立通道；家谱进入证书上下文 | 遗传特征体现在形态上 | `routes/breeding.rs`：两步授权、孵化仓、退役 | — |
 | #21 AI 对话 | 能力白名单来自能力目录 | — | `routes/chat.rs`；模型接入在新的 `service` 层 crate 里以 trait 抽象，HTTP 客户端依赖保持可选 | — |
 | #7 身份与活动协议 | — | — | 由 `pet-schema` 生成 HTTP 接口的 JSON Schema，与命令协议同法 | 连接器在接入方仓库 |
