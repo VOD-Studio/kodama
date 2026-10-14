@@ -1,6 +1,6 @@
 {
   "name": "@violetjs/pet",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Electronic pet SDK for the web and Node: deterministic WebAssembly rules core, typed commands, terminal and canvas rendering, and an offline local mode.",
   "keywords": [
     "pet",
