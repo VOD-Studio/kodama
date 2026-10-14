@@ -45,9 +45,40 @@
 ## 发布形态
 
 - 目前没有任何包发布到 registry，`0.0.0` 仅用于本地验收。
-- 发布沿用仓库已有的 npm 发布工作流模式（`publish-npm.yml` 校验清单、测试与外部消费后再发布）；宠物拆为独立仓库后在新仓库建立等价流程，须使用带 provenance 的发布并核对 `NPM_TOKEN`。
+- 发布由本仓库的 `release.yml` 与 `package.yml` 完成，使用带 provenance 的发布，流程与配置见下文「发版与发布」。
 - Skill 与 `docs/capabilities.md` 随 SDK 包分发，保证外部 agent 不依赖本仓库（能力文档已随包，Skill 本体见 #16）。
 
 ## 对应验收
 
 外部开发者能照做的接入与升级说明：安装、初始化、命令、升级与不支持平台的行为已在 SDK 与 CLI 的验收脚本中体现；面向用户的接入文档属于 #16 的 Skill 与文档工作。
+
+## 发版与发布
+
+版本号由 [release-please](https://github.com/googleapis/release-please) 从 Conventional Commits 推导，仓库里 `.release-please-manifest.json` 是基线，`release-please-config.json` 指明同步改哪些文件（Cargo workspace、各 crate 在 `Cargo.lock` 里的版本、`@violetjs/pet` 的 `package.json`）。所有包共用一个版本号。
+
+```
+合并到 main ──► release.yml：release-please 开/更新「发版 PR」（版本号 + CHANGELOG）
+                    └─ 对该分支手动触发一次 CI（GITHUB_TOKEN 建的 PR 不会自动触发 CI）
+合并发版 PR ──► release.yml：打标签 vX.Y.Z、建 GitHub Release
+                    └─ 同一个工作流调用 package.yml 发布 npm 包
+```
+
+- `feat` 升次版本，`fix` 升补丁版本；1.0 之前破坏性变更也只升次版本。`docs`、`chore`、`ci`、`test` 默认不触发发版。
+- `package.yml` 构建并打包 `@violetjs/pet`、三个平台包（darwin-arm64、linux-x64、linux-arm64）与 `@violetjs/pet-cli`，产物作为 artifact 交出；这些构建作业**接触不到任何发布凭据**。发布前校验标签、`Cargo.toml` 与 `package.json` 的版本一致。
+- `release.yml` 里只有一个 `publish` 作业声明了 `npm` 环境，下载 artifact 后发布，CLI 主包放在各平台包之后。
+- PR 修改了包相关文件时，`package.yml` 会以 dry-run 跑一遍（打包并检查文件清单，不需要凭据），打包问题在合并前暴露。
+- 发布可以重跑：同名同版本已存在则跳过。
+- crates 的 `publish = false`，**不会**发布到 crates.io。
+
+### 需要在 GitHub 与 npm 上配置的内容
+
+| 配置 | 位置 | 说明 |
+|---|---|---|
+| `npm` 环境 | 仓库 Settings → Environments → New environment，名称 `npm` | 部署分支只允许 `main`；开启 Required reviewers 并加上维护者，每次发布前需要人工批准（npm 的版本一旦发布不能重发） |
+| `NPM_TOKEN` | 上述 `npm` 环境的 Environment secrets | 放在环境里而不是仓库或组织级：只有声明了该环境的作业能读到，PR 与构建作业读不到。在 npmjs.com 的 Access Tokens 里建 Granular access token，对 `@violetjs` 组织内的包授予 Read and write，并允许在 CI 中绕过 2FA。环境密钥不能是组织级的 |
+| `@violetjs` 组织 | npmjs.com | 令牌所属账号必须是该组织成员且有发布权限 |
+| 分支保护 | 仓库 Settings → Branches | 要求通过 PR 合并与必需的检查 |
+
+缺少令牌时发布作业会失败并提示，其余作业不受影响；配好后重跑即可，已发布的包会跳过。
+
+发布使用 `--provenance`（需要 `id-token: write`，已在工作流里声明）。首次发布用令牌；之后是否改用 npm 的 Trusted Publishing 取决于它对可复用工作流的支持，尚未验证。
