@@ -24,13 +24,36 @@ fn pose_name(p: Pose) -> &'static str {
 }
 
 fn main() {
-    let poses = [Pose::Idle, Pose::Observe, Pose::Eat, Pose::Play, Pose::Sleep, Pose::Startled, Pose::Sick, Pose::Evolve, Pose::End];
+    let poses = [
+        Pose::Idle,
+        Pose::Observe,
+        Pose::Eat,
+        Pose::Play,
+        Pose::Sleep,
+        Pose::Startled,
+        Pose::Sick,
+        Pose::Evolve,
+        Pose::End,
+    ];
     for s in 0..SPECIES_COUNT {
         println!("== 物种 {s}（{:?}）", body_of(s));
         let cols: Vec<Vec<String>> = poses.iter().map(|p| frame(s, *p, 2)).collect();
-        println!("{}", poses.iter().map(|p| format!("{:<9}", pose_name(*p))).collect::<Vec<_>>().join(" "));
+        println!(
+            "{}",
+            poses
+                .iter()
+                .map(|p| format!("{:<9}", pose_name(*p)))
+                .collect::<Vec<_>>()
+                .join(" ")
+        );
         for row in 0..3 {
-            println!("{}", cols.iter().map(|c| c[row].clone()).collect::<Vec<_>>().join(" "));
+            println!(
+                "{}",
+                cols.iter()
+                    .map(|c| c[row].clone())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            );
         }
         println!();
     }

@@ -8,10 +8,24 @@ fn key(seed: u8) -> SigningKey {
 }
 
 fn ctx(kid: &str, issued_at: u64) -> Context {
-    Context { world: "w1".into(), issuer: "violet".into(), kid: kid.into(), request_id: "r1".into(), eligibility: "e".into(), rules_version: 1, issued_at }
+    Context {
+        world: "w1".into(),
+        issuer: "violet".into(),
+        kid: kid.into(),
+        request_id: "r1".into(),
+        eligibility: "e".into(),
+        rules_version: 1,
+        issued_at,
+    }
 }
 
-fn ik(kid: &str, seed: u8, not_before: u64, not_after: Option<u64>, revoked_at: Option<u64>) -> IssuerKey {
+fn ik(
+    kid: &str,
+    seed: u8,
+    not_before: u64,
+    not_after: Option<u64>,
+    revoked_at: Option<u64>,
+) -> IssuerKey {
     // 通过 JSON 构造,与线上形态一致(u64 以字符串编码)。
     serde_json::from_value(serde_json::json!({
         "kid": kid,
@@ -69,7 +83,10 @@ fn tampering_is_classified() {
     assert_eq!(verify(&c, &keys()), Verdict::CommitSignature);
 
     // 用另一把私钥签名但冒用 k1 的公钥
-    assert_eq!(verify(&cert("k1", 9, 1000), &keys()), Verdict::CommitSignature);
+    assert_eq!(
+        verify(&cert("k1", 9, 1000), &keys()),
+        Verdict::CommitSignature
+    );
 }
 
 #[test]
@@ -89,21 +106,30 @@ fn certificate_carries_no_account_data() {
 
 #[test]
 fn unknown_kid_is_reported() {
-    assert_eq!(verify(&cert("missing", 7, 1000), &keys()), Verdict::UnknownKey);
+    assert_eq!(
+        verify(&cert("missing", 7, 1000), &keys()),
+        Verdict::UnknownKey
+    );
     assert_eq!(verify(&cert("k1", 7, 1000), &[]), Verdict::UnknownKey);
 }
 
 #[test]
 fn rotation_keeps_old_certificates_verifiable() {
     // k1 在 5000 结束使用,k2 自 5001 起;旧证书在新密钥集下仍然有效(AC-19)。
-    let set = vec![ik("k1", 7, 0, Some(5000), None), ik("k2", 8, 5001, None, None)];
+    let set = vec![
+        ik("k1", 7, 0, Some(5000), None),
+        ik("k2", 8, 5001, None, None),
+    ];
     assert_eq!(verify(&cert("k1", 7, 1000), &set), Verdict::Valid);
     assert_eq!(verify(&cert("k2", 8, 6000), &set), Verdict::Valid);
 }
 
 #[test]
 fn a_rotated_key_cannot_sign_after_its_window() {
-    let set = vec![ik("k1", 7, 0, Some(5000), None), ik("k2", 8, 5001, None, None)];
+    let set = vec![
+        ik("k1", 7, 0, Some(5000), None),
+        ik("k2", 8, 5001, None, None),
+    ];
     assert_eq!(verify(&cert("k1", 7, 5001), &set), Verdict::KeyNotValid);
     assert_eq!(verify(&cert("k2", 8, 5000), &set), Verdict::KeyNotValid);
 }

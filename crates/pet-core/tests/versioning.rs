@@ -6,10 +6,15 @@ use serde_json::Value;
 fn golden_births_never_change() {
     // 已出生的个体按保存的身份、基因与对应规则版本呈现,不能被后来的实现改写。
     // 修改出生派生必须提升 RULES_VERSION 并保留旧派生;不得重新生成这份文件来让测试通过。
-    let vectors: Vec<Value> = serde_json::from_str(include_str!("../../../scenario/golden-births.json")).unwrap();
+    let vectors: Vec<Value> =
+        serde_json::from_str(include_str!("../../../scenario/golden-births.json")).unwrap();
     assert!(vectors.len() >= 16);
     for v in &vectors {
-        assert_eq!(v["rules_version"].as_u64().unwrap(), 1, "only v1 vectors exist so far");
+        assert_eq!(
+            v["rules_version"].as_u64().unwrap(),
+            1,
+            "only v1 vectors exist so far"
+        );
         let b = derive_birth(&BirthInput {
             world: v["world"].as_str().unwrap().into(),
             request_id: v["request_id"].as_str().unwrap().into(),
@@ -22,10 +27,31 @@ fn golden_births_never_change() {
         assert_eq!(b.id, e["id"].as_str().unwrap(), "{}", v["request_id"]);
         assert_eq!(u64::from(b.rarity), e["rarity"].as_u64().unwrap());
         assert_eq!(u64::from(b.species), e["species"].as_u64().unwrap());
-        let genes: Vec<u64> = e["genes"].as_array().unwrap().iter().map(|g| g.as_u64().unwrap()).collect();
-        assert_eq!(b.genes.iter().map(|g| u64::from(*g)).collect::<Vec<_>>(), genes);
-        let base: Vec<u64> = e["base_traits"].as_array().unwrap().iter().map(|g| g.as_u64().unwrap()).collect();
-        assert_eq!(b.pet.growth.base_traits.iter().map(|g| u64::from(*g)).collect::<Vec<_>>(), base);
+        let genes: Vec<u64> = e["genes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|g| g.as_u64().unwrap())
+            .collect();
+        assert_eq!(
+            b.genes.iter().map(|g| u64::from(*g)).collect::<Vec<_>>(),
+            genes
+        );
+        let base: Vec<u64> = e["base_traits"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|g| g.as_u64().unwrap())
+            .collect();
+        assert_eq!(
+            b.pet
+                .growth
+                .base_traits
+                .iter()
+                .map(|g| u64::from(*g))
+                .collect::<Vec<_>>(),
+            base
+        );
     }
 }
 
@@ -35,7 +61,10 @@ fn pets_saved_before_the_version_field_load_as_version_one() {
     let p: Pet = serde_json::from_str(legacy).unwrap();
     assert_eq!(p.rules_version, 1);
     assert_eq!((p.satiety_rem, p.energy_rem), (0, 0));
-    assert!(act(p, Action::Wait, 10, "r").is_ok(), "legacy save must keep working");
+    assert!(
+        act(p, Action::Wait, 10, "r").is_ok(),
+        "legacy save must keep working"
+    );
 }
 
 #[test]

@@ -1,4 +1,7 @@
-use pet_core::{growth::EvolutionOptions, proof::Verdict, Birth, CapabilityCatalog, Command, ErrorBody, OkBody, Outcome};
+use pet_core::{
+    growth::EvolutionOptions, proof::Verdict, Birth, CapabilityCatalog, Command, ErrorBody, OkBody,
+    Outcome,
+};
 use pet_term::{Frame, Pixels};
 use schemars::generate::SchemaSettings;
 use serde_json::{json, Value};
@@ -37,7 +40,10 @@ fn bundle() -> Value {
 }
 
 fn main() {
-    println!("{}", serde_json::to_string_pretty(&bundle()).expect("schema is serializable"));
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&bundle()).expect("schema is serializable")
+    );
 }
 
 #[cfg(test)]
@@ -51,15 +57,28 @@ mod tests {
         let cmd = serde_json::to_string(&b["$defs"]["Command"]).unwrap();
         for (op, result) in OP_RESULTS {
             assert!(cmd.contains(&format!("\"{op}\"")), "Command has no op {op}");
-            assert!(b["$defs"].get(result).is_some(), "missing definition {result}");
+            assert!(
+                b["$defs"].get(result).is_some(),
+                "missing definition {result}"
+            );
         }
         let catalog_ops: Vec<&str> = CAPABILITIES.iter().map(|c| c.op).collect();
         let mut table_ops: Vec<&str> = OP_RESULTS.iter().map(|(o, _)| *o).collect();
         table_ops.sort();
         let mut sorted = catalog_ops.clone();
         sorted.sort();
-        assert_eq!(sorted, table_ops, "capability catalog and OP_RESULTS must list the same ops");
-        let variants = b["$defs"]["Command"]["oneOf"].as_array().expect("tagged enum").len();
-        assert_eq!(variants, OP_RESULTS.len(), "new Command variant needs an OP_RESULTS entry");
+        assert_eq!(
+            sorted, table_ops,
+            "capability catalog and OP_RESULTS must list the same ops"
+        );
+        let variants = b["$defs"]["Command"]["oneOf"]
+            .as_array()
+            .expect("tagged enum")
+            .len();
+        assert_eq!(
+            variants,
+            OP_RESULTS.len(),
+            "new Command variant needs an OP_RESULTS entry"
+        );
     }
 }

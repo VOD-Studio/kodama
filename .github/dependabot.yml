@@ -1,0 +1,47 @@
+# 依赖自动更新：每月一次；minor/patch 合并为一个 PR，major 单独开 PR 便于评估。
+# 标题前缀符合提交信息检查。默认 chore 不触发发版；修复了已发布产物的漏洞时，
+# 合并前把标题改成 fix(deps): …（squash 合并以 PR 标题为准）。
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      minor-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+    ignore:
+      # 必须与 CI、Dockerfile.dev 安装的 wasm-bindgen-cli 同步升级（scripts/version.mjs 校验），手动处理
+      - dependency-name: wasm-bindgen
+
+  - package-ecosystem: npm
+    directory: /packages/pet-sdk
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      minor-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+    groups:
+      minor-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore(deps)

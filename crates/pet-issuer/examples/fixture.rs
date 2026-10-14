@@ -17,5 +17,8 @@ fn main() {
     };
     let cert = issue_certificate(&key, &ctx, &[1u8; 32], &[2u8; 32]).unwrap();
     let keys = serde_json::json!([{ "kid": "k1", "public_key": hex(&key.verifying_key().to_bytes()), "not_before": "0" }]);
-    println!("{}", serde_json::json!({ "certificate": cert, "issuer_keys": keys }));
+    println!(
+        "{}",
+        serde_json::json!({ "certificate": cert, "issuer_keys": keys })
+    );
 }

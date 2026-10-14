@@ -19,14 +19,31 @@ fn main() {
 /// 帮助文本中的能力列表与机器可读发现同源(pet_core::CAPABILITIES)。
 fn help() {
     println!("usage: pet-cli [exec|live|capabilities|help]\n");
-    println!("  exec          read one JSON command per line on stdin, write one JSON result per line");
+    println!(
+        "  exec          read one JSON command per line on stdin, write one JSON result per line"
+    );
     println!("  live          interactive terminal pet (non-TTY: one JSON status line)");
     println!("  capabilities  print the machine-readable capability catalog\n");
     println!("ops accepted by exec (rules v{}):", pet_core::RULES_VERSION);
     for c in pet_core::CAPABILITIES {
         let errors: Vec<String> = c.errors.iter().map(|e| format!("{e:?}")).collect();
-        let errors = if errors.is_empty() { "-".to_string() } else { errors.join(", ") };
-        println!("  {:<13} {}{}\n  {:<13} errors: {}", c.op, c.summary, if c.mutates_state { " [mutates state]" } else { "" }, "", errors);
+        let errors = if errors.is_empty() {
+            "-".to_string()
+        } else {
+            errors.join(", ")
+        };
+        println!(
+            "  {:<13} {}{}\n  {:<13} errors: {}",
+            c.op,
+            c.summary,
+            if c.mutates_state {
+                " [mutates state]"
+            } else {
+                ""
+            },
+            "",
+            errors
+        );
     }
 }
 

@@ -28,8 +28,15 @@ fn color_mode() -> ColorMode {
 }
 
 fn charset() -> Charset {
-    let loc = ["LC_ALL", "LC_CTYPE", "LANG"].iter().find_map(|k| std::env::var(k).ok().filter(|v| !v.is_empty())).unwrap_or_default();
-    if loc.to_uppercase().contains("UTF") { Charset::Unicode } else { Charset::Ascii }
+    let loc = ["LC_ALL", "LC_CTYPE", "LANG"]
+        .iter()
+        .find_map(|k| std::env::var(k).ok().filter(|v| !v.is_empty()))
+        .unwrap_or_default();
+    if loc.to_uppercase().contains("UTF") {
+        Charset::Unicode
+    } else {
+        Charset::Ascii
+    }
 }
 
 /// 进入时接管终端,Drop 与 panic 钩子都会恢复。
@@ -60,7 +67,15 @@ impl Drop for TermGuard {
 
 fn input(species: u8, w: u16, h: u16, t: u64, pose: Pose, cs: Charset) -> FrameInput {
     // 切片:固定演示个体;账号模式下由投影提供 species / genes。
-    FrameInput { species, genes: [37, 0, 0, 0, 0, 0, 0, 0], pose, charset: cs, w, h, t }
+    FrameInput {
+        species,
+        genes: [37, 0, 0, 0, 0, 0, 0, 0],
+        pose,
+        charset: cs,
+        w,
+        h,
+        t,
+    }
 }
 
 /// 非 TTY:输出一行可读 JSON 状态后退出,不含任何控制码。
@@ -116,7 +131,11 @@ pub fn run() -> i32 {
                         let _ = queue!(out, SetForegroundColor(Color::AnsiValue(c)), Print(ch));
                     }
                     (ColorMode::Ansi16, c) => {
-                        let _ = queue!(out, SetForegroundColor(Color::AnsiValue(1 + c % 6)), Print(ch));
+                        let _ = queue!(
+                            out,
+                            SetForegroundColor(Color::AnsiValue(1 + c % 6)),
+                            Print(ch)
+                        );
                     }
                 }
             }

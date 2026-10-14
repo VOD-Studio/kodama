@@ -1,0 +1,35 @@
+name: Dev environment
+
+# 开发容器（Dockerfile.dev + compose.yaml）必须能跑通与 CI 相同的检查：本机不装 Rust 的维护者依赖它。
+# 每周跑一次，及早发现上游镜像或工具下载地址的变化。
+on:
+  pull_request:
+    paths: ["Dockerfile.dev", "compose.yaml", "Makefile", ".github/workflows/dev-env.yml"]
+  push:
+    branches: [main]
+    paths: ["Dockerfile.dev", "compose.yaml", "Makefile", ".github/workflows/dev-env.yml"]
+  schedule:
+    - cron: "41 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-ci:
+    name: make docker-ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - run: make docker-build
+      # 安全公告由 security.yml 负责，这里只验证环境本身
+      - run: make docker-ci DENY_CHECKS="bans licenses sources"
+      - if: always()
+        run: make docker-clean

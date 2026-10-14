@@ -66,7 +66,15 @@ impl Branch {
     }
 }
 
-const ALL_BRANCHES: [Branch; 7] = [Branch::Curious, Branch::Gentle, Branch::Steady, Branch::Sage, Branch::Guardian, Branch::Wanderer, Branch::Radiant];
+const ALL_BRANCHES: [Branch; 7] = [
+    Branch::Curious,
+    Branch::Gentle,
+    Branch::Steady,
+    Branch::Sage,
+    Branch::Guardian,
+    Branch::Wanderer,
+    Branch::Radiant,
+];
 
 /// 主题倾向:接入方映射后的主题标签及累计次数。
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -109,16 +117,33 @@ impl Default for Growth {
 
 impl Growth {
     pub fn with_base(base: [u16; 3]) -> Self {
-        Self { exp: 0, stage: Stage::Baby, lineage: Vec::new(), traits: base, base_traits: base, drift_day: 0, drift_used: [0; 3], acquired_rarity: 0, topics: Vec::new() }
+        Self {
+            exp: 0,
+            stage: Stage::Baby,
+            lineage: Vec::new(),
+            traits: base,
+            base_traits: base,
+            drift_day: 0,
+            drift_used: [0; 3],
+            acquired_rarity: 0,
+            topics: Vec::new(),
+        }
     }
 
     /// 由基因的后三个字节得到出生底色,落在 300 到 699。
     pub fn base_from_genes(genes: &[u8; 8]) -> [u16; 3] {
-        [300 + genes[5] as u16 % 400, 300 + genes[6] as u16 % 400, 300 + genes[7] as u16 % 400]
+        [
+            300 + genes[5] as u16 % 400,
+            300 + genes[6] as u16 % 400,
+            300 + genes[7] as u16 % 400,
+        ]
     }
 
     pub fn level(&self) -> u8 {
-        LEVEL_EXP.iter().rposition(|t| self.exp >= *t).map_or(1, |i| i as u8 + 1)
+        LEVEL_EXP
+            .iter()
+            .rposition(|t| self.exp >= *t)
+            .map_or(1, |i| i as u8 + 1)
     }
 
     pub(crate) fn add_exp(&mut self, n: u32) {
@@ -133,7 +158,9 @@ impl Growth {
             self.drift_used = [0; 3];
         }
         let room_today = DRIFT_PER_DAY.saturating_sub(self.drift_used[which]);
-        let room_total = (self.base_traits[which] + DRIFT_CAP).min(TRAIT_MAX).saturating_sub(self.traits[which]);
+        let room_total = (self.base_traits[which] + DRIFT_CAP)
+            .min(TRAIT_MAX)
+            .saturating_sub(self.traits[which]);
         let add = (amount.min(room_today) as u16).min(room_total);
         self.traits[which] += add;
         self.drift_used[which] += add as u8;
@@ -145,11 +172,20 @@ impl Growth {
         } else {
             if self.topics.len() == MAX_TOPICS {
                 // 淘汰计数最低且最早的一项,保证确定性。
-                if let Some(i) = self.topics.iter().enumerate().min_by_key(|(i, t)| (t.count, *i)).map(|(i, _)| i) {
+                if let Some(i) = self
+                    .topics
+                    .iter()
+                    .enumerate()
+                    .min_by_key(|(i, t)| (t.count, *i))
+                    .map(|(i, _)| i)
+                {
                     self.topics.remove(i);
                 }
             }
-            self.topics.push(TopicCount { topic: topic.into(), count: 1 });
+            self.topics.push(TopicCount {
+                topic: topic.into(),
+                count: 1,
+            });
         }
     }
 
@@ -210,7 +246,11 @@ fn need(missing: &mut Vec<Missing>, kind: MissingKind, have: u32, need: u32) {
 fn check(g: &Growth, food: u32, branch: Branch) -> BranchOption {
     let mut m = Vec::new();
     let t = |i: usize| g.traits[i] as u32;
-    let entry_level = if branch.source_stage() == Stage::Baby { 3 } else { 7 };
+    let entry_level = if branch.source_stage() == Stage::Baby {
+        3
+    } else {
+        7
+    };
     need(&mut m, MissingKind::Level, g.level() as u32, entry_level);
     match branch {
         Branch::Curious => need(&mut m, MissingKind::Curious, t(CURIOUS), 550),
@@ -226,7 +266,11 @@ fn check(g: &Growth, food: u32, branch: Branch) -> BranchOption {
         }
         Branch::Radiant => {
             need(&mut m, MissingKind::Level, g.level() as u32, 9);
-            for (kind, i) in [(MissingKind::Curious, CURIOUS), (MissingKind::Affection, AFFECTION), (MissingKind::Calm, CALM)] {
+            for (kind, i) in [
+                (MissingKind::Curious, CURIOUS),
+                (MissingKind::Affection, AFFECTION),
+                (MissingKind::Calm, CALM),
+            ] {
                 need(&mut m, kind, t(i), 650);
             }
             need(&mut m, MissingKind::Topic, g.topic_total(), 60);
@@ -237,13 +281,27 @@ fn check(g: &Growth, food: u32, branch: Branch) -> BranchOption {
     // 条件可能因 Radiant 的更高等级要求而重复列出等级,去重保留要求最高的一条。
     m.sort_by_key(|x| (x.kind as u8, core::cmp::Reverse(x.need)));
     m.dedup_by_key(|x| x.kind as u8);
-    BranchOption { branch, to_stage: branch.target_stage(), eligible: m.is_empty(), missing: m }
+    BranchOption {
+        branch,
+        to_stage: branch.target_stage(),
+        eligible: m.is_empty(),
+        missing: m,
+    }
 }
 
 /// 当前阶段可走的全部分支及缺项说明。成年后为空。
 pub fn evolution_options(g: &Growth, food: u32) -> EvolutionOptions {
-    let options = ALL_BRANCHES.iter().copied().filter(|b| b.source_stage() == g.stage).map(|b| check(g, food, b)).collect();
-    EvolutionOptions { stage: g.stage, level: g.level(), options }
+    let options = ALL_BRANCHES
+        .iter()
+        .copied()
+        .filter(|b| b.source_stage() == g.stage)
+        .map(|b| check(g, food, b))
+        .collect();
+    EvolutionOptions {
+        stage: g.stage,
+        level: g.level(),
+        options,
+    }
 }
 
 /// 执行进化。条件不满足返回 NotEligible,不扣任何资源;成功消耗固定食物。

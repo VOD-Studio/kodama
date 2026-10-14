@@ -65,7 +65,10 @@ const DESIGNS: [Design; 8] = [
             ".obbbbbbbbbbo.",
             "..obbbaabbbo..",
         ],
-        legs: [["..obbo..obbo..", "..oooo..oooo.."], [".obbo....obbo.", ".oooo....oooo."]],
+        legs: [
+            ["..obbo..obbo..", "..oooo..oooo.."],
+            [".obbo....obbo.", ".oooo....oooo."],
+        ],
         hue: 20,
         sat: 85,
         accent: (350, 70),
@@ -84,7 +87,10 @@ const DESIGNS: [Design; 8] = [
             ".obllllllllbo.",
             "..obbbbbbbbo..",
         ],
-        legs: [["...oo.oo.oo...", "....o.o.o....."], ["..oo.oo.oo.o..", "...o.o.o.o...."]],
+        legs: [
+            ["...oo.oo.oo...", "....o.o.o....."],
+            ["..oo.oo.oo.o..", "...o.o.o.o...."],
+        ],
         hue: 205,
         sat: 60,
         accent: (340, 70),
@@ -103,7 +109,10 @@ const DESIGNS: [Design; 8] = [
             ".obbbbbbbbbbo.",
             "..obbsbbsbbo..",
         ],
-        legs: [["..obbo..obbo..", "..oooo..oooo.."], [".obbo....obbo.", ".oooo....oooo."]],
+        legs: [
+            ["..obbo..obbo..", "..oooo..oooo.."],
+            [".obbo....obbo.", ".oooo....oooo."],
+        ],
         hue: 30,
         sat: 32,
         accent: (350, 60),
@@ -122,7 +131,10 @@ const DESIGNS: [Design; 8] = [
             ".osbbllllbbso.",
             "..obbbbbbbbo..",
         ],
-        legs: [["..obbo..obbo..", "..oooo..oooo.."], [".obbo....obbo.", ".oooo....oooo."]],
+        legs: [
+            ["..obbo..obbo..", "..oooo..oooo.."],
+            [".obbo....obbo.", ".oooo....oooo."],
+        ],
         hue: 28,
         sat: 55,
         accent: (30, 60),
@@ -141,7 +153,10 @@ const DESIGNS: [Design; 8] = [
             ".obbbbbbbbbbo.",
             "..oooooooooo..",
         ],
-        legs: [["..obbo..obbo..", "..oooo..oooo.."], [".obbo....obbo.", ".oooo....oooo."]],
+        legs: [
+            ["..obbo..obbo..", "..oooo..oooo.."],
+            [".obbo....obbo.", ".oooo....oooo."],
+        ],
         hue: 215,
         sat: 18,
         accent: (190, 80),
@@ -160,7 +175,10 @@ const DESIGNS: [Design; 8] = [
             "..oooooooooo..",
             "..............",
         ],
-        legs: [["....a....a....", ".............."], [".....a..a.....", "....a....a...."]],
+        legs: [
+            ["....a....a....", ".............."],
+            [".....a..a.....", "....a....a...."],
+        ],
         hue: 265,
         sat: 25,
         accent: (30, 95),
@@ -179,7 +197,10 @@ const DESIGNS: [Design; 8] = [
             ".obbbbbbbbbbo.",
             "..oobbbbbboo..",
         ],
-        legs: [["...obo..obo...", "..oo.o..o.oo.."], ["...obo..obo...", ".oo..o..o..oo."]],
+        legs: [
+            ["...obo..obo...", "..oo.o..o.oo.."],
+            ["...obo..obo...", ".oo..o..o..oo."],
+        ],
         hue: 95,
         sat: 40,
         accent: (130, 60),
@@ -198,7 +219,10 @@ const DESIGNS: [Design; 8] = [
             ".obbbbbbbbbbo.",
             "..obbbbbbbbo..",
         ],
-        legs: [["...obo..obo...", "...ooo..ooo..."], ["..obo....obo..", "..ooo....ooo.."]],
+        legs: [
+            ["...obo..obo...", "...ooo..ooo..."],
+            ["..obo....obo..", "..ooo....ooo.."],
+        ],
         hue: 8,
         sat: 90,
         accent: (48, 95),
@@ -313,7 +337,8 @@ fn eyes(layer: &mut Layer, pose: Pose, blink: bool) {
 }
 
 fn mouth(layer: &mut Layer, pose: Pose, step: u64) {
-    let open = matches!(pose, Pose::Eat) && step.is_multiple_of(2) || matches!(pose, Pose::Startled);
+    let open =
+        matches!(pose, Pose::Eat) && step.is_multiple_of(2) || matches!(pose, Pose::Startled);
     let ch = if open { 'm' } else { 'o' };
     put(layer, 6, 7, ch);
     put(layer, 7, 7, ch);
@@ -325,7 +350,9 @@ fn mouth(layer: &mut Layer, pose: Pose, step: u64) {
 
 /// 头顶中央最高的不透明像素所在行,点缀物贴着它放置。
 fn crown_row(layer: &Layer) -> i32 {
-    (0..layer.len()).find(|&y| matches!(layer[y][6], c if c != '.') || layer[y][7] != '.').map_or(0, |y| y as i32 - HEADROOM as i32)
+    (0..layer.len())
+        .find(|&y| matches!(layer[y][6], c if c != '.') || layer[y][7] != '.')
+        .map_or(0, |y| y as i32 - HEADROOM as i32)
 }
 
 fn overlays(layer: &mut Layer, pose: Pose, stage: u8, step: u64) {
@@ -353,7 +380,11 @@ fn overlays(layer: &mut Layer, pose: Pose, stage: u8, step: u64) {
     match pose {
         Pose::Sleep => {
             // 飘起的 z,两帧大小交替。
-            let (x, y) = if step.is_multiple_of(2) { (11, -1) } else { (12, -3) };
+            let (x, y) = if step.is_multiple_of(2) {
+                (11, -1)
+            } else {
+                (12, -3)
+            };
             for (dx, dy) in [(0, 0), (1, 0), (1, 1), (0, 2), (1, 2)] {
                 put(layer, x + dx - 1, y + dy, 'c');
             }
@@ -405,13 +436,20 @@ pub fn render_pixels(i: &PixelInput) -> Pixels {
     let d = &DESIGNS[(i.species % SPECIES_COUNT) as usize];
     let body = body_of(i.species);
     let moving = matches!(i.pose, Pose::Idle);
-    let animated = matches!(i.pose, Pose::Idle | Pose::Eat | Pose::Play | Pose::Evolve | Pose::Startled);
+    let animated = matches!(
+        i.pose,
+        Pose::Idle | Pose::Eat | Pose::Play | Pose::Evolve | Pose::Startled
+    );
     let walking = moving && body != Body::Rooted;
     let span = w.saturating_sub(PIXEL_W) as u64;
     let x0 = if walking && span > 0 {
         let period = span * 2;
         let pos = (i.t / 2) % period;
-        if pos <= span { pos } else { period - pos }
+        if pos <= span {
+            pos
+        } else {
+            period - pos
+        }
     } else {
         span / 2
     };
@@ -420,7 +458,12 @@ pub fn render_pixels(i: &PixelInput) -> Pixels {
 
     let mut layer: Layer = [['.'; PIXEL_W as usize]; HEADROOM + PIXEL_H as usize];
     let frame = (step % 2) as usize;
-    let rows: Vec<&str> = d.top.iter().copied().chain(d.legs[frame].iter().copied()).collect();
+    let rows: Vec<&str> = d
+        .top
+        .iter()
+        .copied()
+        .chain(d.legs[frame].iter().copied())
+        .collect();
     for (y, row) in rows.iter().enumerate() {
         for (x, c) in row.chars().enumerate().take(PIXEL_W as usize) {
             layer[y + HEADROOM][x] = c;
@@ -438,7 +481,11 @@ pub fn render_pixels(i: &PixelInput) -> Pixels {
 
     // 行走与玩耍时上下起伏一格;悬浮者起伏两格。
     let amp: u16 = if body == Body::Floater { 2 } else { 1 };
-    let bob = if (walking || matches!(i.pose, Pose::Play)) && step % 2 == 1 { amp } else { 0 };
+    let bob = if (walking || matches!(i.pose, Pose::Play)) && step % 2 == 1 {
+        amp
+    } else {
+        0
+    };
     let top = h as i32 - PIXEL_H as i32 - bob as i32 - HEADROOM as i32;
 
     let mut grid: Vec<Vec<char>> = (0..h).map(|_| (0..w).map(|_| '.').collect()).collect();

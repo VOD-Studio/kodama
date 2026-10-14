@@ -36,7 +36,10 @@ pub struct Channel {
 
 impl Channel {
     pub fn new(root: &[u8], label: &str) -> Self {
-        Self { bytes: hkdf(b"pet/v1", root, label.as_bytes(), 256), pos: 0 }
+        Self {
+            bytes: hkdf(b"pet/v1", root, label.as_bytes(), 256),
+            pos: 0,
+        }
     }
 
     pub fn next_u64(&mut self) -> u64 {

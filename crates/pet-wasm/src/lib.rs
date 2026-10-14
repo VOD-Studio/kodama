@@ -4,4 +4,3 @@ use wasm_bindgen::prelude::*;
 pub fn execute(input: &str) -> String {
     pet_core::execute(input)
 }
-

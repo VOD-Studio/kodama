@@ -1,0 +1,66 @@
+name: Commits
+
+# release-please 从 main 上的提交推导版本号与 CHANGELOG，仓库允许两种合并方式：
+#   Squash and merge  PR 标题成为唯一的提交 —— 小改动，或提交历史零碎时
+#   Rebase and merge  PR 里的每个提交原样进入 main，各自成为一条 CHANGELOG —— 提交已整理好的大功能
+# 不允许 merge commit：它总会带上 PR 标题，release-please 会把同一改动记两次。
+# 发版 PR 由 GITHUB_TOKEN 创建，不会触发 pull_request；release.yml 以 workflow_dispatch 对其分支补跑一次。
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  # <type>(<scope>)?!?: <描述>
+  PATTERN: '^(feat|fix|perf|refactor|docs|style|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: [^ ]'
+
+jobs:
+  title:
+    # 必需检查：两种合并方式都以 PR 标题为准（squash 时它就是提交信息）
+    name: PR title
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: PR title follows Conventional Commits
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ github.event.pull_request.title }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            TITLE=$(gh pr view "$BRANCH" --repo "$GITHUB_REPOSITORY" --json title --jq .title)
+          fi
+          echo "title: $TITLE"
+          printf '%s' "$TITLE" | grep -Eq "$PATTERN" && exit 0
+          {
+            echo "PR 标题须符合 Conventional Commits：<type>(<scope>)?: <描述>，破坏性变更在冒号前加 !"
+            echo "type：feat fix perf refactor docs style test build ci chore revert。例如："
+            echo "  feat(cli): 支持 linux-arm64"
+            echo "  fix(service): 并发领取不再重复出生"
+          } >&2
+          exit 1
+
+  commits:
+    # 提示性检查，不是必需检查：失败表示这个 PR 只能 squash 合并
+    name: Commit messages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Every commit follows Conventional Commits (required for rebase merge)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number || github.ref_name }}
+        run: |
+          bad=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json commits --jq '.commits[].messageHeadline' \
+            | grep -Ev '^Merge ' | grep -Ev "$PATTERN" || true)
+          [ -z "$bad" ] && exit 0
+          {
+            echo "这些提交不符合 Conventional Commits，用 Rebase and merge 会原样进入 main："
+            printf '  %s\n' "$bad"
+            echo "请用 Squash and merge（以 PR 标题为准），或先整理提交再 rebase 合并。"
+          } >&2
+          exit 1

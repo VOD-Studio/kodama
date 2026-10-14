@@ -106,14 +106,46 @@ struct Design {
 }
 
 const DESIGNS: [Design; 8] = [
-    Design { head: " /\\_/\\ ", face: "( E.E )", base: [" /| |\\ ", " \\| |/ "] }, // 0 余烬狐:幻想,四足
-    Design { head: " ,~~~, ", face: "((E.E))", base: [" ~ ~ ~ ", "  ~~~  "] },    // 1 云絮:幻想,悬浮
-    Design { head: " |\\_/| ", face: "=(E.E)=", base: [" (___)>", " (___)<"] }, // 2 猫:现实,四足
-    Design { head: " /^^^\\ ", face: "d(E.E)b", base: [" /|_|\\ ", " \\|_|/ "] }, // 3 狗:现实,四足
-    Design { head: " [===] ", face: "|[E.E]|", base: [" _| |_ ", " |_ _| "] },   // 4 方块机器人:机械,双足
-    Design { head: " -o-o- ", face: "<(E.E)>", base: ["  ^ ^  ", "  v v  "] },   // 5 无人机:机械,悬浮
-    Design { head: " \\\\|// ", face: " (E.E) ", base: ["  /|\\  ", "  \\|/  "] }, // 6 芽苗:植物,扎根
-    Design { head: " ,^^^, ", face: "{ E.E }", base: [" /\\/\\/ ", " \\/\\/\\ "] }, // 7 余火:元素,四足
+    Design {
+        head: " /\\_/\\ ",
+        face: "( E.E )",
+        base: [" /| |\\ ", " \\| |/ "],
+    }, // 0 余烬狐:幻想,四足
+    Design {
+        head: " ,~~~, ",
+        face: "((E.E))",
+        base: [" ~ ~ ~ ", "  ~~~  "],
+    }, // 1 云絮:幻想,悬浮
+    Design {
+        head: " |\\_/| ",
+        face: "=(E.E)=",
+        base: [" (___)>", " (___)<"],
+    }, // 2 猫:现实,四足
+    Design {
+        head: " /^^^\\ ",
+        face: "d(E.E)b",
+        base: [" /|_|\\ ", " \\|_|/ "],
+    }, // 3 狗:现实,四足
+    Design {
+        head: " [===] ",
+        face: "|[E.E]|",
+        base: [" _| |_ ", " |_ _| "],
+    }, // 4 方块机器人:机械,双足
+    Design {
+        head: " -o-o- ",
+        face: "<(E.E)>",
+        base: ["  ^ ^  ", "  v v  "],
+    }, // 5 无人机:机械,悬浮
+    Design {
+        head: " \\\\|// ",
+        face: " (E.E) ",
+        base: ["  /|\\  ", "  \\|/  "],
+    }, // 6 芽苗:植物,扎根
+    Design {
+        head: " ,^^^, ",
+        face: "{ E.E }",
+        base: [" /\\/\\/ ", " \\/\\/\\ "],
+    }, // 7 余火:元素,四足
 ];
 
 fn eye_for(pose: Pose, blink: bool, unicode: bool) -> char {
@@ -142,7 +174,11 @@ fn sprite(i: &FrameInput, blink: bool, step: u64) -> [String; 3] {
         Pose::Evolve => {
             // 进化:头部两侧闪烁星光,随时钟交替。
             let spark = if step.is_multiple_of(2) { '*' } else { '+' };
-            head = head.chars().enumerate().map(|(n, c)| if n == 0 || n == 6 { spark } else { c }).collect();
+            head = head
+                .chars()
+                .enumerate()
+                .map(|(n, c)| if n == 0 || n == 6 { spark } else { c })
+                .collect();
         }
         _ => {}
     }
@@ -159,7 +195,13 @@ fn sprite(i: &FrameInput, blink: bool, step: u64) -> [String; 3] {
         // 终结:坐在纪念台上并静止,与生病在不看颜色时也能区分。
         Pose::End => base = " ._._. ".into(),
         // 玩耍:下半身整行换成蹦跳的样子。
-        Pose::Play => base = if step.is_multiple_of(2) { "  \\o/  ".into() } else { "  /o\\  ".into() },
+        Pose::Play => {
+            base = if step.is_multiple_of(2) {
+                "  \\o/  ".into()
+            } else {
+                "  /o\\  ".into()
+            }
+        }
         _ => {}
     }
     [head, face, base]
@@ -168,18 +210,26 @@ fn sprite(i: &FrameInput, blink: bool, step: u64) -> [String; 3] {
 /// 合成一帧字符单元网格。尺寸小于精灵时裁剪,不 panic。
 pub fn render(i: &FrameInput) -> Frame {
     let (w, h) = (i.w.max(1), i.h.max(1));
-    let mut cells: Vec<Vec<(char, u8)>> = (0..h).map(|_| (0..w).map(|_| (' ', 0)).collect()).collect();
+    let mut cells: Vec<Vec<(char, u8)>> =
+        (0..h).map(|_| (0..w).map(|_| (' ', 0)).collect()).collect();
 
     let body = body_of(i.species);
     // 只有待机会位移(扎根者原地摇摆);其余姿态停在原地。
     let moving = matches!(i.pose, Pose::Idle);
-    let animated = matches!(i.pose, Pose::Idle | Pose::Eat | Pose::Play | Pose::Evolve | Pose::Startled);
+    let animated = matches!(
+        i.pose,
+        Pose::Idle | Pose::Eat | Pose::Play | Pose::Evolve | Pose::Startled
+    );
     let walking = moving && body != Body::Rooted;
     let span = w.saturating_sub(SPRITE_W) as u64;
     let x0 = if walking && span > 0 {
         let period = span * 2;
         let pos = (i.t / 2) % period;
-        if pos <= span { pos } else { period - pos }
+        if pos <= span {
+            pos
+        } else {
+            period - pos
+        }
     } else {
         span / 2
     };
@@ -187,7 +237,11 @@ pub fn render(i: &FrameInput) -> Frame {
     let blink = i.t % 40 >= 38;
     // 悬浮者上下起伏更明显(两格),行走者一格。
     let bob_amp = if body == Body::Floater { 2 } else { 1 };
-    let bob = if (walking || matches!(i.pose, Pose::Play)) && step % 2 == 1 { bob_amp.min(h.saturating_sub(SPRITE_H)) } else { 0 };
+    let bob = if (walking || matches!(i.pose, Pose::Play)) && step % 2 == 1 {
+        bob_amp.min(h.saturating_sub(SPRITE_H))
+    } else {
+        0
+    };
     let y0 = h.saturating_sub(SPRITE_H + bob);
     let color = match i.pose {
         Pose::Sick | Pose::End => 244,
@@ -209,7 +263,13 @@ pub fn render(i: &FrameInput) -> Frame {
     Frame {
         w,
         h,
-        rows: cells.iter().map(|r| r.iter().map(|c| c.0).collect()).collect(),
-        colors: cells.iter().map(|r| r.iter().map(|c| c.1).collect()).collect(),
+        rows: cells
+            .iter()
+            .map(|r| r.iter().map(|c| c.0).collect())
+            .collect(),
+        colors: cells
+            .iter()
+            .map(|r| r.iter().map(|c| c.1).collect())
+            .collect(),
     }
 }

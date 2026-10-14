@@ -1,0 +1,33 @@
+name: Security
+
+# 依赖的安全公告：每周与依赖变更时检查。放在 CI 之外，避免新公告让无关的 PR 突然失败；
+# 许可、来源与重复依赖在 CI 的 Lint 作业里逐 PR 检查。
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  push:
+    branches: [main]
+    paths: ["Cargo.lock", "deny.toml", ".github/workflows/security.yml"]
+  pull_request:
+    paths: ["Cargo.lock", "deny.toml", ".github/workflows/security.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_DENY_VERSION: 0.20.2
+
+jobs:
+  advisories:
+    name: RustSec advisories
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: taiki-e/install-action@1168f6810a3cb30a3514bf5756a3b7f0422c6df8 # v2
+        with:
+          tool: cargo-deny@${{ env.CARGO_DENY_VERSION }}
+      - run: make deny DENY_CHECKS=advisories

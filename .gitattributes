@@ -1,0 +1,4 @@
+# 统一 LF：shell 脚本在 Windows 检出后挂进 Linux 容器（make docker-*）也能运行
+* text=auto eol=lf
+*.wasm binary
+*.png binary

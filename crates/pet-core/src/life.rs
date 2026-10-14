@@ -1,5 +1,5 @@
 use crate::codec::{u64_string, ErrorCode};
-use crate::growth::{self, Branch, Growth, MAX_TOPIC_LEN, AFFECTION, CALM, CURIOUS};
+use crate::growth::{self, Branch, Growth, AFFECTION, CALM, CURIOUS, MAX_TOPIC_LEN};
 use crate::RULES_VERSION;
 use alloc::string::String;
 use serde::{Deserialize, Serialize};
@@ -68,7 +68,20 @@ impl Pet {
     }
 
     pub fn newborn_with(id: String, at: u64, growth: Growth) -> Self {
-        Self { id, rules_version: RULES_VERSION, satiety: 80, energy: 80, food: 5, medicine: 1, satiety_rem: 0, energy_rem: 0, neglect: 0, last_tick: at, last_request: String::new(), growth }
+        Self {
+            id,
+            rules_version: RULES_VERSION,
+            satiety: 80,
+            energy: 80,
+            food: 5,
+            medicine: 1,
+            satiety_rem: 0,
+            energy_rem: 0,
+            neglect: 0,
+            last_tick: at,
+            last_request: String::new(),
+            growth,
+        }
     }
 
     pub fn phase(&self) -> Phase {
@@ -91,7 +104,9 @@ pub enum Action {
     Heal,
     Wait,
     /// 进化到指定分支。永不自动发生,需要主人选择。
-    Evolve { branch: Branch },
+    Evolve {
+        branch: Branch,
+    },
 }
 
 /// 短期情绪,由身体状态派生,不存储,所以不会成为永久状态。
@@ -224,7 +239,12 @@ fn advance(p: &mut Pet, now: u64) -> Result<(), ActError> {
 pub fn act(mut pet: Pet, action: Action, now: u64, request_id: &str) -> Result<Outcome, ActError> {
     if !pet.last_request.is_empty() && pet.last_request == request_id {
         let (phase, mood) = (pet.phase(), pet.mood());
-        return Ok(Outcome { pet, phase, mood, replayed: true });
+        return Ok(Outcome {
+            pet,
+            phase,
+            mood,
+            replayed: true,
+        });
     }
     if pet.rules_version != RULES_VERSION {
         return Err(ActError::UnsupportedRules);
@@ -274,19 +294,37 @@ pub fn act(mut pet: Pet, action: Action, now: u64, request_id: &str) -> Result<O
     }
     pet.last_request = request_id.into();
     let (phase, mood) = (pet.phase(), pet.mood());
-    Ok(Outcome { pet, phase, mood, replayed: false })
+    Ok(Outcome {
+        pet,
+        phase,
+        mood,
+        replayed: false,
+    })
 }
 
 /// 发放奖励。与 `act` 同样先按逻辑时间结算,幂等键为 `request_id`,死亡个体拒绝。
-pub fn grant(mut pet: Pet, reward: &Reward, now: u64, request_id: &str) -> Result<Outcome, ActError> {
+pub fn grant(
+    mut pet: Pet,
+    reward: &Reward,
+    now: u64,
+    request_id: &str,
+) -> Result<Outcome, ActError> {
     if !pet.last_request.is_empty() && pet.last_request == request_id {
         let (phase, mood) = (pet.phase(), pet.mood());
-        return Ok(Outcome { pet, phase, mood, replayed: true });
+        return Ok(Outcome {
+            pet,
+            phase,
+            mood,
+            replayed: true,
+        });
     }
     if pet.rules_version != RULES_VERSION {
         return Err(ActError::UnsupportedRules);
     }
-    let topic_ok = reward.topic.as_deref().is_none_or(|t| !t.is_empty() && t.len() <= MAX_TOPIC_LEN);
+    let topic_ok = reward
+        .topic
+        .as_deref()
+        .is_none_or(|t| !t.is_empty() && t.len() <= MAX_TOPIC_LEN);
     if reward.exp > 100 || reward.food > 10 || reward.medicine > 3 || !topic_ok {
         return Err(ActError::InvalidReward);
     }
@@ -303,5 +341,10 @@ pub fn grant(mut pet: Pet, reward: &Reward, now: u64, request_id: &str) -> Resul
     }
     pet.last_request = request_id.into();
     let (phase, mood) = (pet.phase(), pet.mood());
-    Ok(Outcome { pet, phase, mood, replayed: false })
+    Ok(Outcome {
+        pet,
+        phase,
+        mood,
+        replayed: false,
+    })
 }
