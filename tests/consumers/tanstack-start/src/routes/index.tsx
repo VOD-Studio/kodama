@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { initPet, execute } from "@violetjs/pet";
 import { mountPet } from "@violetjs/pet/web";
+import { createLocalPet, openIndexedDbStore } from "@violetjs/pet/local";
 import { useEffect, useRef, useState } from "react";
 
 const birth = JSON.stringify({ op: "birth", world: "w1", request_id: "r1", server_seed: "aa".repeat(32), client_seed: "bb".repeat(32), born_at: "0" });
@@ -12,6 +13,7 @@ function probe(): string {
 function Home() {
   const [id, setId] = useState("pending");
   const [painted, setPainted] = useState("none");
+  const [local, setLocal] = useState("pending");
   const canvas = useRef<HTMLCanvasElement>(null);
   const ssrProbe = probe(); // 渲染期调用:SSR 与 hydration 首帧都不得已实例化
   useEffect(() => {
@@ -26,7 +28,21 @@ function Home() {
       let opaque = 0;
       for (let i = 3; i < data.length; i += 4) if (data[i] > 0) opaque++;
       setPainted(String(opaque));
-    });
+    }).then(async () => {
+      // 本地模式落在真实的 IndexedDB 上：第一次打开领养并喂食，第二次打开（同一浏览器档案）读回存档
+      const store = await openIndexedDbStore("consumer-check");
+      const pet = createLocalPet({ store });
+      const before = await pet.get();
+      if (!before) {
+        await pet.adopt();
+        await pet.act("feed");
+        setLocal(`new:${(await pet.get())!.version}`);
+      } else {
+        const fed = await pet.act("feed");
+        setLocal(`restored:${before.version}:${fed.ok}`);
+      }
+      store.close();
+    }).catch((e) => setLocal(`error:${e}`));
     return () => mounted?.dispose();
   }, []);
   return (
@@ -35,6 +51,7 @@ function Home() {
       <p id="pet">{id}</p>
       <canvas ref={canvas} />
       <p id="painted">{painted}</p>
+      <p id="local">{local}</p>
     </main>
   );
 }
