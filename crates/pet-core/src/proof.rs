@@ -178,17 +178,24 @@ pub fn verify(cert: &Certificate, keys: &[IssuerKey]) -> Verdict {
     ) else {
         return Verdict::BadEncoding;
     };
-    let (Some(commit_sig), Some(accept_sig)) = (sig(&cert.commit_sig), sig(&cert.accept_sig)) else {
+    let (Some(commit_sig), Some(accept_sig)) = (sig(&cert.commit_sig), sig(&cert.accept_sig))
+    else {
         return Verdict::BadEncoding;
     };
     let ctx = &cert.context;
-    if vk.verify_strict(&commit_msg(ctx, &cm), &commit_sig).is_err() {
+    if vk
+        .verify_strict(&commit_msg(ctx, &cm), &commit_sig)
+        .is_err()
+    {
         return Verdict::CommitSignature;
     }
     if commitment(ctx, &ss).as_slice() != cm.as_slice() {
         return Verdict::CommitmentMismatch;
     }
-    if vk.verify_strict(&accept_msg(ctx, &cm, &cs), &accept_sig).is_err() {
+    if vk
+        .verify_strict(&accept_msg(ctx, &cm, &cs), &accept_sig)
+        .is_err()
+    {
         return Verdict::AcceptSignature;
     }
     let Ok(b) = derive_birth(&BirthInput {

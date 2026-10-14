@@ -12,7 +12,7 @@ pub mod proof;
 mod rng;
 
 pub use birth::{derive_birth, Birth, BirthInput};
-pub use life::{act, grant, Action, ActError, Mood, Outcome, Pet, Phase, Reward};
+pub use life::{act, grant, ActError, Action, Mood, Outcome, Pet, Phase, Reward};
 
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -65,21 +65,34 @@ pub fn execute(input: &str) -> String {
             Ok(v) => codec::ok(&v),
             Err(e) => codec::error(ErrorCode::BadInput, e),
         },
-        Ok(Command::Grant { pet, reward, now, request_id }) => match grant(pet, &reward, now, &request_id) {
+        Ok(Command::Grant {
+            pet,
+            reward,
+            now,
+            request_id,
+        }) => match grant(pet, &reward, now, &request_id) {
             Ok(v) => codec::ok(&v),
             Err(e) => codec::error(e.code(), e.message()),
         },
-        Ok(Command::EvolutionOptions { pet }) => codec::ok(&growth::evolution_options(&pet.growth, pet.food)),
+        Ok(Command::EvolutionOptions { pet }) => {
+            codec::ok(&growth::evolution_options(&pet.growth, pet.food))
+        }
         Ok(Command::Capabilities) => codec::ok(&catalog()),
         Ok(Command::Frame(f)) => codec::ok(&pet_term::render(&f)),
         Ok(Command::Sprite(s)) => codec::ok(&pet_term::render_pixels(&s)),
-        Ok(Command::VerifyBirth { certificate, issuer_keys }) => codec::ok(&proof::verify(&certificate, &issuer_keys)),
-        Ok(Command::Act { pet, action, now, request_id }) => {
-            match act(pet, action, now, &request_id) {
-                Ok(v) => codec::ok(&v),
-                Err(e) => codec::error(e.code(), e.message()),
-            }
-        }
+        Ok(Command::VerifyBirth {
+            certificate,
+            issuer_keys,
+        }) => codec::ok(&proof::verify(&certificate, &issuer_keys)),
+        Ok(Command::Act {
+            pet,
+            action,
+            now,
+            request_id,
+        }) => match act(pet, action, now, &request_id) {
+            Ok(v) => codec::ok(&v),
+            Err(e) => codec::error(e.code(), e.message()),
+        },
     };
     out
 }

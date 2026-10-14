@@ -1,11 +1,13 @@
-use pet_core::{act, Action, Phase, Pet};
+use pet_core::{act, Action, Pet, Phase};
 
 fn code(r: Result<pet_core::Outcome, pet_core::ActError>) -> pet_core::ErrorCode {
     r.err().expect("action must be rejected").code()
 }
 
 fn wait(p: Pet, now: u64, id: &str) -> Pet {
-    act(p, Action::Wait, now, id).expect("alive pet accepts wait").pet
+    act(p, Action::Wait, now, id)
+        .expect("alive pet accepts wait")
+        .pet
 }
 
 #[test]
@@ -18,7 +20,8 @@ fn coming_back_from_any_absence_never_kills() {
                 p.satiety = satiety;
                 p.neglect = neglect;
                 let phase_before = p.phase();
-                let out = act(p, Action::Wait, gap, "back").expect("returning must not be rejected as dead");
+                let out = act(p, Action::Wait, gap, "back")
+                    .expect("returning must not be rejected as dead");
                 assert!(
                     out.phase != Phase::Dead || phase_before == Phase::Dead,
                     "satiety {satiety}, neglect {neglect}, gap {gap} died on return"
@@ -39,7 +42,10 @@ fn frequent_settlement_does_not_freeze_decay() {
         frequent = wait(frequent, t, &format!("f{t}"));
     }
     let once = wait(Pet::newborn("p".into(), 0), total, "once");
-    assert_eq!((frequent.satiety, frequent.energy), (once.satiety, once.energy));
+    assert_eq!(
+        (frequent.satiety, frequent.energy),
+        (once.satiety, once.energy)
+    );
     assert!(frequent.satiety < 80, "decay must happen");
 }
 
@@ -85,7 +91,9 @@ fn medicine_is_the_way_back_from_sick() {
     let mut p = Pet::newborn("p".into(), 0);
     p = wait(p, 100 * 24 * 60, "away");
     assert_eq!(p.phase(), Phase::Sick);
-    let fed = act(p.clone(), Action::Feed, 100 * 24 * 60 + 1, "feed").unwrap().pet;
+    let fed = act(p.clone(), Action::Feed, 100 * 24 * 60 + 1, "feed")
+        .unwrap()
+        .pet;
     assert_eq!(fed.phase(), Phase::Sick, "food alone does not cure");
     let healed = act(fed, Action::Heal, 100 * 24 * 60 + 2, "heal").unwrap();
     assert_ne!(healed.phase, Phase::Sick);
@@ -121,7 +129,19 @@ fn rejected_actions_report_a_distinct_code_and_produce_no_state() {
 fn dead_pet_rejects_every_action() {
     let mut p = Pet::newborn("p".into(), 0);
     p.neglect = 7200;
-    for (i, a) in [Action::Feed, Action::Rest, Action::Play, Action::Heal, Action::Wait].into_iter().enumerate() {
-        assert_eq!(code(act(p.clone(), a, 0, &format!("d{i}"))), pet_core::ErrorCode::Dead);
+    for (i, a) in [
+        Action::Feed,
+        Action::Rest,
+        Action::Play,
+        Action::Heal,
+        Action::Wait,
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        assert_eq!(
+            code(act(p.clone(), a, 0, &format!("d{i}"))),
+            pet_core::ErrorCode::Dead
+        );
     }
 }

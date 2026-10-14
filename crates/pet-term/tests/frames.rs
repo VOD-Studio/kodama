@@ -1,13 +1,29 @@
 use pet_term::*;
 
 fn input(w: u16, h: u16, t: u64, pose: Pose) -> FrameInput {
-    FrameInput { species: 0, genes: [10; 8], pose, charset: Charset::Ascii, w, h, t }
+    FrameInput {
+        species: 0,
+        genes: [10; 8],
+        pose,
+        charset: Charset::Ascii,
+        w,
+        h,
+        t,
+    }
 }
 
 #[test]
 fn golden_frame() {
     let f = render(&input(12, 4, 0, Pose::Idle));
-    assert_eq!(f.rows, vec!["            ", " /\\_/\\      ", "( o.o )     ", " /| |\\      "]);
+    assert_eq!(
+        f.rows,
+        vec![
+            "            ",
+            " /\\_/\\      ",
+            "( o.o )     ",
+            " /| |\\      "
+        ]
+    );
 }
 
 #[test]
@@ -31,7 +47,15 @@ fn poses_are_distinguishable_without_color() {
 
 #[test]
 fn walking_moves_and_stays_in_bounds() {
-    let xs: Vec<usize> = (0..60).map(|t| render(&input(20, 4, t, Pose::Idle)).rows.iter().find_map(|r| r.find('(')).unwrap()).collect();
+    let xs: Vec<usize> = (0..60)
+        .map(|t| {
+            render(&input(20, 4, t, Pose::Idle))
+                .rows
+                .iter()
+                .find_map(|r| r.find('('))
+                .unwrap()
+        })
+        .collect();
     assert!(xs.iter().all(|x| *x + 7 <= 20));
     assert!(xs.iter().min() != xs.iter().max());
 }

@@ -10,13 +10,23 @@ pub fn issue_commit(key: &SigningKey, ctx: &Context, server_seed: &[u8]) -> (Str
 }
 
 /// 第二步:客户端随机材料被持久固定后签发接受收据。
-pub fn issue_accept(key: &SigningKey, ctx: &Context, server_seed: &[u8], client_seed: &[u8]) -> String {
+pub fn issue_accept(
+    key: &SigningKey,
+    ctx: &Context,
+    server_seed: &[u8],
+    client_seed: &[u8],
+) -> String {
     let c = commitment(ctx, server_seed);
     hex(&key.sign(&accept_msg(ctx, &c, client_seed)).to_bytes())
 }
 
 /// 第三步:揭示并装配证书。
-pub fn issue_certificate(key: &SigningKey, ctx: &Context, server_seed: &[u8], client_seed: &[u8]) -> Result<Certificate, &'static str> {
+pub fn issue_certificate(
+    key: &SigningKey,
+    ctx: &Context,
+    server_seed: &[u8],
+    client_seed: &[u8],
+) -> Result<Certificate, &'static str> {
     let (c, commit_sig) = issue_commit(key, ctx, server_seed);
     let accept_sig = issue_accept(key, ctx, server_seed, client_seed);
     let b = derive_birth(&BirthInput {

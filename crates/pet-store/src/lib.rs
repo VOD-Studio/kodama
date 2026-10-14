@@ -1,4 +1,4 @@
-use pet_core::{Action, ActError, Pet};
+use pet_core::{ActError, Action, Pet};
 use rusqlite::{Connection, OptionalExtension, TransactionBehavior};
 use std::path::Path;
 
@@ -60,7 +60,13 @@ impl From<postgres::Error> for StoreError {
 /// 存储契约:读取版本 + 单次原子提交。不暴露事务回调。
 pub trait Store {
     fn load(&mut self, scope: &Scope) -> Result<Option<Versioned>, StoreError>;
-    fn commit(&mut self, scope: &Scope, expected: u64, request_id: &str, cs: &Changeset) -> Result<Commit, StoreError>;
+    fn commit(
+        &mut self,
+        scope: &Scope,
+        expected: u64,
+        request_id: &str,
+        cs: &Changeset,
+    ) -> Result<Commit, StoreError>;
 }
 
 mod pg;
@@ -91,25 +97,48 @@ impl Store for SqliteStore {
     fn load(&mut self, scope: &Scope) -> Result<Option<Versioned>, StoreError> {
         Ok(self
             .conn
-            .query_row("SELECT version, state FROM pets WHERE scope=?1", [scope.key()], |r| {
-                Ok(Versioned { version: r.get::<_, i64>(0)? as u64, state: r.get(1)? })
-            })
+            .query_row(
+                "SELECT version, state FROM pets WHERE scope=?1",
+                [scope.key()],
+                |r| {
+                    Ok(Versioned {
+                        version: r.get::<_, i64>(0)? as u64,
+                        state: r.get(1)?,
+                    })
+                },
+            )
             .optional()?)
     }
 
-    fn commit(&mut self, scope: &Scope, expected: u64, request_id: &str, cs: &Changeset) -> Result<Commit, StoreError> {
+    fn commit(
+        &mut self,
+        scope: &Scope,
+        expected: u64,
+        request_id: &str,
+        cs: &Changeset,
+    ) -> Result<Commit, StoreError> {
         let key = scope.key();
-        let tx = self.conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let tx = self
+            .conn
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
         let prior: Option<(String, String)> = tx
-            .query_row("SELECT params_hash, result FROM requests WHERE scope=?1 AND request_id=?2", [&key, request_id], |r| {
-                Ok((r.get(0)?, r.get(1)?))
-            })
+            .query_row(
+                "SELECT params_hash, result FROM requests WHERE scope=?1 AND request_id=?2",
+                [&key, request_id],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
             .optional()?;
         if let Some((hash, result)) = prior {
-            return Ok(if hash == cs.params_hash { Commit::Replayed { result } } else { Commit::RequestIdReused });
+            return Ok(if hash == cs.params_hash {
+                Commit::Replayed { result }
+            } else {
+                Commit::RequestIdReused
+            });
         }
         let actual: u64 = tx
-            .query_row("SELECT version FROM pets WHERE scope=?1", [&key], |r| r.get::<_, i64>(0))
+            .query_row("SELECT version FROM pets WHERE scope=?1", [&key], |r| {
+                r.get::<_, i64>(0)
+            })
             .optional()?
             .map_or(0, |v| v as u64);
         if actual != expected {
@@ -146,7 +175,14 @@ impl From<StoreError> for ExecError {
 }
 
 /// 动作执行外层:load → 规则核心 → 原子 commit;版本冲突时重读重试。
-pub fn run_act<S: Store>(store: &mut S, scope: &Scope, action: Action, action_name: &str, now: u64, request_id: &str) -> Result<String, ExecError> {
+pub fn run_act<S: Store>(
+    store: &mut S,
+    scope: &Scope,
+    action: Action,
+    action_name: &str,
+    now: u64,
+    request_id: &str,
+) -> Result<String, ExecError> {
     use sha2::{Digest, Sha256};
     // 指纹只覆盖调用方可控的参数；时间由服务端决定，不能让重试因为跨过分钟边界而被判为请求标识复用。
     let params_hash = format!("{:x}", Sha256::digest(action_name));
@@ -156,7 +192,11 @@ pub fn run_act<S: Store>(store: &mut S, scope: &Scope, action: Action, action_na
         let out = pet_core::act(pet, action, now, request_id).map_err(ExecError::Act)?;
         let state = serde_json::to_string(&out.pet).map_err(|_| ExecError::Corrupt)?;
         let result = serde_json::to_string(&out).map_err(|_| ExecError::Corrupt)?;
-        let cs = Changeset { state, result, params_hash: params_hash.clone() };
+        let cs = Changeset {
+            state,
+            result,
+            params_hash: params_hash.clone(),
+        };
         match store.commit(scope, cur.version, request_id, &cs)? {
             Commit::Committed { .. } => return Ok(cs.result),
             Commit::Replayed { result } => return Ok(result),
@@ -168,7 +208,21 @@ pub fn run_act<S: Store>(store: &mut S, scope: &Scope, action: Action, action_na
 }
 
 /// 正式领取:以版本 0 提交,已有宠物则冲突。
-pub fn seed<S: Store>(store: &mut S, scope: &Scope, pet: &Pet, request_id: &str) -> Result<Commit, StoreError> {
+pub fn seed<S: Store>(
+    store: &mut S,
+    scope: &Scope,
+    pet: &Pet,
+    request_id: &str,
+) -> Result<Commit, StoreError> {
     let state = serde_json::to_string(pet).unwrap();
-    store.commit(scope, 0, request_id, &Changeset { state: state.clone(), result: state, params_hash: "birth".into() })
+    store.commit(
+        scope,
+        0,
+        request_id,
+        &Changeset {
+            state: state.clone(),
+            result: state,
+            params_hash: "birth".into(),
+        },
+    )
 }

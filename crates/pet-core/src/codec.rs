@@ -4,7 +4,11 @@ use serde::Serialize;
 
 /// 成功响应信封。
 #[derive(Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema), schemars(rename = "{T}Result"))]
+#[cfg_attr(
+    feature = "schema",
+    derive(schemars::JsonSchema),
+    schemars(rename = "{T}Result")
+)]
 pub struct OkBody<T> {
     pub ok: bool,
     pub value: T,
@@ -62,7 +66,12 @@ pub fn error(code: ErrorCode, message: &str) -> String {
         code: ErrorCode,
         message: &'a str,
     }
-    serde_json::to_string(&Borrowed { ok: false, code, message }).unwrap_or_default()
+    serde_json::to_string(&Borrowed {
+        ok: false,
+        code,
+        message,
+    })
+    .unwrap_or_default()
 }
 
 pub fn hex(bytes: &[u8]) -> String {

@@ -89,25 +89,47 @@ impl ReplayGuard {
     }
 }
 
-pub fn verify_assertion(raw: &str, issuers: &[TrustedIssuer], audience: &str, now: u64, replay: &ReplayGuard) -> Result<Subject, AssertionError> {
+pub fn verify_assertion(
+    raw: &str,
+    issuers: &[TrustedIssuer],
+    audience: &str,
+    now: u64,
+    replay: &ReplayGuard,
+) -> Result<Subject, AssertionError> {
     let mut parts = raw.split('.');
-    let (Some("v1"), Some(p), Some(s), None) = (parts.next(), parts.next(), parts.next(), parts.next()) else {
+    let (Some("v1"), Some(p), Some(s), None) =
+        (parts.next(), parts.next(), parts.next(), parts.next())
+    else {
         return Err(AssertionError::Malformed);
     };
     let payload_bytes = unb64(p).ok_or(AssertionError::Malformed)?;
-    let sig_bytes: [u8; 64] = unb64(s).and_then(|v| v.try_into().ok()).ok_or(AssertionError::Malformed)?;
-    let payload: Payload = serde_json::from_slice(&payload_bytes).map_err(|_| AssertionError::Malformed)?;
+    let sig_bytes: [u8; 64] = unb64(s)
+        .and_then(|v| v.try_into().ok())
+        .ok_or(AssertionError::Malformed)?;
+    let payload: Payload =
+        serde_json::from_slice(&payload_bytes).map_err(|_| AssertionError::Malformed)?;
 
-    let issuer = issuers.iter().find(|i| i.iss == payload.iss).ok_or(AssertionError::UnknownIssuer)?;
-    let key = issuer.keys.iter().find(|k| k.kid == payload.kid).ok_or(AssertionError::UnknownKey)?;
-    if payload.iat < key.not_before || key.not_after.is_some_and(|e| payload.iat > e) || key.revoked_at.is_some_and(|r| payload.iat >= r) {
+    let issuer = issuers
+        .iter()
+        .find(|i| i.iss == payload.iss)
+        .ok_or(AssertionError::UnknownIssuer)?;
+    let key = issuer
+        .keys
+        .iter()
+        .find(|k| k.kid == payload.kid)
+        .ok_or(AssertionError::UnknownKey)?;
+    if payload.iat < key.not_before
+        || key.not_after.is_some_and(|e| payload.iat > e)
+        || key.revoked_at.is_some_and(|r| payload.iat >= r)
+    {
         return Err(AssertionError::KeyNotValid);
     }
     let pubkey: [u8; 32] = pet_core_unhex(&key.public_key).ok_or(AssertionError::UnknownKey)?;
     let vk = VerifyingKey::from_bytes(&pubkey).map_err(|_| AssertionError::UnknownKey)?;
     let mut msg = ASSERTION_DOMAIN.to_vec();
     msg.extend_from_slice(&payload_bytes);
-    vk.verify_strict(&msg, &Signature::from_bytes(&sig_bytes)).map_err(|_| AssertionError::BadSignature)?;
+    vk.verify_strict(&msg, &Signature::from_bytes(&sig_bytes))
+        .map_err(|_| AssertionError::BadSignature)?;
 
     if payload.aud != audience {
         return Err(AssertionError::WrongAudience);
@@ -121,10 +143,17 @@ pub fn verify_assertion(raw: &str, issuers: &[TrustedIssuer], audience: &str, no
     if payload.exp < payload.iat || payload.exp - payload.iat > MAX_ASSERTION_TTL {
         return Err(AssertionError::TooLong);
     }
-    if !replay.check_and_insert(format!("{}\u{1f}{}", payload.iss, payload.jti), payload.exp, now) {
+    if !replay.check_and_insert(
+        format!("{}\u{1f}{}", payload.iss, payload.jti),
+        payload.exp,
+        now,
+    ) {
         return Err(AssertionError::Replayed);
     }
-    Ok(Subject { iss: payload.iss, sub: payload.sub })
+    Ok(Subject {
+        iss: payload.iss,
+        sub: payload.sub,
+    })
 }
 
 fn pet_core_unhex(s: &str) -> Option<[u8; 32]> {
@@ -148,19 +177,28 @@ struct TokenBody {
 /// 签发服务访问令牌:无状态、带过期。撤销需要令牌存储,见 docs/service.md。
 pub fn issue_token(secret: &[u8], who: &Subject, now: u64) -> (String, u64) {
     let exp = now + TOKEN_TTL;
-    let body = b64(&serde_json::to_vec(&TokenBody { iss: who.iss.clone(), sub: who.sub.clone(), exp }).unwrap());
+    let body = b64(&serde_json::to_vec(&TokenBody {
+        iss: who.iss.clone(),
+        sub: who.sub.clone(),
+        exp,
+    })
+    .unwrap());
     let tag = b64(&hmac_sha256(secret, &[b"pet/token/v1\n", body.as_bytes()]));
     (format!("t1.{body}.{tag}"), exp)
 }
 
 pub fn verify_token(secret: &[u8], raw: &str, now: u64) -> Option<Subject> {
     let mut it = raw.split('.');
-    let (Some("t1"), Some(body), Some(tag), None) = (it.next(), it.next(), it.next(), it.next()) else {
+    let (Some("t1"), Some(body), Some(tag), None) = (it.next(), it.next(), it.next(), it.next())
+    else {
         return None;
     };
     if !verify_hmac(secret, &[b"pet/token/v1\n", body.as_bytes()], &unb64(tag)?) {
         return None;
     }
     let b: TokenBody = serde_json::from_slice(&unb64(body)?).ok()?;
-    (b.exp > now).then_some(Subject { iss: b.iss, sub: b.sub })
+    (b.exp > now).then_some(Subject {
+        iss: b.iss,
+        sub: b.sub,
+    })
 }

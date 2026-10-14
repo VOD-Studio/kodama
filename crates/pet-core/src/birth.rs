@@ -36,11 +36,21 @@ pub struct Birth {
 }
 
 pub fn derive_birth(i: &BirthInput) -> Result<Birth, &'static str> {
-    let s = unhex(&i.server_seed).filter(|v| v.len() == 32).ok_or("server_seed must be 32 bytes hex")?;
-    let c = unhex(&i.client_seed).filter(|v| v.len() == 32).ok_or("client_seed must be 32 bytes hex")?;
+    let s = unhex(&i.server_seed)
+        .filter(|v| v.len() == 32)
+        .ok_or("server_seed must be 32 bytes hex")?;
+    let c = unhex(&i.client_seed)
+        .filter(|v| v.len() == 32)
+        .ok_or("client_seed must be 32 bytes hex")?;
 
     let mut ctx: Vec<u8> = Vec::new();
-    for part in [&RULES_VERSION.to_be_bytes()[..], i.world.as_bytes(), i.request_id.as_bytes(), &s, &c] {
+    for part in [
+        &RULES_VERSION.to_be_bytes()[..],
+        i.world.as_bytes(),
+        i.request_id.as_bytes(),
+        &s,
+        &c,
+    ] {
         ctx.extend_from_slice(&(part.len() as u32).to_be_bytes());
         ctx.extend_from_slice(part);
     }
@@ -67,5 +77,15 @@ pub fn derive_birth(i: &BirthInput) -> Result<Birth, &'static str> {
     h.update(&root);
     let id = hex(&h.finalize()[..16]);
 
-    Ok(Birth { id: id.clone(), rarity, species, genes, pet: Pet::newborn_with(id, i.born_at, Growth::with_base(Growth::base_from_genes(&genes))) })
+    Ok(Birth {
+        id: id.clone(),
+        rarity,
+        species,
+        genes,
+        pet: Pet::newborn_with(
+            id,
+            i.born_at,
+            Growth::with_base(Growth::base_from_genes(&genes)),
+        ),
+    })
 }

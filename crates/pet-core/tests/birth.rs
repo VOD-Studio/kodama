@@ -25,14 +25,20 @@ fn rarity_follows_configured_weights() {
     let n = 20_000u32;
     let mut buckets = [0u32; 5];
     for i in 0..n {
-        let inp = BirthInput { request_id: format!("req-{i}"), ..input("", 7, 9) };
+        let inp = BirthInput {
+            request_id: format!("req-{i}"),
+            ..input("", 7, 9)
+        };
         buckets[derive_birth(&inp).unwrap().rarity as usize] += 1;
     }
     let expect_bp = [6000u32, 2500, 1000, 400, 100];
     for (got, bp) in buckets.iter().zip(expect_bp) {
         let want = n * bp / 10_000;
         let tol = want / 8 + 10;
-        assert!(got.abs_diff(want) <= tol, "bucket {got} vs {want} (tol {tol}): {buckets:?}");
+        assert!(
+            got.abs_diff(want) <= tol,
+            "bucket {got} vs {want} (tol {tol}): {buckets:?}"
+        );
     }
 }
 

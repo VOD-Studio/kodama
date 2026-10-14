@@ -1,0 +1,6 @@
+# 只用稳定版选项：本地、编辑器与 CI 的格式化结果一致，不需要 nightly 工具链。
+# 其余保持 rustfmt 默认值（行宽 100），不引入仓库特有的风格。
+edition = "2021"
+newline_style = "Unix"
+use_field_init_shorthand = true
+use_try_shorthand = true

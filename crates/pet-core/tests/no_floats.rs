@@ -8,13 +8,20 @@ fn run(v: Value) -> Value {
 }
 
 fn newborn() -> Value {
-    let b = run(json!({"op":"birth","world":"w","request_id":"r","server_seed":"aa".repeat(32),"client_seed":"bb".repeat(32),"born_at":"0"}));
+    let b = run(
+        json!({"op":"birth","world":"w","request_id":"r","server_seed":"aa".repeat(32),"client_seed":"bb".repeat(32),"born_at":"0"}),
+    );
     b["value"]["pet"].clone()
 }
 
 #[test]
 fn floats_in_integer_fields_are_rejected_as_bad_input() {
-    for (field, bad) in [("satiety", json!(80.5)), ("food", json!(1e2)), ("energy", json!(79.0)), ("medicine", json!(-0.0))] {
+    for (field, bad) in [
+        ("satiety", json!(80.5)),
+        ("food", json!(1e2)),
+        ("energy", json!(79.0)),
+        ("medicine", json!(-0.0)),
+    ] {
         let mut pet = newborn();
         pet[field] = bad.clone();
         let r = run(json!({"op":"act","pet":pet,"action":"wait","now":"10","request_id":"x"}));
@@ -29,7 +36,9 @@ fn floats_in_nested_arrays_are_rejected() {
     pet["growth"]["traits"] = json!([500.5, 500, 500]);
     let r = run(json!({"op":"act","pet":pet,"action":"wait","now":"10","request_id":"x"}));
     assert_eq!(r["code"], "bad_input");
-    let r = run(json!({"op":"frame","species":1,"genes":[1,2,3,4,5,6,7,8.5],"pose":"idle","charset":"ascii","w":10,"h":3,"t":"0"}));
+    let r = run(
+        json!({"op":"frame","species":1,"genes":[1,2,3,4,5,6,7,8.5],"pose":"idle","charset":"ascii","w":10,"h":3,"t":"0"}),
+    );
     assert_eq!(r["code"], "bad_input");
 }
 

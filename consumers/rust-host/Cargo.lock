@@ -165,7 +165,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "pet-core"
-version = "0.0.0"
+version = "0.1.1"
 dependencies = [
  "ed25519-dalek",
  "hmac",
@@ -177,7 +177,7 @@ dependencies = [
 
 [[package]]
 name = "pet-term"
-version = "0.0.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",

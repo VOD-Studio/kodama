@@ -63,10 +63,18 @@ pub struct ApiError {
 
 impl ApiError {
     fn new(status: StatusCode, code: &str, message: &str) -> Self {
-        Self { status, code: code.into(), message: message.into() }
+        Self {
+            status,
+            code: code.into(),
+            message: message.into(),
+        }
     }
     fn unauthorized() -> Self {
-        Self::new(StatusCode::UNAUTHORIZED, "unauthorized", "missing or invalid access token")
+        Self::new(
+            StatusCode::UNAUTHORIZED,
+            "unauthorized",
+            "missing or invalid access token",
+        )
     }
     fn not_found(what: &str) -> Self {
         Self::new(StatusCode::NOT_FOUND, "not_found", what)
@@ -79,7 +87,11 @@ impl ApiError {
     }
     fn internal(e: impl std::fmt::Debug) -> Self {
         eprintln!("internal error: {e:?}");
-        Self::new(StatusCode::INTERNAL_SERVER_ERROR, "internal", "internal error")
+        Self::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "internal",
+            "internal error",
+        )
     }
 }
 
@@ -91,7 +103,11 @@ impl From<StoreError> for ApiError {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        (self.status, Json(json!({"ok": false, "code": self.code, "message": self.message}))).into_response()
+        (
+            self.status,
+            Json(json!({"ok": false, "code": self.code, "message": self.message})),
+        )
+            .into_response()
     }
 }
 
@@ -102,7 +118,10 @@ fn ok(v: Value) -> Json<Value> {
 // ---------- 作用域与记录 ----------
 
 fn scope(st: &Config, who: &Subject, suffix: &str) -> Scope {
-    Scope { world: st.world.clone(), owner: format!("{}#{suffix}", who.owner_key()) }
+    Scope {
+        world: st.world.clone(),
+        owner: format!("{}#{suffix}", who.owner_key()),
+    }
 }
 
 fn pet_scope(st: &Config, who: &Subject) -> Scope {
@@ -123,15 +142,22 @@ struct BirthRecord {
 }
 
 fn valid_hex(s: &str, len: usize) -> bool {
-    s.len() == len && s.bytes().all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+    s.len() == len
+        && s.bytes()
+            .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
 }
 
 fn unhex(s: &str) -> Vec<u8> {
-    (0..s.len() / 2).map(|i| u8::from_str_radix(&s[i * 2..i * 2 + 2], 16).unwrap_or(0)).collect()
+    (0..s.len() / 2)
+        .map(|i| u8::from_str_radix(&s[i * 2..i * 2 + 2], 16).unwrap_or(0))
+        .collect()
 }
 
 fn valid_request_id(s: &str) -> bool {
-    !s.is_empty() && s.len() <= 64 && s.bytes().all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b))
+    !s.is_empty()
+        && s.len() <= 64
+        && s.bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b))
 }
 
 async fn with_store<S, T, F>(st: &Arc<AppState<S>>, f: F) -> Result<T, ApiError>
@@ -151,24 +177,41 @@ where
 
 /// 请求体解析放在认证之后，并且畸形输入也返回统一的错误格式。
 fn parse_json<T: serde::de::DeserializeOwned>(body: &Bytes) -> Result<T, ApiError> {
-    serde_json::from_slice(body).map_err(|e| ApiError::bad_request("bad_input", &format!("invalid JSON body: {e}")))
+    serde_json::from_slice(body)
+        .map_err(|e| ApiError::bad_request("bad_input", &format!("invalid JSON body: {e}")))
 }
 
 fn authed<S: Store>(st: &AppState<S>, headers: &HeaderMap) -> Result<Subject, ApiError> {
-    let raw = headers.get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()).and_then(|v| v.strip_prefix("Bearer ")).ok_or_else(ApiError::unauthorized)?;
+    let raw = headers
+        .get(header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.strip_prefix("Bearer "))
+        .ok_or_else(ApiError::unauthorized)?;
     verify_token(&st.cfg.token_secret, raw, st.secs()).ok_or_else(ApiError::unauthorized)
 }
 
 /// 宠物在 `ticks` 时刻的投影。读取只结算展示，不写存储；死亡个体按存档原样展示。
 fn project(pet: &Pet, ticks: u64, version: u64) -> Value {
-    match pet_core::act(pet.clone(), pet_core::Action::Wait, ticks.max(pet.last_tick), "projection") {
+    match pet_core::act(
+        pet.clone(),
+        pet_core::Action::Wait,
+        ticks.max(pet.last_tick),
+        "projection",
+    ) {
         Ok(o) => json!({"pet": o.pet, "phase": o.phase, "mood": o.mood, "version": version}),
         Err(_) => json!({"pet": pet, "phase": Phase::Dead, "version": version}),
     }
 }
 
 fn is_dead(pet: &Pet, ticks: u64) -> bool {
-    pet.phase() == Phase::Dead || pet_core::act(pet.clone(), pet_core::Action::Wait, ticks.max(pet.last_tick), "probe").is_err_and(|e| e.code() == pet_core::ErrorCode::Dead)
+    pet.phase() == Phase::Dead
+        || pet_core::act(
+            pet.clone(),
+            pet_core::Action::Wait,
+            ticks.max(pet.last_tick),
+            "probe",
+        )
+        .is_err_and(|e| e.code() == pet_core::ErrorCode::Dead)
 }
 
 // ---------- 路由 ----------
@@ -201,18 +244,38 @@ struct ExchangeBody {
     assertion: String,
 }
 
-async fn exchange<S: Store + Send + 'static>(State(st): State<Arc<AppState<S>>>, raw: Bytes) -> Result<Json<Value>, ApiError> {
+async fn exchange<S: Store + Send + 'static>(
+    State(st): State<Arc<AppState<S>>>,
+    raw: Bytes,
+) -> Result<Json<Value>, ApiError> {
     let body: ExchangeBody = parse_json(&raw)?;
     let now = st.secs();
-    let who = verify_assertion(&body.assertion, &st.cfg.issuers, &st.cfg.audience, now, &st.replay)
-        .map_err(|e| ApiError::new(StatusCode::UNAUTHORIZED, e.code(), "identity assertion rejected"))?;
+    let who = verify_assertion(
+        &body.assertion,
+        &st.cfg.issuers,
+        &st.cfg.audience,
+        now,
+        &st.replay,
+    )
+    .map_err(|e| {
+        ApiError::new(
+            StatusCode::UNAUTHORIZED,
+            e.code(),
+            "identity assertion rejected",
+        )
+    })?;
     let (token, exp) = issue_token(&st.cfg.token_secret, &who, now);
-    Ok(ok(json!({"access_token": token, "token_type": "Bearer", "expires_at": exp})))
+    Ok(ok(
+        json!({"access_token": token, "token_type": "Bearer", "expires_at": exp}),
+    ))
 }
 
 // ---------- 出生：承诺 → 接受 → 揭示 ----------
 
-async fn create_birth<S: Store + Send + 'static>(State(st): State<Arc<AppState<S>>>, headers: HeaderMap) -> Result<(StatusCode, Json<Value>), ApiError> {
+async fn create_birth<S: Store + Send + 'static>(
+    State(st): State<Arc<AppState<S>>>,
+    headers: HeaderMap,
+) -> Result<(StatusCode, Json<Value>), ApiError> {
     let who = authed(&st, &headers)?;
     let v = with_store(&st, move |st, store| {
         let ticks = st.ticks();
@@ -258,13 +321,19 @@ fn birth_view(rec: &BirthRecord) -> Value {
     }
 }
 
-async fn get_birth<S: Store + Send + 'static>(State(st): State<Arc<AppState<S>>>, headers: HeaderMap, Path(id): Path<String>) -> Result<Json<Value>, ApiError> {
+async fn get_birth<S: Store + Send + 'static>(
+    State(st): State<Arc<AppState<S>>>,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+) -> Result<Json<Value>, ApiError> {
     let who = authed(&st, &headers)?;
     if !valid_hex(&id, 32) {
         return Err(ApiError::not_found("birth not found"));
     }
     let v = with_store(&st, move |st, store| {
-        let rec = store.load(&scope(&st.cfg, &who, &format!("birth:{id}")))?.ok_or_else(|| ApiError::not_found("birth not found"))?;
+        let rec = store
+            .load(&scope(&st.cfg, &who, &format!("birth:{id}")))?
+            .ok_or_else(|| ApiError::not_found("birth not found"))?;
         let rec: BirthRecord = serde_json::from_str(&rec.state).map_err(ApiError::internal)?;
         Ok(birth_view(&rec))
     })
@@ -277,22 +346,41 @@ struct AcceptBody {
     client_seed: String,
 }
 
-async fn accept_birth<S: Store + Send + 'static>(State(st): State<Arc<AppState<S>>>, headers: HeaderMap, Path(id): Path<String>, raw: Bytes) -> Result<Json<Value>, ApiError> {
+async fn accept_birth<S: Store + Send + 'static>(
+    State(st): State<Arc<AppState<S>>>,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+    raw: Bytes,
+) -> Result<Json<Value>, ApiError> {
     let who = authed(&st, &headers)?;
     let body: AcceptBody = parse_json(&raw)?;
     if !valid_hex(&id, 32) {
         return Err(ApiError::not_found("birth not found"));
     }
     if !valid_hex(&body.client_seed, 64) {
-        return Err(ApiError::bad_request("bad_input", "client_seed must be 64 lowercase hex characters"));
+        return Err(ApiError::bad_request(
+            "bad_input",
+            "client_seed must be 64 lowercase hex characters",
+        ));
     }
-    let v = with_store(&st, move |st, store| accept(st, store, &who, &id, &body.client_seed)).await?;
+    let v = with_store(&st, move |st, store| {
+        accept(st, store, &who, &id, &body.client_seed)
+    })
+    .await?;
     Ok(ok(v))
 }
 
-fn accept<S: Store>(st: &AppState<S>, store: &mut S, who: &Subject, id: &str, client_seed: &str) -> Result<Value, ApiError> {
+fn accept<S: Store>(
+    st: &AppState<S>,
+    store: &mut S,
+    who: &Subject,
+    id: &str,
+    client_seed: &str,
+) -> Result<Value, ApiError> {
     let birth_scope = scope(&st.cfg, who, &format!("birth:{id}"));
-    let loaded = store.load(&birth_scope)?.ok_or_else(|| ApiError::not_found("birth not found"))?;
+    let loaded = store
+        .load(&birth_scope)?
+        .ok_or_else(|| ApiError::not_found("birth not found"))?;
     let mut rec: BirthRecord = serde_json::from_str(&loaded.state).map_err(ApiError::internal)?;
 
     if rec.accepted {
@@ -300,14 +388,19 @@ fn accept<S: Store>(st: &AppState<S>, store: &mut S, who: &Subject, id: &str, cl
         return if rec.client_seed.as_deref() == Some(client_seed) {
             Ok(accepted_view(store, st, who, &rec)?)
         } else {
-            Err(ApiError::conflict("client_seed_fixed", "the client seed was already accepted and cannot change"))
+            Err(ApiError::conflict(
+                "client_seed_fixed",
+                "the client seed was already accepted and cannot change",
+            ))
         };
     }
 
     let ticks = st.ticks();
     let server_seed = unhex(&rec.server_seed);
     let client_bytes = unhex(client_seed);
-    let cert = pet_issuer::issue_certificate(&st.signing, &rec.context, &server_seed, &client_bytes).map_err(|e| ApiError::bad_request("bad_input", e))?;
+    let cert =
+        pet_issuer::issue_certificate(&st.signing, &rec.context, &server_seed, &client_bytes)
+            .map_err(|e| ApiError::bad_request("bad_input", e))?;
     let birth = derive_birth(&BirthInput {
         world: rec.context.world.clone(),
         request_id: rec.context.request_id.clone(),
@@ -327,11 +420,18 @@ fn accept<S: Store>(st: &AppState<S>, store: &mut S, who: &Subject, id: &str, cl
             // 这次领取已经由另一个并发请求或上一次尝试完成了宠物的创建：幂等地继续，而不是当成“已有主宠”。
             already_created = true;
         } else if !is_dead(&old, ticks) {
-            return Err(ApiError::conflict("already_has_pet", "this world already has a living main pet for the account"));
+            return Err(ApiError::conflict(
+                "already_has_pet",
+                "this world already has a living main pet for the account",
+            ));
         } else {
             // 已逝去的个体先归档为纪念，再被新个体替换；纪念保留名字、形象与经历。
             let memorial = scope(&st.cfg, who, &format!("memorial:{}", old.id));
-            let cs = Changeset { state: v.state.clone(), result: "archived".into(), params_hash: "archive".into() };
+            let cs = Changeset {
+                state: v.state.clone(),
+                result: "archived".into(),
+                params_hash: "archive".into(),
+            };
             store.commit(&memorial, 0, "archive", &cs)?;
             expected = v.version;
         }
@@ -339,18 +439,32 @@ fn accept<S: Store>(st: &AppState<S>, store: &mut S, who: &Subject, id: &str, cl
 
     if !already_created {
         let pet_json = serde_json::to_string(&birth.pet).map_err(ApiError::internal)?;
-        let cs = Changeset { state: pet_json.clone(), result: pet_json, params_hash: "adopt".into() };
+        let cs = Changeset {
+            state: pet_json.clone(),
+            result: pet_json,
+            params_hash: "adopt".into(),
+        };
         match store.commit(&pet_scope, expected, &format!("adopt:{id}"), &cs)? {
             Commit::Committed { .. } | Commit::Replayed { .. } => {}
             Commit::Conflict { .. } => {
                 // 提交的瞬间另一个请求先写入了：落库的若正是这次出生的个体就继续，否则说明另一次领取先赢了。
-                let now = store.load(&pet_scope)?.ok_or_else(|| ApiError::internal("pet vanished"))?;
+                let now = store
+                    .load(&pet_scope)?
+                    .ok_or_else(|| ApiError::internal("pet vanished"))?;
                 let p: Pet = serde_json::from_str(&now.state).map_err(ApiError::internal)?;
                 if p.id != birth.id {
-                    return Err(ApiError::conflict("already_has_pet", "another adoption completed first"));
+                    return Err(ApiError::conflict(
+                        "already_has_pet",
+                        "another adoption completed first",
+                    ));
                 }
             }
-            Commit::RequestIdReused => return Err(ApiError::conflict("request_conflict", "adoption request id was reused")),
+            Commit::RequestIdReused => {
+                return Err(ApiError::conflict(
+                    "request_conflict",
+                    "adoption request id was reused",
+                ))
+            }
         }
     }
 
@@ -359,25 +473,47 @@ fn accept<S: Store>(st: &AppState<S>, store: &mut S, who: &Subject, id: &str, cl
     rec.certificate = Some(cert);
     rec.pet_id = Some(birth.id.clone());
     let state = serde_json::to_string(&rec).map_err(ApiError::internal)?;
-    let cs = Changeset { state: state.clone(), result: state, params_hash: pet_core::hex(&hmac_sha256(b"accept", &[client_seed.as_bytes()])) };
+    let cs = Changeset {
+        state: state.clone(),
+        result: state,
+        params_hash: pet_core::hex(&hmac_sha256(b"accept", &[client_seed.as_bytes()])),
+    };
     match store.commit(&birth_scope, loaded.version, "accept", &cs)? {
         Commit::Committed { .. } | Commit::Replayed { .. } => {}
         Commit::Conflict { .. } => {
             // 另一次相同请求先写入了接受结果：以落库的为准。
-            let again = store.load(&birth_scope)?.ok_or_else(|| ApiError::internal("birth vanished"))?;
-            let stored: BirthRecord = serde_json::from_str(&again.state).map_err(ApiError::internal)?;
+            let again = store
+                .load(&birth_scope)?
+                .ok_or_else(|| ApiError::internal("birth vanished"))?;
+            let stored: BirthRecord =
+                serde_json::from_str(&again.state).map_err(ApiError::internal)?;
             if stored.client_seed.as_deref() != Some(client_seed) {
-                return Err(ApiError::conflict("client_seed_fixed", "the client seed was already accepted and cannot change"));
+                return Err(ApiError::conflict(
+                    "client_seed_fixed",
+                    "the client seed was already accepted and cannot change",
+                ));
             }
             return accepted_view(store, st, who, &stored);
         }
-        Commit::RequestIdReused => return Err(ApiError::conflict("client_seed_fixed", "the client seed was already accepted and cannot change")),
+        Commit::RequestIdReused => {
+            return Err(ApiError::conflict(
+                "client_seed_fixed",
+                "the client seed was already accepted and cannot change",
+            ))
+        }
     }
     accepted_view(store, st, who, &rec)
 }
 
-fn accepted_view<S: Store>(store: &mut S, st: &AppState<S>, who: &Subject, rec: &BirthRecord) -> Result<Value, ApiError> {
-    let pet = store.load(&pet_scope(&st.cfg, who))?.map(|v| (serde_json::from_str::<Pet>(&v.state), v.version));
+fn accepted_view<S: Store>(
+    store: &mut S,
+    st: &AppState<S>,
+    who: &Subject,
+    rec: &BirthRecord,
+) -> Result<Value, ApiError> {
+    let pet = store
+        .load(&pet_scope(&st.cfg, who))?
+        .map(|v| (serde_json::from_str::<Pet>(&v.state), v.version));
     let pet = match pet {
         Some((Ok(p), version)) => project(&p, st.ticks(), version),
         _ => Value::Null,
@@ -387,10 +523,15 @@ fn accepted_view<S: Store>(store: &mut S, st: &AppState<S>, who: &Subject, rec: 
 
 // ---------- 宠物 ----------
 
-async fn get_pet<S: Store + Send + 'static>(State(st): State<Arc<AppState<S>>>, headers: HeaderMap) -> Result<Json<Value>, ApiError> {
+async fn get_pet<S: Store + Send + 'static>(
+    State(st): State<Arc<AppState<S>>>,
+    headers: HeaderMap,
+) -> Result<Json<Value>, ApiError> {
     let who = authed(&st, &headers)?;
     let v = with_store(&st, move |st, store| {
-        let v = store.load(&pet_scope(&st.cfg, &who))?.ok_or_else(|| ApiError::not_found("no pet"))?;
+        let v = store
+            .load(&pet_scope(&st.cfg, &who))?
+            .ok_or_else(|| ApiError::not_found("no pet"))?;
         let pet: Pet = serde_json::from_str(&v.state).map_err(ApiError::internal)?;
         Ok(project(&pet, st.ticks(), v.version))
     })
@@ -404,23 +545,49 @@ struct ActBody {
     request_id: String,
 }
 
-async fn act<S: Store + Send + 'static>(State(st): State<Arc<AppState<S>>>, headers: HeaderMap, raw: Bytes) -> Result<Json<Value>, ApiError> {
+async fn act<S: Store + Send + 'static>(
+    State(st): State<Arc<AppState<S>>>,
+    headers: HeaderMap,
+    raw: Bytes,
+) -> Result<Json<Value>, ApiError> {
     let who = authed(&st, &headers)?;
     let body: ActBody = parse_json(&raw)?;
     if !valid_request_id(&body.request_id) {
-        return Err(ApiError::bad_request("bad_input", "request_id must be 1-64 characters of [A-Za-z0-9-_.:]"));
+        return Err(ApiError::bad_request(
+            "bad_input",
+            "request_id must be 1-64 characters of [A-Za-z0-9-_.:]",
+        ));
     }
-    let action: pet_core::Action = serde_json::from_value(body.action.clone()).map_err(|e| ApiError::bad_request("bad_input", &e.to_string()))?;
+    let action: pet_core::Action = serde_json::from_value(body.action.clone())
+        .map_err(|e| ApiError::bad_request("bad_input", &e.to_string()))?;
     let action_text = body.action.to_string();
     let v = with_store(&st, move |st, store| {
-        match pet_store::run_act(store, &pet_scope(&st.cfg, &who), action, &action_text, st.ticks(), &body.request_id) {
+        match pet_store::run_act(
+            store,
+            &pet_scope(&st.cfg, &who),
+            action,
+            &action_text,
+            st.ticks(),
+            &body.request_id,
+        ) {
             Ok(result) => serde_json::from_str::<Value>(&result).map_err(ApiError::internal),
             Err(ExecError::NoPet) => Err(ApiError::not_found("no pet")),
-            Err(ExecError::RequestIdReused) => Err(ApiError::conflict("request_conflict", "request_id was already used with different parameters")),
+            Err(ExecError::RequestIdReused) => Err(ApiError::conflict(
+                "request_conflict",
+                "request_id was already used with different parameters",
+            )),
             Err(ExecError::Act(e)) => {
-                let status = if e.code() == pet_core::ErrorCode::Dead { StatusCode::CONFLICT } else { StatusCode::UNPROCESSABLE_ENTITY };
+                let status = if e.code() == pet_core::ErrorCode::Dead {
+                    StatusCode::CONFLICT
+                } else {
+                    StatusCode::UNPROCESSABLE_ENTITY
+                };
                 let code = serde_json::to_value(e.code()).unwrap_or_default();
-                Err(ApiError::new(status, code.as_str().unwrap_or("rejected"), e.message()))
+                Err(ApiError::new(
+                    status,
+                    code.as_str().unwrap_or("rejected"),
+                    e.message(),
+                ))
             }
             Err(other) => Err(ApiError::internal(other)),
         }
@@ -429,12 +596,20 @@ async fn act<S: Store + Send + 'static>(State(st): State<Arc<AppState<S>>>, head
     Ok(ok(v))
 }
 
-async fn evolution<S: Store + Send + 'static>(State(st): State<Arc<AppState<S>>>, headers: HeaderMap) -> Result<Json<Value>, ApiError> {
+async fn evolution<S: Store + Send + 'static>(
+    State(st): State<Arc<AppState<S>>>,
+    headers: HeaderMap,
+) -> Result<Json<Value>, ApiError> {
     let who = authed(&st, &headers)?;
     let v = with_store(&st, move |st, store| {
-        let v = store.load(&pet_scope(&st.cfg, &who))?.ok_or_else(|| ApiError::not_found("no pet"))?;
+        let v = store
+            .load(&pet_scope(&st.cfg, &who))?
+            .ok_or_else(|| ApiError::not_found("no pet"))?;
         let pet: Pet = serde_json::from_str(&v.state).map_err(ApiError::internal)?;
-        Ok(serde_json::to_value(pet_core::growth::evolution_options(&pet.growth, pet.food)).unwrap())
+        Ok(
+            serde_json::to_value(pet_core::growth::evolution_options(&pet.growth, pet.food))
+                .unwrap(),
+        )
     })
     .await?;
     Ok(ok(v))
