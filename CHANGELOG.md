@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0](https://github.com/VOD-Studio/kodama/compare/v0.1.1...v0.2.0) (2026-10-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **release:** CLI 改由 GitHub Release 分发，服务镜像发布到 GHCR ([#31](https://github.com/VOD-Studio/kodama/issues/31))
+
+### Features
+
+* **release:** CLI 改由 GitHub Release 分发，服务镜像发布到 GHCR ([#31](https://github.com/VOD-Studio/kodama/issues/31)) ([7c5dd12](https://github.com/VOD-Studio/kodama/commit/7c5dd128481ec90766834136e628ed237449029e))
+* **sdk:** 导出 @violetjs/pet/wasm，Node 里不再按路径读取 .wasm ([997c7eb](https://github.com/VOD-Studio/kodama/commit/997c7eba8d6f52d2b3415579de2ef7be621b8127))
+
+
+### Bug Fixes
+
+* **sdk:** npm 页面补上说明、关键字与中英文 README ([2035ba1](https://github.com/VOD-Studio/kodama/commit/2035ba18cc435d0029f1bbc1bef11e3262d5e7a8))
+
 ## [0.1.1](https://github.com/VOD-Studio/kodama/compare/v0.1.0...v0.1.1) (2026-10-14)
 
 
