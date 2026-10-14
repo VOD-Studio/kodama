@@ -199,6 +199,8 @@ pub(crate) fn accept<S: Store>(
                 params_hash: "archive".into(),
             };
             store.commit(&memorial, 0, "archive", &cs)?;
+            // 纪念目录：列出与读取纪念时用；与归档一样可以重复执行
+            super::memorials::index(st, store, who, &old.id)?;
             expected = v.version;
         }
     }

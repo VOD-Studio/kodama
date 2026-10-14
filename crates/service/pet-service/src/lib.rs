@@ -19,7 +19,7 @@ pub use state::{AppState, Config};
 use axum::routing::{delete, get, post};
 use axum::Router;
 use pet_store::Store;
-use routes::{activity as activity_routes, auth, births, meta, pets, sessions};
+use routes::{activity as activity_routes, auth, births, memorials, meta, pets, sessions};
 use std::sync::Arc;
 
 /// 全部 HTTP 接口。新增接口在这里登记，并写进 docs/operations/service.md 的接口表。
@@ -44,6 +44,8 @@ pub fn router<S: Store + Send + 'static>(state: Arc<AppState<S>>) -> Router {
         .route("/v1/pets/me", get(pets::get_pet::<S>))
         .route("/v1/pets/me/actions", post(pets::act::<S>))
         .route("/v1/pets/me/evolution", get(pets::evolution::<S>))
+        .route("/v1/memorials", get(memorials::list::<S>))
+        .route("/v1/memorials/{id}", get(memorials::get::<S>))
         .route("/v1/activity", post(activity_routes::receive::<S>))
         .with_state(state)
 }
