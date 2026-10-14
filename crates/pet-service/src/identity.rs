@@ -75,7 +75,7 @@ impl AssertionError {
     }
 }
 
-/// 已使用的断言标识,防止重放。进程内保存,多实例部署需要换成共享存储(见 pet/docs/service.md)。
+/// 已使用的断言标识,防止重放。进程内保存,多实例部署需要换成共享存储(见 docs/service.md)。
 #[derive(Default)]
 pub struct ReplayGuard {
     seen: Mutex<HashMap<String, u64>>,
@@ -145,7 +145,7 @@ struct TokenBody {
     exp: u64,
 }
 
-/// 签发服务访问令牌:无状态、带过期。撤销需要令牌存储,见 pet/docs/service.md。
+/// 签发服务访问令牌:无状态、带过期。撤销需要令牌存储,见 docs/service.md。
 pub fn issue_token(secret: &[u8], who: &Subject, now: u64) -> (String, u64) {
     let exp = now + TOKEN_TTL;
     let body = b64(&serde_json::to_vec(&TokenBody { iss: who.iss.clone(), sub: who.sub.clone(), exp }).unwrap());

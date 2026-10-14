@@ -4,7 +4,7 @@
 
 ## 目录
 
-`pet/catalog/species.json` 是素材清单，由 `crates/pet-term/tests/catalog.rs` 校验。每个物种声明：稳定编号与键、类别、身体结构、辨识特征、各画风的状态、各画风实际覆盖的动作、来源、作者与许可。
+`catalog/species.json` 是素材清单，由 `crates/pet-term/tests/catalog.rs` 校验。每个物种声明：稳定编号与键、类别、身体结构、辨识特征、各画风的状态、各画风实际覆盖的动作、来源、作者与许可。
 
 | 编号 | 键 | 类别 | 身体结构 | 辨识特征 |
 |---|---|---|---|---|

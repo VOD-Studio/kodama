@@ -1,6 +1,6 @@
 # 拆分为独立仓库的计划
 
-#517 的一部分。**尚未执行**：创建仓库是对外部的、难以撤回的动作，需要有人明确决定时机并创建。本文给出建议的时机与名字、拆分后的仓库结构、仓库自己的调试方式，以及开发阶段与 Violet 联调的方式，并保证“一条命令可执行，历史不丢”。
+#517 的一部分。**已于 2026-10-14 执行**：从 Violet 的 `release/2.0` 拆出 `pet/` 的完整历史，推送为 `VOD-Studio/kodama` 的 `main`。本文保留了建议、结构与调试方案；“执行步骤”一节记录的是实际做过的操作，路径前缀 `pet/` 指拆分前在 Violet 里的位置。
 
 ## 建议：现在拆
 
@@ -87,7 +87,7 @@ Violet 里保留：PRD-0036、ADR-0021、活动连接器（#528）、站点挂�
 
 PR #516 是 squash 合并，`release/2.0` 上 `pet/` 的早期历史只有一个压缩提交。PR 的原始头部仍保存在 GitHub 的 `refs/pull/<n>/head`，从那里拆能保留历史。PR #541 用 merge commit 合并后，之后的历史是原子提交，不需要再重放。
 
-已验证（只在本地，未推送）：把 PR #535 的提交重放到 `refs/pull/516/head` 上，再对 `pet/` 做 subtree split，得到 **34 个提交**，文件树与当时的 `pet/` 逐文件一致，不含 `web/`、`api/`、`.github/`。
+实际结果：把 #535 与 #541 的 26 个非合并提交重放到 `refs/pull/516/head` 上，再对 `pet/` 做 subtree split，得到 **44 个提交**，文件树与 `release/2.0` 的 `pet/` 逐文件一致（树比较输出为空），不含 `web/`、`api/`、`.github/`。拆出的历史原样推送为 `main`，之后在分支上做独立化改造（`LICENSE`、路径引用、CI、README）。
 
 ```sh
 # 1. 取得 #516 的原始头部（squash 前的提交）
@@ -126,9 +126,9 @@ PRD-0036、ADR-0021、CONTEXT 中的术语、Violet 活动连接器（#528）、
 
 ## 迁移清单
 
-- [ ] 合并 PR #541（merge commit），其中已含像素画风与开发入口
-- [ ] 由有权限的人创建 `VOD-Studio/kodama`（可见性、默认分支、保护规则）
-- [ ] 按上面步骤拆分并校验树一致
+- [x] 合并 PR #541（merge commit），其中已含像素画风与开发入口
+- [x] 由有权限的人创建 `VOD-Studio/kodama`
+- [x] 按上面步骤拆分并校验树一致（44 个提交）
 - [ ] 新仓库配置 CI：安装 `wasm-bindgen-cli@0.2.129`、Postgres 服务、Chrome；`RUNNER_STATUS_TOKEN` 与 `SELF_HOSTED_RUNNER` 是否沿用另议
 - [ ] 新仓库配置 release-please（独立版本，不再牵动 Violet 的发版）
 - [ ] 新仓库首次 CI 全绿后，再从 Violet 删除 `pet/` 与 `pet.yml`

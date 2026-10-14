@@ -4,7 +4,7 @@ use crate::RULES_VERSION;
 use alloc::string::String;
 use serde::{Deserialize, Serialize};
 
-// 逻辑时间单位:1 刻度 = 1 分钟。默认值依据 pet/docs/parameters.md 的快进体验记录。
+// 逻辑时间单位:1 刻度 = 1 分钟。默认值依据 docs/parameters.md 的快进体验记录。
 /// 饱食每降 1 点所需刻度(100 点 40 小时耗尽,一次喂食恰好抵一天的消耗)。
 const SATIETY_DECAY_TICKS: u64 = 24;
 const ENERGY_DECAY_TICKS: u64 = 30;

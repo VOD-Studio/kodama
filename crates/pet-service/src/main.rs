@@ -9,7 +9,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 fn need(name: &str) -> String {
     std::env::var(name).unwrap_or_else(|_| {
-        eprintln!("missing required environment variable {name}; see pet/docs/service.md");
+        eprintln!("missing required environment variable {name}; see docs/service.md");
         std::process::exit(2);
     })
 }
