@@ -4,6 +4,7 @@ pub(crate) mod activity;
 pub(crate) mod auth;
 pub(crate) mod births;
 pub(crate) mod device;
+pub(crate) mod memorials;
 pub(crate) mod meta;
 pub(crate) mod pets;
 pub(crate) mod sessions;
