@@ -45,6 +45,9 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
           components: clippy
+      # 必须排在所有 cargo 命令之前：后面的 clippy 与测试会悄悄改写锁文件，掩盖没提交的更新
+      - name: Cargo.lock is committed up to date
+        run: cargo metadata --locked --format-version 1 > /dev/null
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - uses: taiki-e/install-action@1168f6810a3cb30a3514bf5756a3b7f0422c6df8 # v2
         with:
