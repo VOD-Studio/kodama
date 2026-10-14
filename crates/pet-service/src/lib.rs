@@ -112,7 +112,7 @@ fn pet_scope(st: &Config, who: &Subject) -> Scope {
 #[derive(Serialize, Deserialize, Clone)]
 struct BirthRecord {
     context: Context,
-    /// 在揭示前保密,只存在于存储中,绝不通过接口返回。待加密存放见 pet/docs/service.md。
+    /// 在揭示前保密,只存在于存储中,绝不通过接口返回。待加密存放见 docs/service.md。
     server_seed: String,
     commitment: String,
     commit_sig: String,

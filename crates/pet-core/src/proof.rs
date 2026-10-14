@@ -38,7 +38,7 @@ pub struct Context {
     pub eligibility: String,
     pub rules_version: u32,
     /// 签发方声称的签发时间(逻辑时间)。它由签名保护但由签发方自报,
-    /// 所以撤销被盗密钥时应取最早可能的泄露时间,见 pet/docs/birth-protocol.md。
+    /// 所以撤销被盗密钥时应取最早可能的泄露时间,见 docs/birth-protocol.md。
     #[serde(with = "u64_string")]
     #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub issued_at: u64,

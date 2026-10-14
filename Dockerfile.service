@@ -1,4 +1,4 @@
-# pet-service 镜像。构建上下文为 pet/ 目录：docker build -f Dockerfile.service -t pet-service pet
+# pet-service 镜像。构建上下文为仓库根：docker build -f Dockerfile.service -t pet-service .
 FROM rust:1-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./

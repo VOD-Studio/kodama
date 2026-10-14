@@ -144,11 +144,11 @@ fn sqlite_factory() -> Factory<SqliteStore> {
 }
 
 fn pg_factory() -> Factory<PgStore> {
-    let url = std::env::var("PET_TEST_PG_URL").expect("PET_TEST_PG_URL must point at a throwaway Postgres (see pet/scripts/test-pg.sh)");
+    let url = std::env::var("PET_TEST_PG_URL").expect("PET_TEST_PG_URL must point at a throwaway Postgres (see scripts/test-pg.sh)");
     static N: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
     let schema = format!("t_{}_{}", std::process::id(), N.fetch_add(1, std::sync::atomic::Ordering::SeqCst));
     Arc::new(move || PgStore::open(&url, &schema).unwrap())
 }
 
 contract!(sqlite, sqlite_factory);
-contract!(postgres, pg_factory, #[ignore = "needs PET_TEST_PG_URL; run pet/scripts/test-pg.sh"]);
+contract!(postgres, pg_factory, #[ignore = "needs PET_TEST_PG_URL; run scripts/test-pg.sh"]);
