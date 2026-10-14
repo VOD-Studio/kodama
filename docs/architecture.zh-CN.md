@@ -237,7 +237,7 @@ CAPABILITIES（pet-core::caps）────────────────
 
 | issue | 规则（`pet-core`） | 美术（`pet-term`、`assets/`） | 服务（`pet-service`、`pet-store`） | 客户端 |
 |---|---|---|---|---|
-| 进化形态与精细画风（#6、#11、#14） | `rules/growth.rs`：条件不变；`Stage` 与 `Branch` 在 `pet_term::form` | **像素画风已完成**（[设计](design/evolution.md)）：每阶段一副身体、分支特征、每物种 16 种外形，名称在 `assets/catalog/`；终端外形是下一步 | 入口仍是 `GET /v1/pets/me/evolution` | SDK 把 `lineage` 传给 `sprite` |
+| 进化形态与精细画风（#6、#11、#14） | `rules/growth.rs`：条件不变；`Stage` 与 `Branch` 在 `pet_term::form` | **像素画风已完成**（[设计](design/evolution.md)）：每阶段一副身体、分支特征、每物种 16 种外形，名称在 `assets/catalog/`；终端以半格字符绘制同一套像素画（`charset: "blocks"`） | 入口仍是 `GET /v1/pets/me/evolution` | SDK 把 `lineage` 传给 `sprite` |
 | #5 规则版本迁移 | `rules/migrate.rs`：显式的 `migrate(pet, from, to)` 与不变量测试 | — | 加载时迁移并持久化；表结构变更以编号迁移放在 `pet-store` | — |
 | #10 账号服务 | — | — | `http.rs` 里的连接池、令牌存储、速率限制；固化存储契约签名 | — |
 | #12 活动与奖励 | `grant`（已有） | — | `routes/activity.rs`：持久收件、去重、世界内上限 | 接入方的连接器发送签名事件 |
