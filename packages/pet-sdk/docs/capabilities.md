@@ -6,7 +6,7 @@
 | op | 作用 | 产生状态变化 | 成功响应类型 | 可能的错误 |
 |---|---|---|---|---|
 | `birth` | 由出生输入派生个体身份、稀有度、物种与基因 | 是 | `BirthResult` | `bad_input` |
-| `act` | 对宠物执行喂食、休息、玩耍、治疗、等待、进化或穿脱装扮,按逻辑时间结算病程;升级时解锁装扮 | 是 | `OutcomeResult` | `bad_input`、`dead`、`no_food`、`no_medicine`、`not_sick`、`too_tired`、`time_backwards`、`unsupported_rules`、`not_eligible`、`not_owned`、`incompatible_item` |
+| `act` | 对宠物执行喂食、休息、玩耍、治疗、等待、进化、穿脱装扮或探险(出发、领取、召回),按逻辑时间结算病程;升级时解锁装扮 | 是 | `OutcomeResult` | `bad_input`、`dead`、`no_food`、`no_medicine`、`not_sick`、`too_tired`、`time_backwards`、`unsupported_rules`、`not_eligible`、`not_owned`、`incompatible_item`、`on_expedition`、`no_expedition`、`still_away`、`daily_limit`、`unwell` |
 | `grant` | 发放经服务裁决后的奖励(经验、食物、药品、主题倾向);核心只校验单次上限 | 是 | `OutcomeResult` | `bad_input`、`dead`、`invalid_reward`、`time_backwards`、`unsupported_rules` |
 | `evolution_options` | 列出当前阶段的进化分支,以及每个分支的缺项说明 | 否 | `EvolutionOptionsResult` | `bad_input` |
 | `frame` | 将姿态与呈现时钟合成为字符单元网格 | 否 | `FrameResult` | `bad_input` |
@@ -30,5 +30,10 @@
 - `invalid_reward` — 奖励超出单次允许的范围。
 - `not_owned` — 宠物没有这件物品。
 - `incompatible_item` — 物品不适合宠物的身体结构。
+- `on_expedition` — 宠物正在探险，要等它回来。
+- `no_expedition` — 宠物没有在探险。
+- `still_away` — 探险还没到时间。
+- `daily_limit` — 当天的次数已用完。
+- `unwell` — 生病时不能出发。
 
 失败响应为 `{ ok: false, code, message }`;按 `code` 分支,`message` 仅供人读。

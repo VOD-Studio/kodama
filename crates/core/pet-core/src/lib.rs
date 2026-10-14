@@ -15,7 +15,7 @@ pub use birth::{derive_birth, proof, Birth, BirthInput};
 pub use protocol::caps::{catalog, Capability, CapabilityCatalog, CAPABILITIES};
 pub use protocol::codec::{hex, ErrorBody, ErrorCode, OkBody};
 pub use protocol::{execute, Command};
-pub use rules::growth;
 pub use rules::life::{act, grant, ActError, Action, Mood, Outcome, Pet, Phase, Reward};
+pub use rules::{expedition, growth, wardrobe};
 
 pub const RULES_VERSION: u32 = 1;

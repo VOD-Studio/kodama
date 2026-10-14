@@ -8,7 +8,7 @@ ajv.addSchema(schema, "pet");
 const check = (name) => ajv.getSchema(`pet#/$defs/${name}`);
 
 const transcript = fs.readFileSync(new URL("../../../target/out-native.txt", import.meta.url), "utf8").trim().split("\n");
-const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url))).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", ...Array(4).fill("act"), ...Array(3).fill("sprite"), "frame", "capabilities"];
+const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url))).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", ...Array(4).fill("act"), ...Array(5).fill("act"), ...Array(3).fill("sprite"), "frame", "capabilities"];
 if (ops.length !== transcript.length) throw new Error(`op count ${ops.length} != transcript ${transcript.length}`);
 
 let n = 0;
@@ -31,6 +31,8 @@ const inputs = [
   { op: "sprite", species: 0, genes: [1, 2, 3, 4, 5, 6, 7, 8], pose: "idle", stage: 0, w: 56, h: 36, t: "0", outfit: { head: "star_hat", background: "meadow" } },
   { op: "act", pet: JSON.parse(transcript[0]).value.pet, action: { equip: { item: "round_glasses" } }, now: "1", request_id: "o" },
   { op: "act", pet: JSON.parse(transcript[0]).value.pet, action: { unequip: { slot: "head" } }, now: "1", request_id: "o" },
+  { op: "act", pet: JSON.parse(transcript[0]).value.pet, action: { depart: { topic: "rust", tier: "medium" } }, now: "1", request_id: "x" },
+  { op: "act", pet: JSON.parse(transcript[0]).value.pet, action: "return", now: "1", request_id: "x" },
   { op: "sprite", species: 5, genes: [1, 2, 3, 4, 5, 6, 7, 8], pose: "idle", stage: 1, w: 14, h: 16, t: "0" },
 ];
 for (const c of inputs) if (!cmd(c)) throw new Error(`${c.op} input violates Command: ${ajv.errorsText(cmd.errors)}`);

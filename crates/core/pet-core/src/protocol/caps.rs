@@ -32,7 +32,7 @@ pub const CAPABILITIES: &[Capability] = &[
     },
     Capability {
         op: "act",
-        summary: "对宠物执行喂食、休息、玩耍、治疗、等待、进化或穿脱装扮,按逻辑时间结算病程;升级时解锁装扮",
+        summary: "对宠物执行喂食、休息、玩耍、治疗、等待、进化、穿脱装扮或探险(出发、领取、召回),按逻辑时间结算病程;升级时解锁装扮",
         mutates_state: true,
         errors: &[
             BadInput,
@@ -46,6 +46,11 @@ pub const CAPABILITIES: &[Capability] = &[
             NotEligible,
             NotOwned,
             IncompatibleItem,
+            OnExpedition,
+            NoExpedition,
+            StillAway,
+            DailyLimit,
+            Unwell,
         ],
     },
     Capability {

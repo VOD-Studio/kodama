@@ -43,6 +43,15 @@ wear.forEach(([action, request_id], i) => {
   out.push(res);
   if (JSON.parse(res).ok) pet = JSON.parse(res).value.pet;
 });
+// 探险：出发、未到时间领取被拒、到时间领取得到可复算的见闻、再出发后召回返还食物
+pet.energy = 90;
+pet.food = 6;
+const trip = [[{ depart: { topic: "rust", tier: "short" } }, "x1", 0n], [{ return: null }, "x2", 10n], [{ return: null }, "x3", 240n], [{ depart: { topic: "go", tier: "long" } }, "x4", 250n], [{ recall: null }, "x5", 260n]];
+for (const [action, request_id, dt] of trip) {
+  const res = exec(JSON.stringify({ op: "act", pet, action: Object.values(action)[0] === null ? Object.keys(action)[0] : action, now: String(9000000000000000100n + dt), request_id }));
+  out.push(res);
+  if (JSON.parse(res).ok) pet = JSON.parse(res).value.pet;
+}
 const night = { head: "star_hat", face: "round_glasses", body: "bow_tie", back: "hero_cape", background: "night_sky" };
 for (const [sp, w, h, t, pose, outfit] of [[0, 56, 38, "41", "idle", night], [6, 56, 38, "3", "observe", { back: "travel_pack", background: "meadow" }], [2, 40, 30, "9", "evolve", night]])
   out.push(exec(JSON.stringify({ op: "sprite", species: sp, genes: [37, 1, 2, 3, 4, 5, 6, 7], pose, stage: 2, lineage: ["gentle", "wanderer"], w, h, t, outfit })));

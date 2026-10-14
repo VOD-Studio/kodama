@@ -43,6 +43,16 @@ pub enum ErrorCode {
     NotOwned,
     /// 物品不适合宠物的身体结构。
     IncompatibleItem,
+    /// 宠物正在探险，要等它回来。
+    OnExpedition,
+    /// 宠物没有在探险。
+    NoExpedition,
+    /// 探险还没到时间。
+    StillAway,
+    /// 当天的次数已用完。
+    DailyLimit,
+    /// 生病时不能出发。
+    Unwell,
 }
 
 /// 失败响应信封。

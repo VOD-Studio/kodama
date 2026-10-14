@@ -73,7 +73,7 @@ Sign in once to the pet service of a site that hosts kodama. The CLI and the web
 pet-cli login --service https://pet.example.com   # or set PET_SERVICE
 # To sign in, open this page and confirm the code BCDF-GHJK: https://example.com/pet/device?code=BCDF-GHJK
 pet-cli status                        # your pet as one JSON line
-pet-cli act feed                      # feed|rest|play|heal|wait|evolve BRANCH|equip ITEM|unequip SLOT
+pet-cli act feed                      # feed|rest|play|heal|wait|return|recall|evolve BRANCH|equip ITEM|unequip SLOT|depart TOPIC TIER
 pet-cli act feed --request-id tap-1   # retrying the same id replays the first result
 pet-cli live --account                # animated; f feed, p play, r rest, h heal, q quit
 pet-cli logout                        # revoke the session and delete the saved credentials

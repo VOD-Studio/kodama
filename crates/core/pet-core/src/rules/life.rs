@@ -1,4 +1,5 @@
 use crate::protocol::codec::{u64_string, ErrorCode};
+use crate::rules::expedition::{Tier, Travels};
 use crate::rules::growth::{self, Branch, Growth, AFFECTION, CALM, CURIOUS, MAX_TOPIC_LEN};
 use crate::rules::wardrobe::Wardrobe;
 use crate::RULES_VERSION;
@@ -64,6 +65,9 @@ pub struct Pet {
     /// 衣橱：拥有的物品与身上的装扮。空时不写出，旧存档与出生结果保持原样。
     #[serde(default, skip_serializing_if = "Wardrobe::is_empty")]
     pub wardrobe: Wardrobe,
+    /// 探险：进行中的一次、当天出发次数与收藏册。空时不写出。
+    #[serde(default, skip_serializing_if = "Travels::is_empty")]
+    pub travels: Travels,
 }
 
 fn first_rules_version() -> u32 {
@@ -91,6 +95,7 @@ impl Pet {
             growth,
             species: None,
             wardrobe: Wardrobe::default(),
+            travels: Travels::default(),
         }
     }
 
@@ -104,7 +109,7 @@ impl Pet {
     }
 }
 
-#[derive(Clone, Copy, Deserialize)]
+#[derive(Clone, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum Action {
@@ -125,6 +130,15 @@ pub enum Action {
     Unequip {
         slot: Slot,
     },
+    /// 带着一个主题去探险（4、12 或 24 小时），出发消耗食物。
+    Depart {
+        topic: String,
+        tier: Tier,
+    },
+    /// 探险到时间后领取：少量经验与一件见闻。
+    Return,
+    /// 领取前召回：返还出发消耗的食物，没有产出。
+    Recall,
 }
 
 /// 短期情绪,由身体状态派生,不存储,所以不会成为永久状态。
@@ -191,6 +205,12 @@ pub enum ActError {
     InvalidReward,
     NotOwned,
     IncompatibleItem,
+    OnExpedition,
+    NoExpedition,
+    StillAway,
+    DailyLimit,
+    Unwell,
+    BadTopic,
 }
 
 impl ActError {
@@ -207,6 +227,12 @@ impl ActError {
             Self::InvalidReward => ErrorCode::InvalidReward,
             Self::NotOwned => ErrorCode::NotOwned,
             Self::IncompatibleItem => ErrorCode::IncompatibleItem,
+            Self::OnExpedition => ErrorCode::OnExpedition,
+            Self::NoExpedition => ErrorCode::NoExpedition,
+            Self::StillAway => ErrorCode::StillAway,
+            Self::DailyLimit => ErrorCode::DailyLimit,
+            Self::Unwell => ErrorCode::Unwell,
+            Self::BadTopic => ErrorCode::BadInput,
         }
     }
 
@@ -223,6 +249,12 @@ impl ActError {
             Self::InvalidReward => "reward is outside the allowed bounds",
             Self::NotOwned => "the pet does not own this item",
             Self::IncompatibleItem => "this item does not fit the pet's body",
+            Self::OnExpedition => "the pet is away on an expedition",
+            Self::NoExpedition => "the pet is not on an expedition",
+            Self::StillAway => "the expedition has not finished yet",
+            Self::DailyLimit => "the pet already set out twice today",
+            Self::Unwell => "a sick pet cannot set out",
+            Self::BadTopic => "the topic must be 1-32 bytes",
         }
     }
 }
@@ -279,6 +311,15 @@ pub fn act(mut pet: Pet, action: Action, now: u64, request_id: &str) -> Result<O
     }
     // 本功能之前已经升级的个体：先按当前等级补齐解锁，这次就能穿上
     pet.wardrobe.unlock(pet.growth.level());
+    // 探险期间宠物不在家：玩耍、休息、进化与再次出发都要等它回来；喂食、治疗与装扮照常
+    if pet.travels.away()
+        && matches!(
+            action,
+            Action::Play | Action::Rest | Action::Evolve { .. } | Action::Depart { .. }
+        )
+    {
+        return Err(ActError::OnExpedition);
+    }
     match action {
         Action::Wait => {}
         Action::Feed => {
@@ -319,6 +360,22 @@ pub fn act(mut pet: Pet, action: Action, now: u64, request_id: &str) -> Result<O
         Action::Evolve { branch } => growth::evolve(&mut pet.growth, &mut pet.food, branch)?,
         Action::Equip { item } => pet.wardrobe.equip(item, pet.species)?,
         Action::Unequip { slot } => pet.wardrobe.unequip(slot),
+        Action::Depart { topic, tier } => {
+            let sick = pet.phase() == Phase::Sick;
+            pet.travels.depart(
+                request_id,
+                (&topic, tier),
+                now,
+                &mut pet.food,
+                pet.energy,
+                sick,
+            )?
+        }
+        Action::Return => {
+            let (exp, _) = pet.travels.come_home(&pet.id, now)?;
+            pet.growth.add_exp(exp);
+        }
+        Action::Recall => pet.food += pet.travels.recall()?,
     }
     // 升级解锁装扮：每次结算都按当前等级补齐，所以升级来自哪个动作都一样
     pet.wardrobe.unlock(pet.growth.level());

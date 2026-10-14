@@ -20,7 +20,15 @@ export type Action =
       unequip: {
         slot: Slot;
       };
-    };
+    }
+  | {
+      depart: {
+        tier: Tier;
+        topic: string;
+      };
+    }
+  | "return"
+  | "recall";
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "Branch".
@@ -47,9 +55,22 @@ export type Item =
 export type Slot = "head" | "face" | "body" | "back" | "background";
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Tier".
+ */
+export type Tier = "short" | "medium" | "long";
+/**
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "Stage".
  */
 export type Stage = "baby" | "young" | "adult";
+/**
+ * 见闻的种类。名称在 `assets/catalog/souvenirs.json`。
+ *
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Keepsake".
+ */
+export type Keepsake =
+  "postcard" | "pebble" | "feather" | "seashell" | "star_fragment" | "old_map" | "pressed_leaf" | "ticket";
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "MissingKind".
@@ -73,7 +94,12 @@ export type ErrorCode =
   | "not_eligible"
   | "invalid_reward"
   | "not_owned"
-  | "incompatible_item";
+  | "incompatible_item"
+  | "on_expedition"
+  | "no_expedition"
+  | "still_away"
+  | "daily_limit"
+  | "unwell";
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "Charset".
@@ -206,6 +232,7 @@ export interface Pet {
    * 物种，出生时确定；装备时据此检查身体结构。本字段之前出生的个体没有记录。
    */
   species?: number | null;
+  travels?: Travels;
   wardrobe?: Wardrobe;
 }
 /**
@@ -266,6 +293,59 @@ export interface Growth {
  */
 export interface TopicCount {
   count: number;
+  topic: string;
+}
+/**
+ * 探险的全部状态：进行中的一次、当天出发次数、收藏册。空时不写出，旧存档保持原样。
+ *
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Travels".
+ */
+export interface Travels {
+  /**
+   * 每种见闻累计得到的件数，顺序同 `KEEPSAKES`。
+   */
+  album?: number[];
+  /**
+   * 出发次数所属的逻辑日（逻辑时间 / 1440）与次数。
+   */
+  day?: string;
+  departures?: number;
+  /**
+   * 最近得到的见闻，新的在后。
+   */
+  recent?: Souvenir[];
+  trip?: Trip | null;
+}
+/**
+ * 一件见闻：在哪个主题的探险里得到的什么东西。约十六分之一会是闪亮的。
+ *
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Souvenir".
+ */
+export interface Souvenir {
+  found_at: string;
+  kind: Keepsake;
+  shiny: boolean;
+  topic: string;
+}
+/**
+ * 进行中的探险。
+ *
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Trip".
+ */
+export interface Trip {
+  /**
+   * 什么时候可以领取。
+   */
+  back_at: string;
+  departed_at: string;
+  /**
+   * 探险编号，即出发那次请求的标识；收藏品由它复算。
+   */
+  id: string;
+  tier: Tier;
   topic: string;
 }
 /**
