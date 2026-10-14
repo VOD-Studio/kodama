@@ -116,6 +116,8 @@ jobs:
         run: make image-smoke
       - name: Schema, types and docs match the Rust types
         run: make schema-check
+      - name: SDK web rendering (lifecycle, accessibility)
+        run: make sdk-test
       - name: Real TTY behavior
         run: make tty
 

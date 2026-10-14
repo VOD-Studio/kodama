@@ -7,7 +7,7 @@ NO_STD_TARGET := thumbv7em-none-eabihf
 SHELL_SCRIPTS := $(shell git ls-files '*.sh')
 
 .PHONY: help fmt fmt-check clippy check-arch lint-scripts lint-workflows check-versions deny lint \
-	test test-pg three-end schema schema-check tty e2e e2e-pg consumers ci \
+	test test-pg three-end schema schema-check sdk-test tty e2e e2e-pg consumers ci \
 	term preview dev-init dev token wasm cli-archive image image-smoke clean \
 	docker-build docker-shell docker-dev docker-token docker-down docker-clean
 
@@ -84,6 +84,9 @@ tty: ## 真实 pty 中验证 pet-cli live:动画、resize、退出恢复终端�
 	cargo build --release -q -p pet-cli
 	python3 tests/tty/tty_test.py
 
+sdk-test: wasm ## SDK 的 JS 部分(网页渲染的生命周期与无障碍),基于刚构建的 dist
+	cd packages/pet-sdk && node --test test/*.test.mjs
+
 e2e: ## 服务端到端(真实二进制、HTTP、重启),SQLite
 	sh tests/e2e/run.sh
 
@@ -93,7 +96,7 @@ e2e-pg: ## 同上,另含 Postgres;未设置 PET_TEST_PG_URL 时需要 Docker
 consumers: ## 外部消费方验收:CLI 发布归档、Node 嵌入、Rust 宿主、TanStack Start(需要 Chrome)
 	for t in cli-archive node-embed rust-host tanstack-start; do sh tests/consumers/$$t/run.sh || exit 1; done
 
-ci: lint test test-pg three-end e2e-pg schema-check tty ## CI 的 Lint 与 Core 作业(服务镜像除外)
+ci: lint test test-pg three-end e2e-pg schema-check sdk-test tty ## CI 的 Lint 与 Core 作业(服务镜像除外)
 
 ##@ 构建
 

@@ -41,7 +41,14 @@
       "types": "./dist/terminal.d.ts",
       "default": "./dist/terminal.js"
     },
+    "./web": {
+      "types": "./dist/web.d.ts",
+      "default": "./dist/web.js"
+    },
     "./wasm": "./dist/pet_wasm_bg.wasm"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
   },
   "engines": {
     "node": ">=22"
