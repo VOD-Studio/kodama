@@ -1,6 +1,7 @@
 //! `live --account` 的数据源：后台线程读写服务，界面线程每帧只取最新结果，网络慢也不会卡住动画。
 use super::client::{Client, Failure};
 use pet_core::Pet;
+use pet_term::outfit::Outfit;
 use pet_term::{Branch, Pose};
 use serde_json::{json, Value};
 use std::sync::mpsc::{channel, Receiver, Sender};
@@ -27,6 +28,8 @@ pub struct View {
     pub species: u8,
     pub genes: [u8; 8],
     pub lineage: Vec<Branch>,
+    /// 身上的装扮。
+    pub outfit: Outfit,
     pub phase: String,
     pub mood: String,
     pub food: u32,
@@ -52,6 +55,7 @@ impl View {
             species,
             genes,
             lineage: pet.growth.lineage.clone(),
+            outfit: pet.wardrobe.worn.clone(),
             phase: v["phase"].as_str().unwrap_or("healthy").into(),
             mood: v["mood"].as_str().unwrap_or("").into(),
             food: pet.food,

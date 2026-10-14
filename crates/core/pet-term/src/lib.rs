@@ -9,8 +9,10 @@ use serde::{Deserialize, Serialize};
 
 mod blocks;
 pub mod form;
+pub mod outfit;
 mod pixel;
 pub use form::{Branch, Form, Stage};
+pub use outfit::{Item, Outfit, Slot};
 pub use pixel::{render_pixels, PixelInput, Pixels};
 
 const SPRITE_W: u16 = 7;
@@ -87,6 +89,9 @@ pub struct FrameInput {
     pub stage: u8,
     #[serde(default)]
     pub lineage: Vec<Branch>,
+    /// 穿戴的装扮；只有 `blocks` 画风画出来。
+    #[serde(default)]
+    pub outfit: Outfit,
 }
 
 #[derive(Serialize)]

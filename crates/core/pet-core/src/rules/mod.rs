@@ -3,3 +3,4 @@
 //! 只依赖 `crate::rng` 的独立随机通道与 `crate::protocol::codec` 的编码,不依赖协议入口。
 pub mod growth;
 pub mod life;
+pub mod wardrobe;

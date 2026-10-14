@@ -32,6 +32,48 @@
             "evolve"
           ],
           "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "穿上拥有的物品，替换同一槽位上的物品。不改变任何数值。",
+          "properties": {
+            "equip": {
+              "properties": {
+                "item": {
+                  "$ref": "#/$defs/Item"
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "equip"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "脱下一个槽位上的物品；物品仍然拥有。",
+          "properties": {
+            "unequip": {
+              "properties": {
+                "slot": {
+                  "$ref": "#/$defs/Slot"
+                }
+              },
+              "required": [
+                "slot"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "unequip"
+          ],
+          "type": "object"
         }
       ]
     },
@@ -562,6 +604,16 @@
           "const": "invalid_reward",
           "description": "奖励超出单次允许的范围。",
           "type": "string"
+        },
+        {
+          "const": "not_owned",
+          "description": "宠物没有这件物品。",
+          "type": "string"
+        },
+        {
+          "const": "incompatible_item",
+          "description": "物品不适合宠物的身体结构。",
+          "type": "string"
         }
       ]
     },
@@ -691,6 +743,11 @@
             "$ref": "#/$defs/Branch"
           },
           "type": "array"
+        },
+        "outfit": {
+          "$ref": "#/$defs/Outfit",
+          "default": {},
+          "description": "穿戴的装扮；只有 `blocks` 画风画出来。"
         },
         "pose": {
           "$ref": "#/$defs/Pose"
@@ -871,6 +928,20 @@
       ],
       "type": "object"
     },
+    "Item": {
+      "enum": [
+        "round_glasses",
+        "knit_scarf",
+        "flower_crown",
+        "meadow",
+        "travel_pack",
+        "star_hat",
+        "bow_tie",
+        "night_sky",
+        "hero_cape"
+      ],
+      "type": "string"
+    },
     "Missing": {
       "description": "未满足的进化条件:还差多少。",
       "properties": {
@@ -955,6 +1026,62 @@
         "ok",
         "value"
       ],
+      "type": "object"
+    },
+    "Outfit": {
+      "description": "身上穿戴的装扮：每个槽位至多一件。",
+      "properties": {
+        "back": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Item"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "background": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Item"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "body": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Item"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "face": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Item"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "head": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Item"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "type": "object"
     },
     "Pet": {
@@ -1043,6 +1170,20 @@
           "maximum": 255,
           "minimum": 0,
           "type": "integer"
+        },
+        "species": {
+          "description": "物种，出生时确定；装备时据此检查身体结构。本字段之前出生的个体没有记录。",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "wardrobe": {
+          "$ref": "#/$defs/Wardrobe",
+          "description": "衣橱：拥有的物品与身上的装扮。空时不写出，旧存档与出生结果保持原样。"
         }
       },
       "required": [
@@ -1093,6 +1234,11 @@
             "$ref": "#/$defs/Branch"
           },
           "type": "array"
+        },
+        "outfit": {
+          "$ref": "#/$defs/Outfit",
+          "default": {},
+          "description": "穿戴的装扮（即宠物的 `wardrobe.worn`）。不适合这个身体结构的物品不画。"
         },
         "pose": {
           "$ref": "#/$defs/Pose"
@@ -1254,6 +1400,16 @@
       ],
       "type": "object"
     },
+    "Slot": {
+      "enum": [
+        "head",
+        "face",
+        "body",
+        "back",
+        "background"
+      ],
+      "type": "string"
+    },
     "Stage": {
       "enum": [
         "baby",
@@ -1326,6 +1482,22 @@
         "value"
       ],
       "type": "object"
+    },
+    "Wardrobe": {
+      "properties": {
+        "owned": {
+          "description": "拥有的物品，按目录顺序。",
+          "items": {
+            "$ref": "#/$defs/Item"
+          },
+          "type": "array"
+        },
+        "worn": {
+          "$ref": "#/$defs/Outfit",
+          "description": "身上的装扮。"
+        }
+      },
+      "type": "object"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1350,11 +1522,13 @@
           "too_tired",
           "time_backwards",
           "unsupported_rules",
-          "not_eligible"
+          "not_eligible",
+          "not_owned",
+          "incompatible_item"
         ],
         "mutates_state": true,
         "op": "act",
-        "summary": "对宠物执行喂食、休息、玩耍、治疗或等待,按逻辑时间结算病程"
+        "summary": "对宠物执行喂食、休息、玩耍、治疗、等待、进化或穿脱装扮,按逻辑时间结算病程;升级时解锁装扮"
       },
       {
         "errors": [

@@ -85,6 +85,7 @@ export function mountPet(canvas, options) {
       pose: currentPose(),
       stage: pet.stage ?? lineage.length,
       lineage,
+      outfit: pet.outfit ?? {},
       w: width,
       h: height,
       t: String(reduced ? 0 : t),

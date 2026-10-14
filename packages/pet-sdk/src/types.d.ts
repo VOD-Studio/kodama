@@ -10,12 +10,41 @@ export type Action =
       evolve: {
         branch: Branch;
       };
+    }
+  | {
+      equip: {
+        item: Item;
+      };
+    }
+  | {
+      unequip: {
+        slot: Slot;
+      };
     };
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "Branch".
  */
 export type Branch = ("curious" | "gentle" | "steady" | "sage" | "guardian" | "wanderer") | "radiant";
+/**
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Item".
+ */
+export type Item =
+  | "round_glasses"
+  | "knit_scarf"
+  | "flower_crown"
+  | "meadow"
+  | "travel_pack"
+  | "star_hat"
+  | "bow_tie"
+  | "night_sky"
+  | "hero_cape";
+/**
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Slot".
+ */
+export type Slot = "head" | "face" | "body" | "back" | "background";
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "Stage".
@@ -42,7 +71,9 @@ export type ErrorCode =
   | "time_backwards"
   | "unsupported_rules"
   | "not_eligible"
-  | "invalid_reward";
+  | "invalid_reward"
+  | "not_owned"
+  | "incompatible_item";
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "Charset".
@@ -171,9 +202,17 @@ export interface Pet {
    * 饱食衰减的余数刻度,保证结算频率不影响总衰减量。
    */
   satiety_rem?: number;
+  /**
+   * 物种，出生时确定；装备时据此检查身体结构。本字段之前出生的个体没有记录。
+   */
+  species?: number | null;
+  wardrobe?: Wardrobe;
 }
 /**
- * 成长状态:经验、阶段、性格、主题倾向。缺省为初始值,兼容没有该字段的旧存档。
+ * 成长状态。所有字段有默认值,保证没有该结构的旧存档仍可加载。
+ *
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Growth".
  */
 export interface Growth {
   /**
@@ -228,6 +267,30 @@ export interface Growth {
 export interface TopicCount {
   count: number;
   topic: string;
+}
+/**
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Wardrobe".
+ */
+export interface Wardrobe {
+  /**
+   * 拥有的物品，按目录顺序。
+   */
+  owned?: Item[];
+  worn?: Outfit;
+}
+/**
+ * 身上穿戴的装扮：每个槽位至多一件。
+ *
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Outfit".
+ */
+export interface Outfit {
+  back?: Item | null;
+  background?: Item | null;
+  body?: Item | null;
+  face?: Item | null;
+  head?: Item | null;
 }
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
@@ -395,6 +458,7 @@ export interface FrameInput {
   genes: [number, number, number, number, number, number, number, number];
   h: number;
   lineage?: Branch[];
+  outfit?: Outfit;
   pose: Pose;
   species: number;
   /**
@@ -422,6 +486,7 @@ export interface PixelInput {
    * 进化分支，按发生顺序（即宠物的 `growth.lineage`）。决定少年与成年的具体外形。
    */
   lineage?: Branch[];
+  outfit?: Outfit;
   pose: Pose;
   species: number;
   /**
@@ -512,56 +577,6 @@ export interface Frame {
 export interface FrameResult {
   ok: boolean;
   value: Frame;
-}
-/**
- * 成长状态。所有字段有默认值,保证没有该结构的旧存档仍可加载。
- *
- * This interface was referenced by `PetWireProtocol`'s JSON-Schema
- * via the `definition` "Growth".
- */
-export interface Growth1 {
-  /**
-   * 后天罕见形态:0 无,1 为 Radiant。与出生稀有度无关,出生档位不变。
-   */
-  acquired_rarity: number;
-  /**
-   * 出生底色,由基因决定,创建后不变。当前性格最多偏离底色 +200。
-   *
-   * @minItems 3
-   * @maxItems 3
-   */
-  base_traits: [number, number, number];
-  /**
-   * 性格漂移预算所属的天(逻辑时间 / 1440)。
-   */
-  drift_day: string;
-  /**
-   * 当天各维度已使用的漂移点数。
-   *
-   * @minItems 3
-   * @maxItems 3
-   */
-  drift_used: [number, number, number];
-  /**
-   * 累计经验,至多 1500。
-   */
-  exp: number;
-  /**
-   * 已选择的进化分支,按发生顺序。出生身份与基因不随进化改变。
-   */
-  lineage: Branch[];
-  stage: Stage;
-  /**
-   * 主题倾向,至多 8 项。
-   */
-  topics: TopicCount[];
-  /**
-   * 当前性格:好奇、亲和、沉稳,各 0 到 1000。
-   *
-   * @minItems 3
-   * @maxItems 3
-   */
-  traits: [number, number, number];
 }
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema

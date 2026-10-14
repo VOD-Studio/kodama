@@ -10,16 +10,21 @@ use alloc::vec::Vec;
 pub(crate) const CLEAR: u8 = b'.';
 
 /// 不产生描边的细节键。
-const DETAIL: &[u8] = b"WZx*!jG";
+const DETAIL: &[u8] = b"WZx*!jGzR";
 
 /// 可打光的填充键：(键, 亮部, 暗部)。
-const SHADE: [(u8, u8, u8); 6] = [
+const SHADE: [(u8, u8, u8); 10] = [
     (b'b', b'h', b's'),
     (b'a', b'c', b'A'),
     (b'p', b'r', b'q'),
     (b'l', b'l', b'L'),
     (b't', b'i', b'T'),
     (b'g', b'G', b'g'),
+    // 装扮的材质：布、皮革、帽子、叶子
+    (b'C', b'E', b'D'),
+    (b'B', b'H', b'J'),
+    (b'M', b'N', b'O'),
+    (b'V', b'I', b'K'),
 ];
 
 #[derive(Clone)]

@@ -33,6 +33,19 @@ const grantRes = exec(JSON.stringify({ op: "grant", pet, reward: { exp: 60, food
 out.push(grantRes);
 pet = JSON.parse(grantRes).value.pet;
 out.push(exec(JSON.stringify({ op: "evolution_options", pet })));
-out.push(exec(JSON.stringify({ op: "act", pet, action: { evolve: { branch: "steady" } }, now: "9000000000000000011", request_id: "e1" })));
+const evolved = exec(JSON.stringify({ op: "act", pet, action: { evolve: { branch: "steady" } }, now: "9000000000000000011", request_id: "e1" }));
+out.push(evolved);
+// 装扮：升到 3 级解锁的物品可以穿；没有的、不适合身体的被拒绝；穿上后画面带上装扮
+pet = JSON.parse(evolved).value.pet;
+const wear = [[{ equip: { item: "round_glasses" } }, "o1"], [{ equip: { item: "hero_cape" } }, "o2"], [{ equip: { item: "knit_scarf" } }, "o3"], [{ unequip: { slot: "face" } }, "o4"]];
+wear.forEach(([action, request_id], i) => {
+  const res = exec(JSON.stringify({ op: "act", pet, action, now: String(9000000000000000012n + BigInt(i)), request_id }));
+  out.push(res);
+  if (JSON.parse(res).ok) pet = JSON.parse(res).value.pet;
+});
+const night = { head: "star_hat", face: "round_glasses", body: "bow_tie", back: "hero_cape", background: "night_sky" };
+for (const [sp, w, h, t, pose, outfit] of [[0, 56, 38, "41", "idle", night], [6, 56, 38, "3", "observe", { back: "travel_pack", background: "meadow" }], [2, 40, 30, "9", "evolve", night]])
+  out.push(exec(JSON.stringify({ op: "sprite", species: sp, genes: [37, 1, 2, 3, 4, 5, 6, 7], pose, stage: 2, lineage: ["gentle", "wanderer"], w, h, t, outfit })));
+out.push(exec(JSON.stringify({ op: "frame", species: 7, genes: [37, 1, 2, 3, 4, 5, 6, 7], pose: "idle", charset: "blocks", w: 48, h: 20, t: "12", outfit: night })));
 out.push(exec(JSON.stringify({ op: "capabilities" })));
 console.log(out.join("\n"));

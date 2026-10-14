@@ -32,7 +32,7 @@ pub const CAPABILITIES: &[Capability] = &[
     },
     Capability {
         op: "act",
-        summary: "对宠物执行喂食、休息、玩耍、治疗或等待,按逻辑时间结算病程",
+        summary: "对宠物执行喂食、休息、玩耍、治疗、等待、进化或穿脱装扮,按逻辑时间结算病程;升级时解锁装扮",
         mutates_state: true,
         errors: &[
             BadInput,
@@ -44,6 +44,8 @@ pub const CAPABILITIES: &[Capability] = &[
             TimeBackwards,
             UnsupportedRules,
             NotEligible,
+            NotOwned,
+            IncompatibleItem,
         ],
     },
     Capability {

@@ -71,11 +71,11 @@ await initPet(await readFile(new URL(import.meta.resolve("@violetjs/pet/wasm")))
 | `op` | 作用 |
 |---|---|
 | `birth` | 由出生输入派生个体身份、稀有度、物种与基因 |
-| `act` | 喂食、休息、玩耍、治疗或等待，并按给定的逻辑时间结算病程 |
+| `act` | 喂食、休息、玩耍、治疗、等待、进化，或穿脱装扮（`equip`、`unequip`），并按给定的逻辑时间结算病程。2 到 10 级每升一级解锁一件装扮 |
 | `grant` | 发放已由服务裁决的奖励 |
 | `evolution_options` | 列出当前阶段的进化分支，以及每个分支还缺什么 |
 | `frame` | 把姿态合成为终端用的字符网格 |
-| `sprite` | 把姿态合成为像素画的调色板与网格。把宠物的 `growth.lineage` 作为 `lineage` 传入即可画出进化后的外形：每个阶段一副身体，每个分支各有特征 |
+| `sprite` | 把姿态合成为像素画的调色板与网格。把宠物的 `growth.lineage` 作为 `lineage` 传入即可画出进化后的外形：每个阶段一副身体，每个分支各有特征。把 `wardrobe.worn` 作为 `outfit` 传入即可画出帽子、眼镜、围巾、披风与背景场景 |
 | `verify_birth` | 核验出生证书的签名、承诺揭示与结果重算 |
 | `capabilities` | 列出全部命令与错误码 |
 
@@ -93,7 +93,7 @@ import { mountPet } from "@violetjs/pet/web";
 
 await initPet();
 const pet = mountPet(document.querySelector("canvas"), {
-  pet: { species: born.value.species, genes: born.value.genes, lineage: born.value.pet.growth.lineage },
+  pet: { species: born.value.species, genes: born.value.genes, lineage: born.value.pet.growth.lineage, outfit: born.value.pet.wardrobe?.worn },
   label: "火团幼狐",
   onActivate: () => console.log("摸了摸"), // 可选
 });

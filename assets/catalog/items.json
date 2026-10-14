@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "note": "装扮目录（#17）：物品、槽位、解锁等级、适用的身体结构与名称。物品与规则在 crates/core/pet-term/src/outfit.rs，由测试保证与本文件一致；美术在 pixel/items.rs。装扮只改变画面，不改变身份、稀有度、基因或任何数值。",
+  "items": [
+    {
+      "id": "round_glasses",
+      "slot": "face",
+      "unlock_level": 2,
+      "bodies": [
+        "walker",
+        "floater",
+        "rooted"
+      ],
+      "name": {
+        "zh": "圆框眼镜",
+        "en": "Round Glasses"
+      }
+    },
+    {
+      "id": "knit_scarf",
+      "slot": "body",
+      "unlock_level": 3,
+      "bodies": [
+        "walker",
+        "floater",
+        "rooted"
+      ],
+      "name": {
+        "zh": "针织围巾",
+        "en": "Knit Scarf"
+      }
+    },
+    {
+      "id": "flower_crown",
+      "slot": "head",
+      "unlock_level": 4,
+      "bodies": [
+        "walker",
+        "floater",
+        "rooted"
+      ],
+      "name": {
+        "zh": "花环",
+        "en": "Flower Crown"
+      }
+    },
+    {
+      "id": "meadow",
+      "slot": "background",
+      "unlock_level": 5,
+      "bodies": [
+        "walker",
+        "floater",
+        "rooted"
+      ],
+      "name": {
+        "zh": "晴日草地",
+        "en": "Sunny Meadow"
+      }
+    },
+    {
+      "id": "travel_pack",
+      "slot": "back",
+      "unlock_level": 6,
+      "bodies": [
+        "walker",
+        "floater"
+      ],
+      "name": {
+        "zh": "旅行背包",
+        "en": "Travel Pack"
+      }
+    },
+    {
+      "id": "star_hat",
+      "slot": "head",
+      "unlock_level": 7,
+      "bodies": [
+        "walker",
+        "floater",
+        "rooted"
+      ],
+      "name": {
+        "zh": "星星法师帽",
+        "en": "Star Hat"
+      }
+    },
+    {
+      "id": "bow_tie",
+      "slot": "body",
+      "unlock_level": 8,
+      "bodies": [
+        "walker",
+        "floater",
+        "rooted"
+      ],
+      "name": {
+        "zh": "领结",
+        "en": "Bow Tie"
+      }
+    },
+    {
+      "id": "night_sky",
+      "slot": "background",
+      "unlock_level": 9,
+      "bodies": [
+        "walker",
+        "floater",
+        "rooted"
+      ],
+      "name": {
+        "zh": "星夜",
+        "en": "Starry Night"
+      }
+    },
+    {
+      "id": "hero_cape",
+      "slot": "back",
+      "unlock_level": 10,
+      "bodies": [
+        "walker"
+      ],
+      "name": {
+        "zh": "勇者披风",
+        "en": "Hero Cape"
+      }
+    }
+  ]
+}

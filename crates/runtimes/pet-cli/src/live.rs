@@ -3,6 +3,7 @@ use crossterm::event::{poll, read, Event, KeyCode, KeyEventKind, KeyModifiers};
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
 use crossterm::{cursor, queue};
+use pet_term::outfit::{Item, Outfit};
 use pet_term::{render, Branch, Charset, FrameInput, Pose};
 use signal_hook::consts::{SIGINT, SIGTERM};
 use std::io::{IsTerminal, Write};
@@ -86,13 +87,36 @@ struct Look {
     species: u8,
     genes: [u8; 8],
     lineage: Vec<Branch>,
+    outfit: Outfit,
 }
 
-fn preview(species: u8, form: usize) -> Look {
+/// 本地预览依次试穿的装扮（按 u 切换）：不穿、草地一套、夜空一套。
+fn demo_outfit(n: usize) -> Outfit {
+    match n % 3 {
+        1 => Outfit {
+            head: Some(Item::FlowerCrown),
+            face: Some(Item::RoundGlasses),
+            body: Some(Item::KnitScarf),
+            background: Some(Item::Meadow),
+            ..Outfit::default()
+        },
+        2 => Outfit {
+            head: Some(Item::StarHat),
+            body: Some(Item::BowTie),
+            back: Some(Item::HeroCape),
+            background: Some(Item::NightSky),
+            ..Outfit::default()
+        },
+        _ => Outfit::default(),
+    }
+}
+
+fn preview(species: u8, form: usize, outfit: usize) -> Look {
     Look {
         species,
         genes: [37, 0, 0, 0, 0, 0, 0, 0],
         lineage: FORMS[form % FORMS.len()].to_vec(),
+        outfit: demo_outfit(outfit),
     }
 }
 
@@ -108,6 +132,7 @@ fn input(look: Look, w: u16, h: u16, t: u64, pose: Pose, cs: Charset) -> FrameIn
         t,
         stage: lineage.len() as u8,
         lineage,
+        outfit: look.outfit,
     }
 }
 
@@ -130,7 +155,14 @@ fn form_label(form: usize) -> String {
 
 /// 非 TTY:输出一行可读 JSON 状态后退出,不含任何控制码。
 fn non_tty() -> i32 {
-    let f = render(&input(preview(1, 0), 24, 4, 0, Pose::Idle, Charset::Ascii));
+    let f = render(&input(
+        preview(1, 0, 0),
+        24,
+        4,
+        0,
+        Pose::Idle,
+        Charset::Ascii,
+    ));
     println!("{}", serde_json::json!({ "pose": "idle", "frame": f.rows }));
     0
 }
@@ -179,6 +211,7 @@ pub fn run(account: bool) -> i32 {
     let mut pose = Pose::Idle;
     let mut species = 1u8;
     let mut form = 0usize;
+    let mut outfit = 0usize;
     let mut t = 0u64;
     let mut out = std::io::stdout();
 
@@ -198,12 +231,13 @@ pub fn run(account: bool) -> i32 {
                         species: v.species,
                         genes: v.genes,
                         lineage: v.lineage.clone(),
+                        outfit: v.outfit.clone(),
                     },
-                    None => preview(1, 0),
+                    None => preview(1, 0, 0),
                 };
                 (look, wt.pose(t))
             }
-            None => (preview(species, form), pose),
+            None => (preview(species, form, outfit), pose),
         };
         let f = render(&input(look, w, rows, t, pose_now, cs));
         let _ = queue!(out, cursor::MoveTo(0, 0));
@@ -235,7 +269,7 @@ pub fn run(account: bool) -> i32 {
         let status = match &watch {
             Some(wt) => wt.status(),
             None => format!(
-                "q quit  i idle o look e eat p play s sleep ! scare k sick v evolve x end  n species  g form [{}]",
+                "q quit  i idle o look e eat p play s sleep ! scare k sick v evolve x end  n species  g form [{}]  u outfit",
                 form_label(form)
             ),
         };
@@ -282,6 +316,8 @@ pub fn run(account: bool) -> i32 {
                         }
                         // 切换进化外形：幼体 → 少年三分支 → 成年各分支
                         KeyCode::Char('g') => form = (form + 1) % FORMS.len(),
+                        // 试穿装扮：不穿 → 草地一套 → 夜空一套
+                        KeyCode::Char('u') => outfit += 1,
                         _ => {}
                     }
                 }
