@@ -1,4 +1,4 @@
-import type { Branch, Pose } from "./types";
+import type { Branch, Outfit, Pose } from "./types";
 
 export interface WebPet {
   species: number;
@@ -6,6 +6,8 @@ export interface WebPet {
   /** 宠物的 `growth.lineage`，决定进化后的外形。 */
   lineage?: Branch[];
   stage?: number;
+  /** 身上的装扮，即宠物的 `wardrobe.worn`。不适合这个身体结构的物品不画。 */
+  outfit?: Outfit;
 }
 
 export interface MountPetOptions {

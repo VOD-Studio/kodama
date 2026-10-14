@@ -71,11 +71,11 @@ Every result is either `{ ok: true, value }` or `{ ok: false, code, message }`. 
 | `op` | What it does |
 |---|---|
 | `birth` | Derives a pet's identity, rarity, species and genes from the birth input |
-| `act` | Feeds, rests, plays with, heals or waits for a pet, and settles illness up to the given logical time |
+| `act` | Feeds, rests, plays with, heals or waits for a pet, evolves it, or puts on and takes off outfits (`equip`, `unequip`), and settles illness up to the given logical time. Each level from 2 to 10 unlocks an outfit item |
 | `grant` | Applies a reward that the service has already decided on |
 | `evolution_options` | Lists evolution branches for the current stage, with what is still missing |
 | `frame` | Renders a pose into a grid of character cells for terminals |
-| `sprite` | Renders a pose into a pixel-art palette and grid. Pass the pet's `growth.lineage` as `lineage` to draw its evolved form; each stage has its own body and each branch its own features |
+| `sprite` | Renders a pose into a pixel-art palette and grid. Pass the pet's `growth.lineage` as `lineage` to draw its evolved form; each stage has its own body and each branch its own features. Pass `wardrobe.worn` as `outfit` to draw hats, glasses, scarves, capes and background scenes |
 | `verify_birth` | Verifies a birth certificate's signature, commit-reveal and recomputed result |
 | `capabilities` | Lists all commands and error codes |
 
@@ -93,7 +93,7 @@ import { mountPet } from "@violetjs/pet/web";
 
 await initPet();
 const pet = mountPet(document.querySelector("canvas"), {
-  pet: { species: born.value.species, genes: born.value.genes, lineage: born.value.pet.growth.lineage },
+  pet: { species: born.value.species, genes: born.value.genes, lineage: born.value.pet.growth.lineage, outfit: born.value.pet.wardrobe?.worn },
   label: "Ember Kit",
   onActivate: () => console.log("petted"), // optional
 });

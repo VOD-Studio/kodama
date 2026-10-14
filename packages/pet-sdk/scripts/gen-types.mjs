@@ -13,6 +13,18 @@ for (const v of schema.$defs.Command.oneOf) {
     v.allOf = [{ $ref }, { type: "object", ...rest }];
   }
 }
+// `$ref` 旁边的 description、default（字段说明与缺省值）会让生成器为同一个类型另起 Outfit1、Growth1 这样的副本；
+// 类型本身的说明在定义处保留，这里只去掉引用旁的兄弟字段。
+(function strip(node) {
+  if (Array.isArray(node)) return node.forEach(strip);
+  if (node === null || typeof node !== "object") return;
+  if (node.$ref) {
+    delete node.description;
+    delete node.default;
+  }
+  Object.values(node).forEach(strip);
+})(schema);
+
 const body = await compile(schema, "PetWire", {
   unreachableDefinitions: true,
   bannerComment: "/* 由 scripts/gen-types.mjs 从 schema/pet.schema.json 生成,请勿手改。 */",

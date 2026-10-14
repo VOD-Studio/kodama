@@ -1,7 +1,9 @@
 use crate::protocol::codec::{u64_string, ErrorCode};
 use crate::rules::growth::{self, Branch, Growth, AFFECTION, CALM, CURIOUS, MAX_TOPIC_LEN};
+use crate::rules::wardrobe::Wardrobe;
 use crate::RULES_VERSION;
 use alloc::string::String;
+use pet_term::outfit::{Item, Slot};
 use serde::{Deserialize, Serialize};
 
 // 逻辑时间单位:1 刻度 = 1 分钟。默认值依据 docs/design/parameters.md 的快进体验记录。
@@ -56,6 +58,12 @@ pub struct Pet {
     /// 成长状态:经验、阶段、性格、主题倾向。缺省为初始值,兼容没有该字段的旧存档。
     #[serde(default)]
     pub growth: Growth,
+    /// 物种，出生时确定；装备时据此检查身体结构。本字段之前出生的个体没有记录。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub species: Option<u8>,
+    /// 衣橱：拥有的物品与身上的装扮。空时不写出，旧存档与出生结果保持原样。
+    #[serde(default, skip_serializing_if = "Wardrobe::is_empty")]
+    pub wardrobe: Wardrobe,
 }
 
 fn first_rules_version() -> u32 {
@@ -81,6 +89,8 @@ impl Pet {
             last_tick: at,
             last_request: String::new(),
             growth,
+            species: None,
+            wardrobe: Wardrobe::default(),
         }
     }
 
@@ -106,6 +116,14 @@ pub enum Action {
     /// 进化到指定分支。永不自动发生,需要主人选择。
     Evolve {
         branch: Branch,
+    },
+    /// 穿上拥有的物品，替换同一槽位上的物品。不改变任何数值。
+    Equip {
+        item: Item,
+    },
+    /// 脱下一个槽位上的物品；物品仍然拥有。
+    Unequip {
+        slot: Slot,
     },
 }
 
@@ -171,6 +189,8 @@ pub enum ActError {
     UnsupportedRules,
     NotEligible,
     InvalidReward,
+    NotOwned,
+    IncompatibleItem,
 }
 
 impl ActError {
@@ -185,6 +205,8 @@ impl ActError {
             Self::UnsupportedRules => ErrorCode::UnsupportedRules,
             Self::NotEligible => ErrorCode::NotEligible,
             Self::InvalidReward => ErrorCode::InvalidReward,
+            Self::NotOwned => ErrorCode::NotOwned,
+            Self::IncompatibleItem => ErrorCode::IncompatibleItem,
         }
     }
 
@@ -199,6 +221,8 @@ impl ActError {
             Self::UnsupportedRules => "pet was saved with a rules version this build cannot settle",
             Self::NotEligible => "evolution conditions are not met",
             Self::InvalidReward => "reward is outside the allowed bounds",
+            Self::NotOwned => "the pet does not own this item",
+            Self::IncompatibleItem => "this item does not fit the pet's body",
         }
     }
 }
@@ -253,6 +277,8 @@ pub fn act(mut pet: Pet, action: Action, now: u64, request_id: &str) -> Result<O
     if pet.phase() == Phase::Dead {
         return Err(ActError::Dead);
     }
+    // 本功能之前已经升级的个体：先按当前等级补齐解锁，这次就能穿上
+    pet.wardrobe.unlock(pet.growth.level());
     match action {
         Action::Wait => {}
         Action::Feed => {
@@ -291,7 +317,11 @@ pub fn act(mut pet: Pet, action: Action, now: u64, request_id: &str) -> Result<O
             pet.growth.drift(AFFECTION, 10, now);
         }
         Action::Evolve { branch } => growth::evolve(&mut pet.growth, &mut pet.food, branch)?,
+        Action::Equip { item } => pet.wardrobe.equip(item, pet.species)?,
+        Action::Unequip { slot } => pet.wardrobe.unequip(slot),
     }
+    // 升级解锁装扮：每次结算都按当前等级补齐，所以升级来自哪个动作都一样
+    pet.wardrobe.unlock(pet.growth.level());
     pet.last_request = request_id.into();
     let (phase, mood) = (pet.phase(), pet.mood());
     Ok(Outcome {
@@ -339,6 +369,7 @@ pub fn grant(
         pet.growth.add_topic(topic);
         pet.growth.drift(CURIOUS, 4, now);
     }
+    pet.wardrobe.unlock(pet.growth.level());
     pet.last_request = request_id.into();
     let (phase, mood) = (pet.phase(), pet.mood());
     Ok(Outcome {

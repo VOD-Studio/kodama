@@ -707,3 +707,64 @@ async fn malformed_bodies_get_the_standard_error_format_after_authentication() {
         .unwrap();
     assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
 }
+
+#[tokio::test]
+async fn outfits_are_worn_through_actions_and_checked_against_the_body() {
+    let e = env();
+    let t = login(&e, "alice").await;
+    let (_, accepted) = adopt(&e, &t, 3).await;
+    let species = accepted["certificate"]["species"].as_u64().unwrap() as u8;
+    // 直接在存储里给足经验，下一次结算按等级解锁全部物品
+    let mut store = SqliteStore::open(&e.db).unwrap();
+    let sc = Scope {
+        world: WORLD.into(),
+        owner: "violet\u{1f}alice#pet".into(),
+    };
+    let cur = store.load(&sc).unwrap().unwrap();
+    let mut pet: pet_core::Pet = serde_json::from_str(&cur.state).unwrap();
+    pet.growth.exp = 1500;
+    let state = serde_json::to_string(&pet).unwrap();
+    let cs = Changeset {
+        state: state.clone(),
+        result: state,
+        params_hash: "x".into(),
+    };
+    store.commit(&sc, cur.version, "test-exp", &cs).unwrap();
+
+    let wear =
+        |item: &str, id: &str| json!({"action": {"equip": {"item": item}}, "request_id": id});
+    let (s, v) = call(
+        &e.app,
+        "POST",
+        "/v1/pets/me/actions",
+        Some(&t),
+        Some(wear("star_hat", "o1")),
+    )
+    .await;
+    assert_eq!(s, StatusCode::OK, "{v}");
+    assert_eq!(v["value"]["pet"]["wardrobe"]["worn"]["head"], "star_hat");
+    assert_eq!(
+        v["value"]["pet"]["food"], accepted["pet"]["pet"]["food"],
+        "outfits change no numbers"
+    );
+
+    let (s, v) = call(
+        &e.app,
+        "POST",
+        "/v1/pets/me/actions",
+        Some(&t),
+        Some(wear("hero_cape", "o2")),
+    )
+    .await;
+    // 行走的物种（assets/catalog/species.json）：悬浮的 1、5 与扎根的 6 之外
+    if !matches!(species, 1 | 5 | 6) {
+        assert_eq!(s, StatusCode::OK, "{v}");
+    } else {
+        assert_eq!(
+            (s, v["code"].as_str()),
+            (StatusCode::UNPROCESSABLE_ENTITY, Some("incompatible_item"))
+        );
+    }
+    let (_, v) = call(&e.app, "GET", "/v1/pets/me", Some(&t), None).await;
+    assert_eq!(v["value"]["pet"]["wardrobe"]["worn"]["head"], "star_hat");
+}

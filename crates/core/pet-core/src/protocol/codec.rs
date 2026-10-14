@@ -39,6 +39,10 @@ pub enum ErrorCode {
     NotEligible,
     /// 奖励超出单次允许的范围。
     InvalidReward,
+    /// 宠物没有这件物品。
+    NotOwned,
+    /// 物品不适合宠物的身体结构。
+    IncompatibleItem,
 }
 
 /// 失败响应信封。

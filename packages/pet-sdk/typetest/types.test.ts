@@ -46,6 +46,13 @@ mounted.dispose();
 mountPet(canvas, { pet: { species: 0, genes: [], lineage: ["dragon"] } });
 // @ts-expect-error 未知的姿态
 mountPet(canvas, { pet: { species: 0, genes: [] }, pose: "fly" });
+// 装扮：槽位与物品是线上协议里的取值
+mountPet(canvas, { pet: { species: 0, genes: [], outfit: { head: "star_hat", background: "night_sky" } } });
+// @ts-expect-error 未知的物品
+mountPet(canvas, { pet: { species: 0, genes: [], outfit: { head: "golden_crown" } } });
+void run({ op: "act", pet, action: { equip: { item: "knit_scarf" } }, now: "1", request_id: "r" });
+// @ts-expect-error 未知的槽位
+void run({ op: "act", pet, action: { unequip: { slot: "tail" } }, now: "1", request_id: "r" });
 
 // 本地模式：动作沿用线上协议的取值，错误码是封闭联合
 import { createLocalPet, createMemoryStore, openIndexedDbStore, type LocalError } from "../src/local";

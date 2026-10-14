@@ -44,7 +44,7 @@ cargo install --locked --git https://github.com/VOD-Studio/kodama pet-cli
 ## 用法
 
 ```sh
-pet-cli live                     # 动态宠物；q 退出，n 切换物种，g 切换进化外形
+pet-cli live                     # 动态宠物；q 退出，n 切换物种，g 切换进化外形，u 试穿装扮
 pet-cli capabilities             # exec 接受的命令与错误码
 echo '{"op":"frame","species":1,"genes":[1,2,3,4,5,6,7,8],"pose":"idle","charset":"ascii","w":10,"h":3,"t":"0"}' | pet-cli exec
 pet-cli --version                # 发布版本与规则版本
@@ -73,7 +73,7 @@ pet-cli --version                # 发布版本与规则版本
 pet-cli login --service https://pet.example.com   # 也可以设置 PET_SERVICE
 # 终端提示：打开这个页面并确认用户码 BCDF-GHJK：https://example.com/pet/device?code=BCDF-GHJK
 pet-cli status                        # 一行 JSON：你的宠物
-pet-cli act feed                      # feed|rest|play|heal|wait|evolve BRANCH
+pet-cli act feed                      # feed|rest|play|heal|wait|evolve BRANCH|equip ITEM|unequip SLOT
 pet-cli act feed --request-id tap-1   # 用同一个请求标识重试，返回第一次的结果
 pet-cli live --account                # 动画；f 喂食，p 玩耍，r 休息，h 治疗，q 退出
 pet-cli logout                        # 撤销会话并删除保存的凭据

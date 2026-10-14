@@ -141,16 +141,18 @@ fn logout() -> Result<Value, Failure> {
     Ok(json!({ "revoked": revoked }))
 }
 
-/// `act <feed|rest|play|heal|wait|evolve BRANCH> [--request-id ID]`。
+/// `act <feed|rest|play|heal|wait|evolve BRANCH|equip ITEM|unequip SLOT> [--request-id ID]`。
 fn parse_action(args: &[String]) -> Result<(Value, String), String> {
-    const USAGE: &str =
-        "usage: pet-cli act <feed|rest|play|heal|wait|evolve BRANCH> [--request-id ID]";
+    const USAGE: &str = "usage: pet-cli act <feed|rest|play|heal|wait|evolve BRANCH|equip ITEM|unequip SLOT> [--request-id ID]";
+    let arg = args
+        .get(1)
+        .filter(|a| !a.starts_with('-'))
+        .ok_or_else(|| USAGE.to_string());
     let action = match args.first().map(String::as_str) {
         Some(a @ ("feed" | "rest" | "play" | "heal" | "wait")) => json!(a),
-        Some("evolve") => match args.get(1) {
-            Some(branch) if !branch.starts_with('-') => json!({ "evolve": { "branch": branch } }),
-            _ => return Err(USAGE.into()),
-        },
+        Some("evolve") => json!({ "evolve": { "branch": arg? } }),
+        Some("equip") => json!({ "equip": { "item": arg? } }),
+        Some("unequip") => json!({ "unequip": { "slot": arg? } }),
         _ => return Err(USAGE.into()),
     };
     // 缺省的请求标识每次不同；需要安全重试时自己传同一个
@@ -201,6 +203,11 @@ mod tests {
         assert!(parse_action(&args(&["evolve"])).is_err());
         assert!(parse_action(&args(&["evolve", "--request-id"])).is_err());
         assert!(parse_action(&args(&["fly"])).is_err());
+        let (a, _) = parse_action(&args(&["equip", "star_hat"])).unwrap();
+        assert_eq!(a, json!({"equip": {"item": "star_hat"}}));
+        let (a, _) = parse_action(&args(&["unequip", "head"])).unwrap();
+        assert_eq!(a, json!({"unequip": {"slot": "head"}}));
+        assert!(parse_action(&args(&["equip"])).is_err());
         assert!(parse_action(&[]).is_err());
     }
 

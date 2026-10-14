@@ -86,10 +86,13 @@ pub fn derive_birth(i: &BirthInput) -> Result<Birth, &'static str> {
         rarity,
         species,
         genes,
-        pet: Pet::newborn_with(
-            id,
-            i.born_at,
-            Growth::with_base(Growth::base_from_genes(&genes)),
-        ),
+        pet: Pet {
+            species: Some(species),
+            ..Pet::newborn_with(
+                id,
+                i.born_at,
+                Growth::with_base(Growth::base_from_genes(&genes)),
+            )
+        },
     })
 }

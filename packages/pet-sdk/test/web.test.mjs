@@ -116,6 +116,18 @@ test("evolving the pet changes the picture", () => {
   m.dispose();
 });
 
+test("an outfit changes the picture; a background fills the whole canvas", () => {
+  const canvas = fakeCanvas();
+  const m = mountPet(canvas, { pet: PET, pose: "observe", window: fakeWindow({ reduced: true }) });
+  const plain = snapshot(canvas.ctx);
+  m.setPet({ ...PET, outfit: { head: "star_hat" } });
+  assert.notEqual(snapshot(canvas.ctx), plain);
+  m.setPet({ ...PET, outfit: { background: "meadow" } });
+  const area = canvas.ctx.rects.reduce((n, [, , , w, h]) => n + w * h, 0);
+  assert.equal(area, canvas.width * canvas.height, "every pixel is painted");
+  m.dispose();
+});
+
 test("passive pets let clicks through; interactive pets are keyboard buttons; dispose restores the canvas", () => {
   const passive = fakeCanvas();
   const a = mountPet(passive, { pet: PET, window: fakeWindow() });

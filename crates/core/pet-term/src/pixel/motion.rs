@@ -1,19 +1,14 @@
 //! 姿态：步态与位移、眼神与嘴、效果（食物、球、Z、感叹号、汗滴、闪光、光环、纪念台、影子），
 //! 以及进化动画。`t` 为呈现时钟的刻度；一帧动作 = 2 个刻度。
 use super::grid::{Grid, CLEAR};
-use super::{compose, Sprite};
+use super::{compose, items, PixelInput, Sprite};
 use crate::form::{Branch, Form};
+use crate::outfit::Outfit;
 use crate::{body_of, Body, Pose};
 
-pub(crate) fn render(
-    species: u8,
-    form: Form,
-    genes: &[u8; 8],
-    pose: Pose,
-    t: u64,
-    w: i32,
-    h: i32,
-) -> Grid {
+pub(crate) fn render(species: u8, form: Form, i: &PixelInput) -> Grid {
+    let (genes, pose, t, outfit) = (&i.genes, i.pose, i.t, &i.outfit);
+    let (w, h) = (i.w.max(1) as i32, i.h.max(1) as i32);
     let kind = body_of(species);
     let step = t / 2;
     let gait = if pose == Pose::Idle {
@@ -22,9 +17,9 @@ pub(crate) fn render(
         0
     };
     let (mut spr, silhouette) = if pose == Pose::Evolve {
-        evolve(species, form, t)
+        evolve(species, form, t, outfit)
     } else {
-        (compose(species, form, gait), false)
+        (compose(species, form, gait, outfit), false)
     };
     if !silhouette {
         face(&mut spr, pose, t, genes);
@@ -52,6 +47,8 @@ pub(crate) fn render(
     let y = h - sh - hover - plinth - lift(pose, kind, step);
 
     let mut out = Grid::new(w, h);
+    // 背景场景在最底层
+    items::scene(outfit, w, h, t, &mut out);
     if hover > 0 {
         // 悬浮者投在地面上的影子，离地越高越小
         let half = (sw / 4).max(2) - lift(pose, kind, step) / 2;
@@ -278,17 +275,17 @@ const FLICKER: [bool; 24] = [
 ];
 
 /// 进化动画：32 刻度一个循环。前 24 刻度前后外形以白色剪影交替闪烁，后 8 刻度显示新外形并伴随闪光。
-fn evolve(species: u8, form: Form, t: u64) -> (Sprite, bool) {
+fn evolve(species: u8, form: Form, t: u64, outfit: &Outfit) -> (Sprite, bool) {
     let phase = (t % 32) as usize;
     if phase >= FLICKER.len() {
-        return (compose(species, form, 0), false);
+        return (compose(species, form, 0, outfit), false);
     }
     let shown = if FLICKER[phase] {
         form
     } else {
         form.previous().unwrap_or(form)
     };
-    let mut s = compose(species, shown, 0);
+    let mut s = compose(species, shown, 0, outfit);
     for c in s.g.cells.iter_mut() {
         if *c == b'o' {
             *c = b'g';
