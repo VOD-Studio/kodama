@@ -185,7 +185,8 @@ pub fn run_act<S: Store>(
 ) -> Result<String, ExecError> {
     use sha2::{Digest, Sha256};
     // 指纹只覆盖调用方可控的参数；时间由服务端决定，不能让重试因为跨过分钟边界而被判为请求标识复用。
-    let params_hash = format!("{:x}", Sha256::digest(action_name));
+    // 与升级前的 format!("{:x}") 相同：小写十六进制；已落库的指纹保持可比对
+    let params_hash = pet_core::hex(&Sha256::digest(action_name));
     for _ in 0..16 {
         let cur = store.load(scope)?.ok_or(ExecError::NoPet)?;
         let pet: Pet = serde_json::from_str(&cur.state).map_err(|_| ExecError::Corrupt)?;
