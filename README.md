@@ -12,9 +12,9 @@
 | 素材 | `crates/pet-term`、`catalog/` | 8 个物种；终端字符画与像素画两种画风，`sprite` 命令输出调色板与像素网格 |
 | 存储 | `crates/pet-store` | SQLite 与 Postgres 共用一套契约测试 |
 | 服务 | `crates/pet-service` | 持有账号宠物的唯一权威状态，见 [docs/service.md](docs/service.md) |
-| 终端 | `crates/pet-cli` | `pet-cli live` 在终端里养一只 |
+| 终端 | `crates/pet-cli` | `pet-cli live` 在终端里养一只；二进制随 GitHub Release 发布 |
 | SDK | `packages/pet-sdk` | npm `@violetjs/pet`：WebAssembly、类型、schema |
-| npm CLI | `packages/pet-cli-npm` | `@violetjs/pet-cli` 与平台包 |
+| 发布 | GitHub Release、GHCR | CLI 各平台归档见 [crates/pet-cli](crates/pet-cli/README.zh-CN.md)；服务镜像 `ghcr.io/vod-studio/pet-service` |
 
 ## 开始
 

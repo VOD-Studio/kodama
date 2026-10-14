@@ -1,15 +1,24 @@
 name: Package
 
-# 构建并打包 npm 包:SDK、各平台 CLI 二进制包、CLI 主包,产物以 artifact 形式交出。
-# 这里的作业接触不到任何发布凭据;发布由 release.yml 里声明了 npm 环境的作业完成。
-# PR 上只做 dry-run(打包并校验文件清单);发版时由 release.yml 调用并传入版本。
+# 构建并验收发布产物，以 artifact 交出：npm 的 @violetjs/pet（SDK）与各平台的 pet-cli 归档。
+# 这里的作业接触不到任何发布凭据；发布由 release.yml 完成（npm 环境、GitHub Release、GHCR）。
+# PR 上只做 dry-run 与验收；发版时由 release.yml 调用并传入版本。
 on:
   pull_request:
     paths:
-      - "packages/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "LICENSE"
+      - "crates/pet-core/**"
+      - "crates/pet-term/**"
       - "crates/pet-wasm/**"
       - "crates/pet-cli/**"
-      - "scripts/**"
+      - "packages/**"
+      - "scripts/package-cli.sh"
+      - "scripts/npm-publish.sh"
+      - "scripts/version.mjs"
+      - "consumers/cli-archive.sh"
+      - "scenario/tty_test.py"
       - ".github/workflows/package.yml"
   workflow_call:
     inputs:
@@ -34,8 +43,6 @@ jobs:
     name: "@violetjs/pet"
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -67,62 +74,41 @@ jobs:
           if-no-files-found: error
 
   cli:
-    name: CLI (${{ matrix.os }})
+    name: CLI (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
-    permissions:
-      contents: read
     strategy:
       fail-fast: false
       matrix:
-        # 与 docs/distribution.md 中已验证的平台一致
-        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-14]
+        # 与 docs/distribution.md 的支持平台一致。Linux 用 musl 静态链接，不依赖发行版的 glibc 版本；
+        # 每个归档都在构建它的平台上验收（真实 TTY），不交叉编译未经验证的平台。
+        include:
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-24.04 }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-24.04-arm }
+          - { target: aarch64-apple-darwin, os: macos-14 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: 22
-      - run: packages/pet-cli-npm/build.sh "$RUNNER_TEMP/out"
-      - name: Pack and dry-run
-        run: |
-          mkdir -p "$RUNNER_TEMP/tgz"
-          npm pack "$RUNNER_TEMP/out/platform" --pack-destination "$RUNNER_TEMP/tgz"
-          scripts/npm-publish.sh "$RUNNER_TEMP"/tgz/*.tgz dry-run
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: ${{ matrix.target }}
+      - name: Build the release archive
+        env:
+          TARGET: ${{ matrix.target }}
+        run: scripts/package-cli.sh "$RUNNER_TEMP/dist" "$TARGET"
+      - name: Archive runs outside the repository
+        env:
+          TARGET: ${{ matrix.target }}
+          # 发版时核对 pet-cli --version 与标签一致
+          VERSION: ${{ inputs.version }}
+        run: sh consumers/cli-archive.sh "$RUNNER_TEMP/dist/pet-cli-$TARGET.tar.gz"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: npm-cli-${{ matrix.os }}
-          path: ${{ runner.temp }}/tgz/*.tgz
-          if-no-files-found: error
-
-  cli-main:
-    name: "@violetjs/pet-cli"
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ inputs.ref }}
-          persist-credentials: false
-      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: 22
-      - run: packages/pet-cli-npm/build.sh "$RUNNER_TEMP/out"
-      - name: Pack and dry-run
-        run: |
-          mkdir -p "$RUNNER_TEMP/tgz"
-          npm pack "$RUNNER_TEMP/out/main" --pack-destination "$RUNNER_TEMP/tgz"
-          scripts/npm-publish.sh "$RUNNER_TEMP"/tgz/*.tgz dry-run
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: npm-cli-main
-          path: ${{ runner.temp }}/tgz/*.tgz
+          name: cli-${{ matrix.target }}
+          path: ${{ runner.temp }}/dist/*.tar.gz
           if-no-files-found: error

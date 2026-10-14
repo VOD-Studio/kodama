@@ -85,9 +85,14 @@ PET_TRUSTED_ISSUERS='[{"iss":"violet","keys":[{"kid":"v1","public_key":"<64 位�
 
 ## 镜像
 
-`Dockerfile.service` 是多阶段构建（构建阶段编译，运行阶段为非 root 用户），数据放在 `/data` 卷。CI 会构建该镜像、以非 root 用户启动并检查 `/healthz` 与能力目录（首次通过：PR VOD-Studio/violet#541）。本机因 Docker 磁盘已满没有本地构建过。
+发版时发布到 `ghcr.io/vod-studio/pet-service`，标签为 `X.Y.Z`、`X.Y` 与 `latest`，含 `linux/amd64` 与 `linux/arm64`，带构建来源证明（`gh attestation verify oci://ghcr.io/vod-studio/pet-service:X.Y.Z --repo VOD-Studio/kodama`）。
 
 ```sh
-docker build -f Dockerfile.service -t pet-service pet
-docker run --rm -p 8787:8787 -v pet-data:/data -e PET_DB=/data/pet.db -e … pet-service
+docker run --rm -p 8787:8787 -v pet-data:/data -e PET_DB=/data/pet.db -e … ghcr.io/vod-studio/pet-service:X.Y.Z
+```
+
+`Dockerfile.service` 是多阶段构建：构建阶段编译，运行阶段以非 root 用户（uid 10001）运行，数据放在 `/data` 卷。CI 在每个 PR 上构建 amd64 镜像，并用 `scripts/smoke-service-image.sh` 检查它以非 root 用户启动、应答 `/healthz` 与能力目录；发版时两个架构各在原生 runner 上构建并跑同一检查后才推送。本地：
+
+```sh
+make image-smoke    # 构建 pet-service:dev 并跑同一检查
 ```
