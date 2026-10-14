@@ -74,7 +74,7 @@ Every result is either `{ ok: true, value }` or `{ ok: false, code, message }`. 
 | `grant` | Applies a reward that the service has already decided on |
 | `evolution_options` | Lists evolution branches for the current stage, with what is still missing |
 | `frame` | Renders a pose into a grid of character cells for terminals |
-| `sprite` | Renders a pose into a pixel-art palette and grid |
+| `sprite` | Renders a pose into a pixel-art palette and grid. Pass the pet's `growth.lineage` as `lineage` to draw its evolved form; each stage has its own body and each branch its own features |
 | `verify_birth` | Verifies a birth certificate's signature, commit-reveal and recomputed result |
 | `capabilities` | Lists all commands and error codes |
 

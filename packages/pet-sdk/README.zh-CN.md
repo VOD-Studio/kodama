@@ -74,7 +74,7 @@ await initPet(await readFile(new URL(import.meta.resolve("@violetjs/pet/wasm")))
 | `grant` | 发放已由服务裁决的奖励 |
 | `evolution_options` | 列出当前阶段的进化分支，以及每个分支还缺什么 |
 | `frame` | 把姿态合成为终端用的字符网格 |
-| `sprite` | 把姿态合成为像素画的调色板与网格 |
+| `sprite` | 把姿态合成为像素画的调色板与网格。把宠物的 `growth.lineage` 作为 `lineage` 传入即可画出进化后的外形：每个阶段一副身体，每个分支各有特征 |
 | `verify_birth` | 核验出生证书的签名、承诺揭示与结果重算 |
 | `capabilities` | 列出全部命令与错误码 |
 
