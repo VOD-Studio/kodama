@@ -34,6 +34,27 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      # release-please 只改 Cargo.toml，Cargo.lock 里各 crate 的版本要另行同步；
+      # 它的 extra-files 对 Cargo.lock 的 [[package]] 数组不生效。
+      - name: Check out the release PR branch
+        if: steps.rp.outputs.prs_created == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ fromJSON(steps.rp.outputs.pr || '{}').headBranchName }}
+          path: release-branch
+      - name: Sync Cargo.lock on the release PR
+        if: steps.rp.outputs.prs_created == 'true'
+        working-directory: release-branch
+        run: |
+          cargo update --workspace
+          if git diff --quiet Cargo.lock; then
+            echo "Cargo.lock 已是最新"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: 同步 Cargo.lock 的 crate 版本" Cargo.lock
+          git push
       # GITHUB_TOKEN 创建或更新的 PR 不会触发 CI,而合并需要 CI 状态;
       # 手动对发版分支触发一次,检查结果会挂在该提交上。
       - name: Run CI on the release PR
