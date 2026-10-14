@@ -4,7 +4,8 @@ import readline from "node:readline";
 import { initPet } from "@violetjs/pet";
 import { mountTerminalPet } from "@violetjs/pet/terminal";
 
-const wasm = fs.readFileSync(new URL("./node_modules/@violetjs/pet/dist/pet_wasm_bg.wasm", import.meta.url));
+// Node 里没有可用的 fetch(file:),把包导出的 .wasm 读成字节交给 initPet
+const wasm = fs.readFileSync(new URL(import.meta.resolve("@violetjs/pet/wasm")));
 await initPet(wasm);
 
 const rows = process.stdout.rows ?? 24;
