@@ -43,7 +43,7 @@ curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 
 ## 文档
 
-[docs/](docs/) 下有参数、成长规则、版本策略、出生协议、分发与许可、素材基线与服务说明。与接入方的契约（身份断言、活动事件）定义在 Violet 仓库的 [ADR-0021](https://github.com/VOD-Studio/violet/blob/release/2.0/docs/adr/0021-pet-service-identity-and-activity-contract.md)。
+[docs/](docs/) 下有 [PRD-0036](docs/prd/0036-独立电子宠物.md)、参数、成长规则、版本策略、出生协议、分发与许可、素材基线与服务说明；领域术语见 [CONTEXT.md](CONTEXT.md)。与接入方的契约（身份断言、活动事件）定义在 [ADR-0021](docs/adr/0021-pet-service-identity-and-activity-contract.md)。
 
 ## 许可
 
