@@ -82,6 +82,33 @@ await initPet(await readFile(new URL(import.meta.resolve("@violetjs/pet/wasm")))
 
 会改变状态的命令（`birth`、`act`、`grant`）返回新状态，SDK 本身不保存任何东西。账号模式下由[宠物服务](https://github.com/VOD-Studio/kodama/blob/main/docs/operations/service.md)持有权威状态，客户端只负责呈现。
 
+## 网页渲染
+
+`@violetjs/pet/web` 在 `<canvas>` 上播放宠物，外形与动作和 `sprite` 命令相同：
+
+```js
+import { initPet } from "@violetjs/pet";
+import { mountPet } from "@violetjs/pet/web";
+
+await initPet();
+const pet = mountPet(document.querySelector("canvas"), {
+  pet: { species: born.value.species, genes: born.value.genes, lineage: born.value.pet.growth.lineage },
+  label: "火团幼狐",
+  onActivate: () => console.log("摸了摸"), // 可选
+});
+// 进化之后：pet.setPet({ ...新的投影 })
+pet.dispose();
+```
+
+- 像素清晰：整数倍放大（`scale`，缺省 4），高分屏另乘 `devicePixelRatio`。
+- 遵循 `prefers-reduced-motion`：只画一帧静止画面，不走动、不播放动画。
+- 页面不可见时暂停；也可以调用 `pause()`、`resume()`。
+- 默认不拦截点击，点击会落到下方的页面（`role="img"`）；提供 `onActivate` 时成为可聚焦的按钮，响应点击、Enter 与空格。
+- 不读写任何存储：投影由调用方传入，用 `setPet()` 替换。`dispose()` 停止时钟、移除监听并恢复 canvas。
+- 导入没有副作用，SSR 期间安全；在客户端调用 `mountPet`。
+
+逻辑画布不小于 56×36 时任何外形都不会被裁切（缺省 96×40），多出的宽度用来走动。
+
 ## 服务端渲染
 
 导入没有副作用，`initPet()` 完成前 `run` 会抛出异常。SSR 时渲染占位内容，并在客户端的 effect 里调用 `initPet()`。CI 用 TanStack Start 的生产构建验证：服务端 HTML 不含 WebAssembly，hydration 之后宠物才出现。

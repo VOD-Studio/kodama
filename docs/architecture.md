@@ -208,6 +208,7 @@ Package versions and `rules_version` are separate: see [versioning](design/versi
 | Service end to end on a real binary | `make e2e-pg` | Core |
 | Service image runs as non-root and answers | `make image-smoke` | Core; Release (both architectures) |
 | Schema, types and docs are current | `make schema-check` | Core |
+| SDK web rendering: lifecycle, reduced motion, accessibility | `make sdk-test` | Core |
 | Real TTY behavior | `make tty` | Core; Platform (linux-arm64, macOS) |
 | Installed packages work outside the repository | `make consumers` | External consumption; Package |
 | Release archives work on each target | `tests/consumers/cli-archive/run.sh` | Package |

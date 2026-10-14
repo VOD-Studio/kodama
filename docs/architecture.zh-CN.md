@@ -208,6 +208,7 @@ CAPABILITIES（pet-core::caps）────────────────
 | 真实二进制上的服务端到端 | `make e2e-pg` | Core |
 | 服务镜像以非 root 运行并应答 | `make image-smoke` | Core；Release（两种架构） |
 | schema、类型与文档未过期 | `make schema-check` | Core |
+| SDK 网页渲染：生命周期、减少动效、无障碍 | `make sdk-test` | Core |
 | 真实 TTY 行为 | `make tty` | Core；Platform（linux-arm64、macOS） |
 | 安装后的包在仓库外可用 | `make consumers` | External consumption；Package |
 | 每个发布归档在对应平台可用 | `tests/consumers/cli-archive/run.sh` | Package |
