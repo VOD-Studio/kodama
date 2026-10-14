@@ -16,7 +16,7 @@ export { createMemoryStore, openIndexedDbStore } from "./store.js";
  */
 export const LOCAL_WORLD = "local";
 
-/** 本地存档格式：{ format, pet, ledger }。改动需要迁移（#5）。 */
+/** 本地存档格式：{ format, pet, ledger, appearance }。改动需要迁移（#5）。 */
 const FORMAT = 1;
 const RETRIES = 16;
 /** 每日口粮：一次喂食约抵一天消耗，多出的留给进化（每次 3 份食物）。 */
@@ -68,8 +68,10 @@ export function createLocalPet({ store, owner = "me", clock = () => Date.now() }
       const out = settle(cur);
       if (!out.ok) return out;
       const { result, ledger } = out;
+      // 外形（物种、基因、稀有度）出生时确定，之后每次提交原样带上
+      const appearance = out.appearance ?? cur?.appearance ?? null;
       const c = await store.commit(scope, cur?.version ?? 0, requestId, {
-        state: JSON.stringify({ format: FORMAT, pet: result.value.pet, ledger }),
+        state: JSON.stringify({ format: FORMAT, pet: result.value.pet, ledger, appearance }),
         result: JSON.stringify(result),
         paramsHash,
       });
@@ -98,6 +100,7 @@ export function createLocalPet({ store, owner = "me", clock = () => Date.now() }
       ...view,
       version: cur.version,
       local: true,
+      appearance: cur.appearance ?? null,
       allowance: { ration: !today.ration, exp: DAILY_EXP - today.exp, rewards: DAILY_REWARDS - today.rewards },
     };
   }
@@ -116,7 +119,9 @@ export function createLocalPet({ store, owner = "me", clock = () => Date.now() }
         client_seed: randomHex(32),
         born_at: String(at(null)),
       });
-      return born.ok ? { ok: true, result: born, ledger: cur?.ledger ?? ledgerOn(null, dayOf(at(null))) } : born;
+      if (!born.ok) return born;
+      const { species, genes, rarity } = born.value;
+      return { ok: true, result: born, ledger: cur?.ledger ?? ledgerOn(null, dayOf(at(null))), appearance: { species, genes, rarity } };
     });
   }
 

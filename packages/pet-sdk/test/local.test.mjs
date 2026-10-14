@@ -87,7 +87,10 @@ test("the pet persists across page reloads", async () => {
   const born = await createLocalPet({ store: before, clock }).adopt();
   before.close();
   const after = createLocalPet({ store: await openIndexedDbStore("reload", { indexedDB }), clock });
-  assert.equal((await after.get()).pet.id, born.value.id);
+  const view = await after.get();
+  assert.equal(view.pet.id, born.value.id);
+  // 重新打开页面后仍能画出同一只宠物
+  assert.deepEqual(view.appearance, { species: born.value.species, genes: born.value.genes, rarity: born.value.rarity });
 });
 
 test("time away is settled by the rules, and a clock set backwards does not rewind the pet", async () => {
@@ -123,6 +126,7 @@ test("a dead pet can be replaced by a new adoption", async () => {
   const next = await local.adopt();
   assert.ok(next.ok);
   assert.notEqual(next.value.id, born.value.id);
+  assert.equal((await local.get()).appearance.species, next.value.species, "a new pet brings its own appearance");
   assert.equal((await local.get()).phase, "healthy");
 });
 

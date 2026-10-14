@@ -20,10 +20,12 @@
 一个作用域（`local` 世界里的一位主人）存一份 JSON：
 
 ```json
-{ "format": 1, "pet": { … }, "ledger": { "day": 20376, "ration": true, "exp": 30, "rewards": 2 } }
+{ "format": 1, "pet": { … }, "ledger": { "day": 20376, "ration": true, "exp": 30, "rewards": 2 },
+  "appearance": { "species": 3, "genes": [ … ], "rarity": 0 } }
 ```
 
 - `pet` 与服务端的宠物状态相同，由规则核心读写。
+- `appearance` 是出生时确定的外形（物种、基因、稀有度）：宠物状态里没有这些字段，重新打开页面后靠它画出同一只宠物。
 - `ledger` 是本地模式自己的当日账本，与宠物状态在同一次提交里写入，所以「领口粮」和「发奖励」不会只写一半。
 - `format` 变化需要迁移（#5）。读到不认识的格式时报错，不猜。
 
