@@ -11,7 +11,7 @@ An electronic pet that lives in your site. Pets are born, need care, grow, evolv
 
 *Kodama* (木霊) is a small spirit that lives in a tree, in the way this pet lives in a site.
 
-> **The birth protocol has not had an independent security review.** Until it does, do not describe births as formally verifiable. Known limitations are listed in [docs/service.md](docs/service.md) and [docs/birth-protocol.md](docs/birth-protocol.md) (both in Chinese).
+> **The birth protocol has not had an independent security review.** Until it does, do not describe births as formally verifiable. Known limitations are listed in [docs/operations/service.md](docs/operations/service.md) and [docs/design/birth-protocol.md](docs/design/birth-protocol.md) (both in Chinese).
 
 ## Use it
 
@@ -19,7 +19,7 @@ An electronic pet that lives in your site. Pets are born, need care, grow, evolv
 |---|---|
 | Show and raise a pet in a web app, or embed one in a Node terminal tool | [`@violetjs/pet`](packages/pet-sdk/README.md) on npm |
 | Run a pet in your terminal, or drive the rules from scripts and agents | [`pet-cli`](crates/runtimes/pet-cli/README.md) from [GitHub Releases](https://github.com/VOD-Studio/kodama/releases) |
-| Share one pet per account between web and CLI | The pet service image `ghcr.io/vod-studio/pet-service` ([docs](docs/service.md)) |
+| Share one pet per account between web and CLI | The pet service image `ghcr.io/vod-studio/pet-service` ([docs](docs/operations/service.md)) |
 
 ```sh
 npm install @violetjs/pet
@@ -68,7 +68,7 @@ T=$(make -s token SUB=alice)   # or: make -s docker-token SUB=alice
 curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 ```
 
-No integrating site is needed: `scripts/dev.mjs` generates keys in `.dev/` and plays the integrating site that issues identity assertions.
+No integrating site is needed: `scripts/dev/dev.mjs` generates keys in `.dev/` and plays the integrating site that issues identity assertions.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the toolchain, the commit and pull request conventions, and how releases work.
 
@@ -77,8 +77,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the toolchain, the commit and pull re
 | Document | Content |
 |---|---|
 | [Architecture](docs/architecture.md) | Layers, dependency rules, data flow, verification |
-| [Distribution](docs/distribution.md) | Package names, channels, platforms, release process (Chinese) |
-| [Service](docs/service.md) | Running the service, endpoints, identity, known limitations (Chinese) |
+| [Distribution](docs/operations/distribution.md) | Package names, channels, platforms, release process (Chinese) |
+| [Service](docs/operations/service.md) | Running the service, endpoints, identity, known limitations (Chinese) |
 | [Capabilities](packages/pet-sdk/docs/capabilities.md) | Every command, result type and error code (Chinese, generated) |
 | [PRD-0036](docs/prd/0036-独立电子宠物.md), [ADR-0021](docs/adr/0021-pet-service-identity-and-activity-contract.md), [CONTEXT.md](CONTEXT.md) | Product requirements, the contract with integrating sites, domain terms (Chinese) |
 | [docs/](docs/) | Parameters, growth rules, versioning, birth protocol, art baseline, extensions (Chinese) |
@@ -87,4 +87,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the toolchain, the commit and pull re
 
 ## License
 
-The code is MIT; see [LICENSE](LICENSE). Licenses for art assets are recorded in `catalog/species.json`.
+The code is MIT; see [LICENSE](LICENSE). Licenses for art assets are recorded in `assets/catalog/species.json`.

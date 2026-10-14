@@ -1,13 +1,13 @@
 name: Dev environment
 
-# 开发容器（Dockerfile.dev + compose.yaml）必须能跑通与 CI 相同的检查：本机不装 Rust 的维护者依赖它。
+# 开发容器（docker/dev.Dockerfile + docker/compose.yaml）必须能跑通与 CI 相同的检查：本机不装 Rust 的维护者依赖它。
 # 每周跑一次，及早发现上游镜像或工具下载地址的变化。
 on:
   pull_request:
-    paths: ["Dockerfile.dev", "compose.yaml", "Makefile", ".github/workflows/dev-env.yml"]
+    paths: ["docker/dev.Dockerfile", "docker/compose.yaml", "Makefile", ".github/workflows/dev-env.yml"]
   push:
     branches: [main]
-    paths: ["Dockerfile.dev", "compose.yaml", "Makefile", ".github/workflows/dev-env.yml"]
+    paths: ["docker/dev.Dockerfile", "docker/compose.yaml", "Makefile", ".github/workflows/dev-env.yml"]
   schedule:
     - cron: "41 2 * * 1"
   workflow_dispatch:

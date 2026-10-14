@@ -18,9 +18,9 @@ You can work either with a local toolchain or with only Docker.
 **Docker only.** Prefix any make target with `docker-` to run it in the dev container, which has exactly the CI toolchain:
 
 ```sh
-make docker-build      # build the image kodama-dev (about 1.9 GB) once, and again when Dockerfile.dev changes
+make docker-build      # build the image kodama-dev (about 1.9 GB) once, and again when docker/dev.Dockerfile changes
 make docker-test       # make test in the container
-make docker-ci         # the checks of the CI Lint and Core jobs, with Postgres from compose.yaml
+make docker-ci         # the checks of the CI Lint and Core jobs, with Postgres from docker/compose.yaml
 make docker-dev        # the local service, reachable from the host at 127.0.0.1:8787
 make -s docker-token   # an access token for SUB (default alice) from that service
 make docker-shell      # a shell in the container
@@ -45,7 +45,7 @@ Run the narrower checks that match your change as well: `make three-end` for rul
 
 - **Formatting** is plain rustfmt (`rustfmt.toml` sets only stable options). The one-time reformatting commit is listed in `.git-blame-ignore-revs`; run `git config blame.ignoreRevsFile .git-blame-ignore-revs` so that `git blame` skips it. GitHub's blame view already does.
 - **Generated files** (`packages/pet-sdk/schema/`, `src/types.d.ts`, `docs/capabilities.md`) are committed. Regenerate them with `make schema` and never edit them by hand.
-- **Architecture rules** are checked by `make check-arch`. To add a crate or a dependency between crates, update the table in `scripts/check-arch.mjs` and `docs/architecture.md` in the same pull request.
+- **Architecture rules** are checked by `make check-arch`. To add a crate or a dependency between crates, update the table in `scripts/check/check-arch.mjs` and `docs/architecture.md` in the same pull request.
 
 ## Commits and pull requests
 
@@ -72,7 +72,7 @@ Add `!` before the colon for a breaking change, for example `feat(sdk)!: …`. B
 
 Two checks support this. **PR title** is required and validates the title. **Commit messages** is advisory and validates every commit; when it fails, use squash.
 
-Dependabot opens grouped update pull requests monthly with `chore(deps)` titles. If an update fixes a vulnerability in something that ships, retitle it `fix(deps): …` before merging so that it triggers a release. `wasm-bindgen` is excluded from Dependabot: update it by hand in `crates/runtimes/pet-wasm/Cargo.toml`, the workflows and `Dockerfile.dev` together. `make check-versions` catches any mismatch.
+Dependabot opens grouped update pull requests monthly with `chore(deps)` titles. If an update fixes a vulnerability in something that ships, retitle it `fix(deps): …` before merging so that it triggers a release. `wasm-bindgen` is excluded from Dependabot: update it by hand in `crates/runtimes/pet-wasm/Cargo.toml`, the workflows and `docker/dev.Dockerfile` together. `make check-versions` catches any mismatch.
 
 ## Releases
 
@@ -82,7 +82,7 @@ Merging to `main` makes release-please open or update a release pull request wit
 - the `pet-cli` archives, `SHA256SUMS` and build provenance to the GitHub Release;
 - the multi-arch `pet-service` image to `ghcr.io/vod-studio/pet-service`.
 
-The process, the required repository settings and the supported platforms are described in [docs/distribution.md](docs/distribution.md) (Chinese).
+The process, the required repository settings and the supported platforms are described in [docs/operations/distribution.md](docs/operations/distribution.md) (Chinese).
 
 ## Reporting security issues
 

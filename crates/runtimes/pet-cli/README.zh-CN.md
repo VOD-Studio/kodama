@@ -68,7 +68,7 @@ pet-cli --version                # 发布版本与规则版本
 想在自己的终端工具里显示宠物时，不要启动 `pet-cli live`，而是嵌入渲染，让宿主保有自己的输入与屏幕：
 
 - Node 宿主：[`@violetjs/pet/terminal`](https://github.com/VOD-Studio/kodama/blob/main/packages/pet-sdk/README.zh-CN.md)
-- Rust 宿主：依赖 `pet-core` 与 `pet-term` 两个 crate（见仓库的 `consumers/rust-host`）
+- Rust 宿主：依赖 `pet-core` 与 `pet-term` 两个 crate（见仓库的 `tests/consumers/rust-host`）
 
 ## 许可
 

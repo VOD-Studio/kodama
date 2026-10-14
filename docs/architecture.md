@@ -44,7 +44,7 @@ An arrow means "depends on". Every edge points toward the pure core at the top, 
 
 | Crate / package | Owns | Does not own |
 |---|---|---|
-| `pet-term` | Character-cell frames (`frame`) and pixel art (`sprite`) for every species and pose; each species' body structure, which tests keep in sync with `catalog/species.json` | Rules, state, terminals (it only returns grids) |
+| `pet-term` | Character-cell frames (`frame`) and pixel art (`sprite`) for every species and pose; each species' body structure, which tests keep in sync with `assets/catalog/species.json` | Rules, state, terminals (it only returns grids) |
 | `pet-core` | Birth derivation, life and illness, growth and evolution, rewards, birth-certificate verification, error codes, the capability catalog, and the single JSON entry point `execute` | Clocks, randomness, storage, networking, signing keys |
 | `pet-issuer` | Signing commitments and birth certificates with Ed25519 keys | Verification (that stays in the core so anyone can run it) |
 | `pet-store` | The `Store` trait and its SQLite and Postgres implementations; `run_act`, which turns a core decision into one atomic commit | Rules, HTTP |
@@ -56,7 +56,7 @@ An arrow means "depends on". Every edge points toward the pure core at the top, 
 
 ### Dependency rules
 
-`scripts/check-arch.mjs` (run by `make check-arch` and the CI Lint job) holds the allowed edges, and fails when:
+`scripts/check/check-arch.mjs` (run by `make check-arch` and the CI Lint job) holds the allowed edges, and fails when:
 
 - a crate depends on a workspace crate outside its allowed list (the table above);
 - a new crate is added to the workspace without being registered;
@@ -65,7 +65,7 @@ An arrow means "depends on". Every edge points toward the pure core at the top, 
 
 The same target then compiles both crates for `thumbv7em-none-eabihf`, a target with no standard library. A dependency that quietly pulls in `std` fails there, even though it would build fine for native targets and `wasm32-unknown-unknown`.
 
-To add a crate or an edge, change the table in `scripts/check-arch.mjs` and this document in the same pull request.
+To add a crate or an edge, change the table in `scripts/check/check-arch.mjs` and this document in the same pull request.
 
 ## How a command flows
 
@@ -83,7 +83,7 @@ sequenceDiagram
   Entry-->>App: result (the caller decides whether to keep the new state)
 ```
 
-`execute(&str) -> String` is the only entry point shared by all three runtimes. Because input and output are both strings, the same transcript (`scenario/steps.json`) can be replayed through the native CLI, Node WebAssembly and web-target WebAssembly and compared byte for byte (`make three-end`).
+`execute(&str) -> String` is the only entry point shared by all three runtimes. Because input and output are both strings, the same transcript (`tests/fixtures/steps.json`) can be replayed through the native CLI, Node WebAssembly and web-target WebAssembly and compared byte for byte (`make three-end`).
 
 ### Account mode: the pet service
 
@@ -131,11 +131,11 @@ Encoding rules: 64-bit integers are decimal strings (JavaScript numbers lose pre
 | No floating point in the rules | `clippy::float_arithmetic = "deny"` for the core crates; the `no_floats` test |
 | No std, no clock, no randomness in the core | `#![no_std]`, the no-std target build in `make check-arch`, and the dependency allowlist |
 | Native, Node and web output agree | `make three-end` compares transcripts byte for byte (CI Core job) |
-| Existing births never change | 16 golden birth vectors (`scenario/golden-births.json`); changing a derivation requires a new `rules_version` |
+| Existing births never change | 16 golden birth vectors (`tests/fixtures/golden-births.json`); changing a derivation requires a new `rules_version` |
 | Old pets are never guessed | `act` refuses an unsupported `rules_version` with `unsupported_rules` |
 | Storage backends behave the same | One contract test suite runs against SQLite and Postgres, including concurrency |
 
-Package versions and `rules_version` are separate: see [versioning](versioning.md).
+Package versions and `rules_version` are separate: see [versioning](design/versioning.md).
 
 ## Verification map
 
@@ -149,7 +149,7 @@ Package versions and `rules_version` are separate: see [versioning](versioning.m
 | Schema, types and docs are current | `make schema-check` | Core |
 | Real TTY behavior | `make tty` | Core; Platform (linux-arm64, macOS) |
 | Installed packages work outside the repository | `make consumers` | External consumption; Package |
-| Release archives work on each target | `consumers/cli-archive.sh` | Package |
+| Release archives work on each target | `tests/consumers/cli-archive/run.sh` | Package |
 | The Docker dev environment works | `make docker-ci` | Dev environment (weekly) |
 | Security advisories | `make deny` | Security (weekly) |
 
@@ -162,13 +162,13 @@ Package versions and `rules_version` are separate: see [versioning](versioning.m
 | `pet-service` | `ghcr.io/vod-studio/pet-service`, amd64 and arm64 |
 | Crates | Not published yet (`publish = false`) |
 
-All artifacts share one version and are released from one tag by `release.yml`. Details are in [distribution](distribution.md).
+All artifacts share one version and are released from one tag by `release.yml`. Details are in [distribution](operations/distribution.md).
 
 ## Known coupling and planned changes
 
 **`pet-core` depends on `pet-term`.** The protocol entry `execute` and the `Command` enum live in `pet-core`, and two commands (`frame`, `sprite`) dispatch to the renderer. The rules themselves do not use `pet-term`. A cleaner split would move `execute`, `Command` and the capability catalog into a protocol crate that depends on both. It is deferred on purpose. Today it would change no behavior: the crates are not published, unused code is already stripped from the `.wasm`, and output is unchanged. It would also break the crate API twice, because the crates will be renamed to `violet-pet-*` before publishing. Both changes will happen together when crates are first published. Until then, `check-arch` keeps the edge from spreading: no other crate may depend on `pet-term` except the CLI and the schema generator.
 
-Other open items are tracked in the PRD and in [service](service.md) ("Known limitations"): token revocation, shared replay protection for multi-instance deployments, encryption of `server_seed` at rest, connection pooling, and rate limiting.
+Other open items are tracked in the PRD and in [service](operations/service.md) ("Known limitations"): token revocation, shared replay protection for multi-instance deployments, encryption of `server_seed` at rest, connection pooling, and rate limiting.
 
 ## Where to change what
 
@@ -176,7 +176,7 @@ Other open items are tracked in the PRD and in [service](service.md) ("Known lim
 |---|---|
 | A rule (growth, illness, rewards) | `crates/core/pet-core/src/{life,growth}.rs` and their tests; keep `make three-end` green; a change to existing results needs a new `rules_version` |
 | A new command | `Command` and `execute` in `pet-core`, register it in `CAPABILITIES`, then `make schema` |
-| Art for a species or pose | `crates/core/pet-term`, `catalog/species.json`; preview with `make preview` |
+| Art for a species or pose | `crates/core/pet-term`, `assets/catalog/species.json`; preview with `make preview` |
 | A storage backend | Implement `Store` in `pet-store` and run the shared contract tests against it |
-| An HTTP endpoint | `crates/service/pet-service/src/lib.rs` (router) and `tests/api.rs`; document it in [service](service.md) |
-| A supported CLI platform | The `cli` matrix in `.github/workflows/package.yml`, the CLI README tables, and [distribution](distribution.md) |
+| An HTTP endpoint | `crates/service/pet-service/src/lib.rs` (router) and `tests/api.rs`; document it in [service](operations/service.md) |
+| A supported CLI platform | The `cli` matrix in `.github/workflows/package.yml`, the CLI README tables, and [distribution](operations/distribution.md) |

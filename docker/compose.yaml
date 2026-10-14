@@ -1,0 +1,48 @@
+# 开发环境：本机只需 Docker。通常经 Makefile 使用，不直接调用：
+#   make docker-shell        进入容器
+#   make docker-<目标>        在容器里运行 make <目标>，例如 make docker-test、make docker-ci
+# 构建产物、依赖与缓存放在命名卷里，不与宿主（可能是 macOS）的 target/ 混用。
+# 路径相对本文件：仓库根是 ..；开发镜像不从仓库复制文件，构建上下文就是 docker/ 本身。
+name: kodama
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+      args:
+        INSTALL_CHROMIUM: ${DEV_CHROMIUM:-false}
+    image: kodama-dev
+    init: true
+    # Makefile 传入宿主的 UID/GID；直接用 docker compose 时缺省为 root。
+    user: "${DEV_UID:-0}:${DEV_GID:-0}"
+    working_dir: /work
+    volumes:
+      - ..:/work
+      - target:/work/target
+      - sdk-node-modules:/work/packages/pet-sdk/node_modules
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - home:/home/dev
+    # 只在 make docker-dev（--service-ports）时发布，供宿主 curl 本地服务
+    ports:
+      - "127.0.0.1:8787:8787"
+
+  # 仅供 test-pg、e2e-pg、ci 使用；Makefile 按需启动，make docker-down 停止
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: pet
+      POSTGRES_DB: pet
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "pet"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  target:
+  sdk-node-modules:
+  cargo-registry:
+  cargo-git:
+  home:

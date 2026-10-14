@@ -80,7 +80,7 @@ await initPet(await readFile(new URL(import.meta.resolve("@violetjs/pet/wasm")))
 
 每个命令的结果类型与可能的错误见[能力目录](https://github.com/VOD-Studio/kodama/blob/main/packages/pet-sdk/docs/capabilities.md)（随包分发为 `docs/capabilities.md`）。JSON Schema 导出为 `@violetjs/pet/schema.json`。
 
-会改变状态的命令（`birth`、`act`、`grant`）返回新状态，SDK 本身不保存任何东西。账号模式下由[宠物服务](https://github.com/VOD-Studio/kodama/blob/main/docs/service.md)持有权威状态，客户端只负责呈现。
+会改变状态的命令（`birth`、`act`、`grant`）返回新状态，SDK 本身不保存任何东西。账号模式下由[宠物服务](https://github.com/VOD-Studio/kodama/blob/main/docs/operations/service.md)持有权威状态，客户端只负责呈现。
 
 ## 服务端渲染
 
@@ -106,7 +106,7 @@ pet.dispose(); // 停止绘制并清空区域
 
 ## 版本
 
-包版本遵循语义化版本。规则变化另以 `rules_version` 标记，并保存在每只宠物里：新版本的包不会悄悄重新派生已有的宠物，遇到不支持的规则版本时返回 `unsupported_rules`，而不是猜测迁移。详见[版本策略](https://github.com/VOD-Studio/kodama/blob/main/docs/versioning.md)。
+包版本遵循语义化版本。规则变化另以 `rules_version` 标记，并保存在每只宠物里：新版本的包不会悄悄重新派生已有的宠物，遇到不支持的规则版本时返回 `unsupported_rules`，而不是猜测迁移。详见[版本策略](https://github.com/VOD-Studio/kodama/blob/main/docs/design/versioning.md)。
 
 ## 许可
 

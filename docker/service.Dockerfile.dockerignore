@@ -1,0 +1,7 @@
+# 只供 docker/service.Dockerfile 使用（BuildKit 读取与 Dockerfile 同名的 .dockerignore）。
+# 构建只需要 Cargo.toml、Cargo.lock 与 crates/，其余一律不进入上下文；.dev/ 里有开发密钥，绝不能进入。
+*
+!Cargo.toml
+!Cargo.lock
+!crates/
+**/target

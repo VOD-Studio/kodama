@@ -80,7 +80,7 @@ Every result is either `{ ok: true, value }` or `{ ok: false, code, message }`. 
 
 The [capability catalog](https://github.com/VOD-Studio/kodama/blob/main/packages/pet-sdk/docs/capabilities.md) (shipped in the package as `docs/capabilities.md`) lists each command's result type and possible errors. The JSON Schema is exported as `@violetjs/pet/schema.json`.
 
-Commands that change state (`birth`, `act`, `grant`) return the new state; the SDK stores nothing. In account mode, the [pet service](https://github.com/VOD-Studio/kodama/blob/main/docs/service.md) holds the authoritative state, and the client only renders it.
+Commands that change state (`birth`, `act`, `grant`) return the new state; the SDK stores nothing. In account mode, the [pet service](https://github.com/VOD-Studio/kodama/blob/main/docs/operations/service.md) holds the authoritative state, and the client only renders it.
 
 ## Server-side rendering
 
@@ -106,7 +106,7 @@ For a standalone terminal pet, use the native [`pet-cli`](https://github.com/VOD
 
 ## Versions
 
-The package version follows semver. Rule changes are versioned separately as `rules_version`, which is stored in every pet: a newer package never silently re-derives an existing pet, and refuses with `unsupported_rules` instead of guessing. See [versioning](https://github.com/VOD-Studio/kodama/blob/main/docs/versioning.md).
+The package version follows semver. Rule changes are versioned separately as `rules_version`, which is stored in every pet: a newer package never silently re-derives an existing pet, and refuses with `unsupported_rules` instead of guessing. See [versioning](https://github.com/VOD-Studio/kodama/blob/main/docs/design/versioning.md).
 
 ## License
 

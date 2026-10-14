@@ -44,7 +44,7 @@ flowchart BT
 
 | crate / 包 | 负责 | 不负责 |
 |---|---|---|
-| `pet-term` | 所有物种与姿态的字符帧（`frame`）与像素画（`sprite`）；各物种的身体结构，由测试保证与 `catalog/species.json` 一致 | 规则、状态、终端（只返回网格） |
+| `pet-term` | 所有物种与姿态的字符帧（`frame`）与像素画（`sprite`）；各物种的身体结构，由测试保证与 `assets/catalog/species.json` 一致 | 规则、状态、终端（只返回网格） |
 | `pet-core` | 出生派生、生命与病程、成长与进化、奖励、出生证书核验、错误码、能力目录，以及唯一的 JSON 入口 `execute` | 时钟、随机源、存储、网络、签名密钥 |
 | `pet-issuer` | 用 Ed25519 密钥签发承诺与出生证书 | 核验（留在核心里，任何人都能运行） |
 | `pet-store` | `Store` trait 及其 SQLite、Postgres 实现；`run_act` 把核心的决定变成一次原子提交 | 规则、HTTP |
@@ -56,7 +56,7 @@ flowchart BT
 
 ### 依赖规则
 
-`scripts/check-arch.mjs`（由 `make check-arch` 与 CI 的 Lint 作业运行）保存允许的依赖边，以下情况会失败：
+`scripts/check/check-arch.mjs`（由 `make check-arch` 与 CI 的 Lint 作业运行）保存允许的依赖边，以下情况会失败：
 
 - crate 依赖了允许列表（上表）之外的 workspace crate；
 - workspace 新增了 crate 却没有登记；
@@ -65,7 +65,7 @@ flowchart BT
 
 同一目标随后在 `thumbv7em-none-eabihf`（没有标准库的目标）上编译这两个 crate。悄悄引入 `std` 的依赖在原生与 `wasm32-unknown-unknown` 上都能编译通过，在这里会失败。
 
-新增 crate 或依赖边时，在同一个 PR 里修改 `scripts/check-arch.mjs` 的表与本文。
+新增 crate 或依赖边时，在同一个 PR 里修改 `scripts/check/check-arch.mjs` 的表与本文。
 
 ## 命令如何流经系统
 
@@ -83,7 +83,7 @@ sequenceDiagram
   Entry-->>App: 结果（是否保存新状态由调用方决定）
 ```
 
-`execute(&str) -> String` 是三种运行环境共用的唯一入口。输入输出都是字符串，因此同一份转录（`scenario/steps.json`）可以分别经原生 CLI、Node WebAssembly 与 web target 的 WebAssembly 重放并逐字节比较（`make three-end`）。
+`execute(&str) -> String` 是三种运行环境共用的唯一入口。输入输出都是字符串，因此同一份转录（`tests/fixtures/steps.json`）可以分别经原生 CLI、Node WebAssembly 与 web target 的 WebAssembly 重放并逐字节比较（`make three-end`）。
 
 ### 账号模式：宠物服务
 
@@ -131,11 +131,11 @@ CAPABILITIES（pet-core::caps）────────────────
 | 规则里没有浮点 | 核心 crate 启用 `clippy::float_arithmetic = "deny"`；`no_floats` 测试 |
 | 核心不依赖 std、时钟与随机源 | `#![no_std]`、`make check-arch` 的无 std 目标编译、依赖允许列表 |
 | 原生、Node、web 输出一致 | `make three-end` 逐字节比较转录（CI 的 Core 作业） |
-| 既有出生永不改变 | 16 组黄金出生向量（`scenario/golden-births.json`）；改变派生必须提升 `rules_version` |
+| 既有出生永不改变 | 16 组黄金出生向量（`tests/fixtures/golden-births.json`）；改变派生必须提升 `rules_version` |
 | 不猜测旧个体的规则 | `act` 遇到不支持的 `rules_version` 返回 `unsupported_rules` |
 | 各存储后端行为一致 | 同一套契约测试分别对 SQLite 与 Postgres 运行，包括并发 |
 
-包版本与 `rules_version` 相互独立，见[版本策略](versioning.md)。
+包版本与 `rules_version` 相互独立，见[版本策略](design/versioning.md)。
 
 ## 验证对照
 
@@ -149,7 +149,7 @@ CAPABILITIES（pet-core::caps）────────────────
 | schema、类型与文档未过期 | `make schema-check` | Core |
 | 真实 TTY 行为 | `make tty` | Core；Platform（linux-arm64、macOS） |
 | 安装后的包在仓库外可用 | `make consumers` | External consumption；Package |
-| 每个发布归档在对应平台可用 | `consumers/cli-archive.sh` | Package |
+| 每个发布归档在对应平台可用 | `tests/consumers/cli-archive/run.sh` | Package |
 | Docker 开发环境可用 | `make docker-ci` | Dev environment（每周） |
 | 安全公告 | `make deny` | Security（每周） |
 
@@ -162,13 +162,13 @@ CAPABILITIES（pet-core::caps）────────────────
 | `pet-service` | `ghcr.io/vod-studio/pet-service`，amd64 与 arm64 |
 | crates | 暂不发布（`publish = false`） |
 
-所有产物共用一个版本号，由 `release.yml` 从同一个标签发布。详见[分发](distribution.md)。
+所有产物共用一个版本号，由 `release.yml` 从同一个标签发布。详见[分发](operations/distribution.md)。
 
 ## 已知耦合与计划中的调整
 
 **`pet-core` 依赖 `pet-term`。** 协议入口 `execute` 与 `Command` 枚举在 `pet-core` 里，其中两个命令（`frame`、`sprite`）分派给渲染；规则本身并不使用 `pet-term`。更干净的拆法是把 `execute`、`Command` 与能力目录移到一个同时依赖两者的协议 crate。这一步是有意推迟的：现在拆不改变任何行为（crate 不发布，`.wasm` 里没用到的代码本来就被裁掉，输出不变）；而且 crate 发布前还要改名为 `violet-pet-*`，现在拆会让 crate 的接口破坏两次。两件事留到首次发布 crate 时一起做。在那之前，`check-arch` 保证这条边不扩散：除 CLI 与 schema 生成器外，其他 crate 都不能依赖 `pet-term`。
 
-其他未完成项记录在 PRD 与[服务说明](service.md)的「已知限制」里：令牌撤销、多实例部署的共享重放防护、`server_seed` 静态加密、连接池与速率限制。
+其他未完成项记录在 PRD 与[服务说明](operations/service.md)的「已知限制」里：令牌撤销、多实例部署的共享重放防护、`server_seed` 静态加密、连接池与速率限制。
 
 ## 改什么动哪里
 
@@ -176,7 +176,7 @@ CAPABILITIES（pet-core::caps）────────────────
 |---|---|
 | 规则（成长、病程、奖励） | `crates/core/pet-core/src/{life,growth}.rs` 及其测试；保持 `make three-end` 通过；改变既有结果需要新的 `rules_version` |
 | 新命令 | `pet-core` 的 `Command` 与 `execute`，在 `CAPABILITIES` 登记，然后 `make schema` |
-| 物种或姿态的画面 | `crates/core/pet-term`、`catalog/species.json`；用 `make preview` 预览 |
+| 物种或姿态的画面 | `crates/core/pet-term`、`assets/catalog/species.json`；用 `make preview` 预览 |
 | 存储后端 | 在 `pet-store` 实现 `Store`，并对它运行共享的契约测试 |
-| HTTP 接口 | `crates/service/pet-service/src/lib.rs`（路由）与 `tests/api.rs`；在[服务说明](service.md)里记录 |
-| CLI 支持的平台 | `.github/workflows/package.yml` 的 `cli` 矩阵、CLI README 的平台表、[分发](distribution.md) |
+| HTTP 接口 | `crates/service/pet-service/src/lib.rs`（路由）与 `tests/api.rs`；在[服务说明](operations/service.md)里记录 |
+| CLI 支持的平台 | `.github/workflows/package.yml` 的 `cli` 矩阵、CLI README 的平台表、[分发](operations/distribution.md) |

@@ -11,7 +11,7 @@
 
 *kodama*（木霊）是住在树里的小精灵，正如这只宠物住在站点里。
 
-> **出生协议尚未经过独立安全评审**，评审通过前不要对外宣称「正式可验证发行」。已知限制见 [docs/service.md](docs/service.md) 与 [docs/birth-protocol.md](docs/birth-protocol.md)。
+> **出生协议尚未经过独立安全评审**，评审通过前不要对外宣称「正式可验证发行」。已知限制见 [docs/operations/service.md](docs/operations/service.md) 与 [docs/design/birth-protocol.md](docs/design/birth-protocol.md)。
 
 ## 使用
 
@@ -19,7 +19,7 @@
 |---|---|
 | 在网页里展示、养成宠物，或嵌入 Node 终端工具 | npm 上的 [`@violetjs/pet`](packages/pet-sdk/README.zh-CN.md) |
 | 在终端里养一只，或从脚本、agent 调用规则 | [GitHub Releases](https://github.com/VOD-Studio/kodama/releases) 里的 [`pet-cli`](crates/runtimes/pet-cli/README.zh-CN.md) |
-| 同一账号在网页与 CLI 共享一只宠物 | 宠物服务镜像 `ghcr.io/vod-studio/pet-service`（[说明](docs/service.md)） |
+| 同一账号在网页与 CLI 共享一只宠物 | 宠物服务镜像 `ghcr.io/vod-studio/pet-service`（[说明](docs/operations/service.md)） |
 
 ```sh
 npm install @violetjs/pet
@@ -68,7 +68,7 @@ T=$(make -s token SUB=alice)   # 或：make -s docker-token SUB=alice
 curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 ```
 
-不需要任何接入方：`scripts/dev.mjs` 在 `.dev/` 里生成密钥，并扮演接入方签发身份断言。要对着真实接入方调试，用 `PET_DEV_TRUST_KEY=<对方公钥> node scripts/dev.mjs init --force`；与 [Violet](https://github.com/VOD-Studio/violet) 联调的方式见 [docs/split-plan.md](docs/split-plan.md)。
+不需要任何接入方：`scripts/dev/dev.mjs` 在 `.dev/` 里生成密钥，并扮演接入方签发身份断言。要对着真实接入方调试，用 `PET_DEV_TRUST_KEY=<对方公钥> node scripts/dev/dev.mjs init --force`；与 [Violet](https://github.com/VOD-Studio/violet) 联调的方式见 [docs/history/split-plan.md](docs/history/split-plan.md)。
 
 工具链、提交与 PR 约定、发版流程见 [CONTRIBUTING.zh-CN.md](CONTRIBUTING.zh-CN.md)。
 
@@ -77,8 +77,8 @@ curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 | 文档 | 内容 |
 |---|---|
 | [架构](docs/architecture.zh-CN.md) | 分层、依赖规则、数据流、验证 |
-| [分发](docs/distribution.md) | 包名、渠道、平台、发版流程 |
-| [服务](docs/service.md) | 运行、接口、身份、已知限制 |
+| [分发](docs/operations/distribution.md) | 包名、渠道、平台、发版流程 |
+| [服务](docs/operations/service.md) | 运行、接口、身份、已知限制 |
 | [能力目录](packages/pet-sdk/docs/capabilities.md) | 全部命令、结果类型与错误码（生成） |
 | [PRD-0036](docs/prd/0036-独立电子宠物.md)、[ADR-0021](docs/adr/0021-pet-service-identity-and-activity-contract.md)、[CONTEXT.md](CONTEXT.md) | 产品需求、与接入方的契约、领域术语 |
 | [docs/](docs/) | 参数、成长规则、版本策略、出生协议、素材基线、扩展玩法 |
@@ -87,4 +87,4 @@ curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 
 ## 许可
 
-代码为 MIT，见 [LICENSE](LICENSE)。素材的许可记录在 `catalog/species.json`。
+代码为 MIT，见 [LICENSE](LICENSE)。素材的许可记录在 `assets/catalog/species.json`。

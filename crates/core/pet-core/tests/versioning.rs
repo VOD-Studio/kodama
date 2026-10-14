@@ -6,8 +6,10 @@ use serde_json::Value;
 fn golden_births_never_change() {
     // 已出生的个体按保存的身份、基因与对应规则版本呈现,不能被后来的实现改写。
     // 修改出生派生必须提升 RULES_VERSION 并保留旧派生;不得重新生成这份文件来让测试通过。
-    let vectors: Vec<Value> =
-        serde_json::from_str(include_str!("../../../../scenario/golden-births.json")).unwrap();
+    let vectors: Vec<Value> = serde_json::from_str(include_str!(
+        "../../../../tests/fixtures/golden-births.json"
+    ))
+    .unwrap();
     assert!(vectors.len() >= 16);
     for v in &vectors {
         assert_eq!(

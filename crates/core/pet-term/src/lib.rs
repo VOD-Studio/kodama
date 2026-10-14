@@ -45,7 +45,7 @@ pub enum Body {
 
 pub const SPECIES_COUNT: u8 = 8;
 
-/// 物种的身体结构。必须与 `catalog/species.json` 一致,由测试保证。
+/// 物种的身体结构。必须与 `assets/catalog/species.json` 一致,由测试保证。
 pub const fn body_of(species: u8) -> Body {
     match species % SPECIES_COUNT {
         1 | 5 => Body::Floater,
