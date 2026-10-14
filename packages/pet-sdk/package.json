@@ -52,6 +52,6 @@
   "devDependencies": {
     "ajv": "^8",
     "json-schema-to-typescript": "^16",
-    "typescript": "^5"
+    "typescript": "^7"
   }
 }
