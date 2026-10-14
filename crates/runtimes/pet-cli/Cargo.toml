@@ -11,3 +11,8 @@ pet-term = { workspace = true }
 crossterm = "0.29"
 signal-hook = "0.3"
 serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+# 账号模式的 HTTP：rustls + ring，不依赖系统 OpenSSL（musl 静态链接）；根证书用操作系统的信任库，
+# 企业代理安装的根证书也能生效
+ureq = { version = "3", default-features = false, features = ["rustls-no-provider", "platform-verifier"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }

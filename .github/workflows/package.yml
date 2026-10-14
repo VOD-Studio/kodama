@@ -96,6 +96,10 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: ${{ matrix.target }}
+      # 账号模式的 TLS（rustls 的 ring）含 C 代码：musl 目标用 musl-gcc 编译
+      - name: Install the musl C toolchain
+        if: contains(matrix.target, 'musl')
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq musl-tools
       - name: Build the release archive
         env:
           TARGET: ${{ matrix.target }}
