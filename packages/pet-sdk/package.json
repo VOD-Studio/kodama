@@ -27,5 +27,10 @@
     "json-schema-to-typescript": "^16",
     "typescript": "^5"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VOD-Studio/kodama.git",
+    "directory": "packages/pet-sdk"
+  },
   "license": "MIT"
 }
