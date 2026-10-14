@@ -46,3 +46,27 @@ mounted.dispose();
 mountPet(canvas, { pet: { species: 0, genes: [], lineage: ["dragon"] } });
 // @ts-expect-error 未知的姿态
 mountPet(canvas, { pet: { species: 0, genes: [] }, pose: "fly" });
+
+// 本地模式：动作沿用线上协议的取值，错误码是封闭联合
+import { createLocalPet, createMemoryStore, openIndexedDbStore, type LocalError } from "../src/local";
+const local = createLocalPet({ store: createMemoryStore(), clock: () => 0 });
+void local.act({ evolve: { branch: "curious" } }, "r1");
+void openIndexedDbStore("pets", { indexedDB });
+// @ts-expect-error 非法动作
+void local.act("fly");
+// @ts-expect-error 需要传入存储
+createLocalPet({});
+void local.adopt().then((r) => {
+  if (!r.ok) {
+    const code: LocalError["code"] = (r as LocalError).code;
+    void code;
+  }
+});
+// @ts-expect-error not a local error code
+const badLocal: LocalError["code"] = "oops";
+void badLocal;
+void local.claimDaily();
+void local.reward("read:1", { exp: 10, topic: "rust" });
+void local.get().then((v) => v && v.allowance.exp + v.allowance.rewards);
+// @ts-expect-error 活动奖励不给食物
+void local.reward("read:2", { food: 3 });
