@@ -25,4 +25,7 @@ CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 # shellcheck disable=SC2086
 DOM=$("$CHROME" --headless=new --disable-gpu ${CHROME_FLAGS:-} --virtual-time-budget=8000 --dump-dom http://localhost:4174/ 2>/dev/null)
 echo "$DOM" | grep -q '<p id="pet">c5e7c006764443ae6dc69000f29bf4aa</p>' || { echo "FAIL: client did not hydrate to expected id"; exit 1; }
-echo "PASS: SSR not-initialised, no wasm in SSR HTML, hydrated id matches native"
+# 网页渲染在真实浏览器里画出了像素：成年带翅膀的外形放大 2 倍，至少有上千个不透明像素
+PAINTED=$(echo "$DOM" | sed -n 's/.*<p id="painted">\([0-9]*\)<\/p>.*/\1/p')
+[ "${PAINTED:-0}" -gt 1000 ] || { echo "FAIL: mountPet painted ${PAINTED:-nothing} pixels"; exit 1; }
+echo "PASS: SSR not-initialised, no wasm in SSR HTML, hydrated id matches native, mountPet painted $PAINTED pixels"
