@@ -7,7 +7,7 @@ license.workspace = true
 
 [dependencies]
 pet-core = { path = "../pet-core" }
-rusqlite = { version = "0.37", features = ["bundled"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
 postgres = "0.19"
 serde_json = "1"
 sha2 = "0.10"
