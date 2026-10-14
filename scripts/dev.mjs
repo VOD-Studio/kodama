@@ -55,7 +55,8 @@ switch (cmd) {
     break;
   }
   case "serve": {
-    const env = init();
+    // PET_LISTEN 可由环境覆盖:容器里须监听 0.0.0.0 才能被宿主访问(make docker-dev)
+    const env = { ...init(), ...(process.env.PET_LISTEN && { PET_LISTEN: process.env.PET_LISTEN }) };
     const child = spawn("cargo", ["run", "-q", "-p", "pet-service"], { cwd: root, env: { ...process.env, ...env }, stdio: "inherit" });
     child.on("exit", (code) => process.exit(code ?? 0));
     for (const s of ["SIGINT", "SIGTERM"]) process.on(s, () => child.kill(s));

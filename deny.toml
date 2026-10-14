@@ -1,0 +1,36 @@
+# cargo-deny：本地 make deny；CI 的 Lint 作业逐 PR 检查 bans、licenses、sources，
+# security.yml 每周检查 advisories（RustSec 安全公告）。
+
+[graph]
+all-features = true
+
+[advisories]
+version = 2
+yanked = "deny"
+
+[licenses]
+version = 2
+# 产物以 MIT 分发，依赖只接受宽松许可；新增许可须评审后加入
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-3-Clause",
+  "Unicode-3.0",
+  "Zlib",
+]
+confidence-threshold = 0.93
+
+[licenses.private]
+# workspace 内的 crate 不发布到 crates.io（publish = false）
+ignore = true
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+# workspace 内部的 path 依赖不写版本号，不算通配
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

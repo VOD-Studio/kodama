@@ -14,6 +14,7 @@ fs.writeFileSync(p,JSON.stringify(j));"
 (cd "$WORK/pkg/main" && pnpm pack --pack-destination "$WORK" >/dev/null)
 mkdir "$WORK/app" && cd "$WORK/app" && echo '{"name":"c","private":true}' > package.json
 CLEAN=$(echo "$PATH" | tr ':' '\n' | grep -v cargo | paste -sd: -)
+# shellcheck disable=SC2010
 env PATH="$CLEAN" pnpm add -s "$WORK"/violetjs-pet-cli-0.0.0.tgz >/dev/null 2>&1 || env PATH="$CLEAN" pnpm add -s "$(ls "$WORK"/*.tgz | grep -v 'cli-'"$KEY" | head -1)"
 env PATH="$CLEAN" sh -c 'command -v cargo >/dev/null && { echo "FAIL: cargo visible"; exit 1; }; true'
 PLAT=$(find node_modules/.pnpm -type d -path "*node_modules/@violetjs/pet-cli-$KEY" | head -1)

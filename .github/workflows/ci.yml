@@ -17,12 +17,58 @@ permissions:
 
 env:
   WASM_BINDGEN_VERSION: 0.2.129
+  CARGO_DENY_VERSION: 0.20.2
+  ACTIONLINT_VERSION: 1.7.12
 
 jobs:
   runner:
     name: Pick runner
     uses: ./.github/workflows/pick-runner.yml
     secrets: inherit
+
+  # 静态检查,不依赖其他作业;本地等价于 make lint
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+        with:
+          targets: thumbv7em-none-eabihf
+          components: clippy, rustfmt
+      # 必须排在所有 cargo 命令之前：后面的 clippy 与构建会悄悄改写锁文件，掩盖没提交的更新
+      - name: Cargo.lock is committed up to date
+        run: cargo metadata --locked --format-version 1 > /dev/null
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - uses: taiki-e/install-action@1168f6810a3cb30a3514bf5756a3b7f0422c6df8 # v2
+        with:
+          tool: cargo-deny@${{ env.CARGO_DENY_VERSION }}
+      # install-action 收录的 actionlint 版本滞后，直接下载官方发布并校验 checksum（与 Dockerfile.dev 同源）
+      - name: Install actionlint
+        run: |
+          base="https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}"
+          file="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          cd "$RUNNER_TEMP"
+          curl -fsSLO "$base/$file"
+          curl -fsSL "$base/actionlint_${ACTIONLINT_VERSION}_checksums.txt" | grep " $file\$" | sha256sum -c -
+          tar -xzf "$file" actionlint
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+      - run: make fmt-check
+      - run: make clippy
+      - name: Architecture (dependency directions, no_std core)
+        run: make check-arch
+      - run: make check-versions
+      - run: make lint-scripts
+      - run: make lint-workflows
+      # 安全公告由 security.yml 定时检查，避免新公告让无关 PR 突然失败
+      - name: Dependencies (licenses, sources, bans)
+        run: make deny DENY_CHECKS="bans licenses sources"
 
   core:
     name: Core, storage and schema
@@ -41,13 +87,11 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           targets: wasm32-unknown-unknown
-          components: clippy
-      # 必须排在所有 cargo 命令之前：后面的 clippy 与测试会悄悄改写锁文件，掩盖没提交的更新
-      - name: Cargo.lock is committed up to date
-        run: cargo metadata --locked --format-version 1 > /dev/null
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - uses: taiki-e/install-action@1168f6810a3cb30a3514bf5756a3b7f0422c6df8 # v2
         with:
@@ -58,17 +102,16 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22
-      - run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Tests (SQLite and Postgres contract)
         env:
           PET_TEST_PG_URL: host=127.0.0.1 port=${{ job.services.postgres.ports['5432'] }} user=postgres password=pet dbname=pet
         run: cargo test --workspace -- --include-ignored
       - name: Native, Node and web WebAssembly agree
-        run: ./scripts/three-end.sh
+        run: make three-end
       - name: Service end to end (SQLite and Postgres)
         env:
           PET_TEST_PG_URL: host=127.0.0.1 port=${{ job.services.postgres.ports['5432'] }} user=postgres password=pet dbname=pet
-        run: ./consumers/service-e2e.sh
+        run: make e2e-pg
       - name: Service image builds and answers
         run: |
           docker build -f Dockerfile.service -t pet-service:ci .
@@ -80,12 +123,9 @@ jobs:
           curl -sf localhost:18787/v1/capabilities | grep -q '"op":"act"'
           docker rm -f pet-svc
       - name: Schema, types and docs match the Rust types
-        working-directory: packages/pet-sdk
-        run: |
-          pnpm install --frozen-lockfile
-          ./scripts/check-schema.sh
+        run: make schema-check
       - name: Real TTY behavior
-        run: python3 scenario/tty_test.py
+        run: make tty
 
   consumers:
     name: External consumption
@@ -94,6 +134,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           targets: wasm32-unknown-unknown
@@ -135,13 +177,13 @@ jobs:
         os: [ubuntu-24.04-arm, macos-14]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - name: Tests (SQLite contract, rules, protocol)
         run: cargo test --workspace
       - name: Release binary and real TTY behavior
-        run: |
-          cargo build --release -p pet-cli
-          python3 scenario/tty_test.py
+        run: make tty
       - name: Rust host embedding
         run: ./consumers/rust-host.sh
