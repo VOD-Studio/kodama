@@ -84,7 +84,7 @@ To add a crate or an edge, change `scripts/check/check-arch.mjs` and this docume
 crates/core/pet-core/src/
 ├── protocol/   execute, Command, codec, capability catalog. The boundary of a future protocol crate
 ├── birth/      birth derivation; proof.rs verifies certificates
-├── rules/      life.rs (needs, illness, death), growth.rs (level, personality, evolution)
+├── rules/      life.rs (needs, illness, death), growth.rs (level, personality, evolution), wardrobe.rs (outfits)
 └── rng.rs      HKDF channels; every feature draws from its own labelled channel
 
 crates/service/pet-service/src/
@@ -124,7 +124,7 @@ kodama/
 ├── docs/
 │   ├── architecture(.zh-CN).md
 │   ├── prd/ adr/ research/   product requirements, decisions, background
-│   ├── design/               rules and protocols: parameters, growth, versioning, birth protocol, local mode, extensions, art
+│   ├── design/               rules and protocols: parameters, growth, versioning, birth protocol, local mode, extensions, art, outfits
 │   ├── operations/           running the service, distribution and releases
 │   └── history/              records of past changes, such as the repository split
 └── .github/                  workflows, dependabot, release-please config and manifest
@@ -249,7 +249,7 @@ Each open issue already has a place in this layout. A feature adds modules where
 | #13 Browser local mode | Unchanged | — | The contract vectors (`tests/fixtures/store-contract.json`) also run against SQLite and Postgres | **Done** ([design](design/local-mode.md)): `@violetjs/pet/local` and `/store`, an IndexedDB store, a daily ration and activity rewards, multiple tabs |
 | #15 CLI accounts | — | — | **Done**: device authorization in `device.rs` and `routes/device.rs` ([details](operations/service.md)); projections carry the appearance | **Done**: `pet-cli`'s `account/` (login, credentials, automatic refresh, `live --account`), talking HTTP; no service crate linked |
 | #16 Skill | Capability catalog (exists) | — | — | `packages/pet-sdk/skill/`, generated parts from the catalog |
-| #17 Outfits and home | `rules/outfit.rs`: slots and body compatibility | Item art and anchors; `assets/catalog/items.json` | `routes/outfit.rs` | Rendering layers in the SDK |
+| #17 Outfits and home | **Done**: `rules/wardrobe.rs` (level unlocks, wearing, body checks), `Pet.species` | **Done**: `outfit.rs` and `pixel/items.rs` in `pet-term`, `assets/catalog/items.json` ([design](design/outfits.md)) | Through `POST /v1/pets/me/actions`; no new endpoint | `sprite`, `frame`, `mountPet` and terminal embedding take an `outfit` |
 | #18 Expeditions | `rules/expedition.rs`: its own RNG channel | Souvenir art | `routes/expeditions.rs`, daily caps | — |
 | #19 Friends | Public projection only | — | `routes/friends.rs`: mutual consent and revocation, own tables | — |
 | #20 Breeding and lineage | `birth/inherit.rs`: inheritance and mutation on its own channel; lineage in the certificate context | Inherited traits in the forms | `routes/breeding.rs`: two-step consent, incubator, retirement | — |

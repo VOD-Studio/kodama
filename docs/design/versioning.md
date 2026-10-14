@@ -7,7 +7,7 @@
 | 版本 | 含义 | 现状 |
 |---|---|---|
 | `rules_version` | 出生派生与结算规则的整体版本，整数 | **已实现**：`Pet.rules_version` 与证书的 `context.rules_version`；当前只有 1 |
-| 存档格式 | `Pet` 的 JSON 形态 | **已实现**：新增字段用 `serde(default)` 兼容旧存档（`rules_version` 缺省为 1，余数字段缺省为 0），有测试 |
+| 存档格式 | `Pet` 的 JSON 形态 | **已实现**：新增字段用 `serde(default)` 兼容旧存档（`rules_version` 缺省为 1，余数字段缺省为 0），有测试。只改变画面、不改变任何结算数值的新增（例如装扮的 `species` 与 `wardrobe`）不提升 `rules_version` |
 
 ## 出生派生：永久冻结
 
