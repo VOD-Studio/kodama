@@ -1,4 +1,4 @@
-use pet_core::{ActError, Action, Pet};
+use pet_core::{ActError, Action, Outcome, Pet, Reward};
 use rusqlite::{Connection, OptionalExtension, TransactionBehavior};
 use std::path::Path;
 
@@ -187,16 +187,43 @@ pub fn run_act<S: Store>(
     // 指纹只覆盖调用方可控的参数；时间由服务端决定，不能让重试因为跨过分钟边界而被判为请求标识复用。
     // 与升级前的 format!("{:x}") 相同：小写十六进制；已落库的指纹保持可比对
     let params_hash = pet_core::hex(&Sha256::digest(action_name));
+    run_rule(store, scope, &params_hash, request_id, |pet| {
+        pet_core::act(pet, action, now, request_id)
+    })
+}
+
+/// 发放已经裁决好的奖励：与 `run_act` 相同的读取 → 规则核心 → 原子提交。
+/// `params_hash` 是奖励内容的指纹：同一请求标识换了奖励会被拒绝。
+pub fn run_grant<S: Store>(
+    store: &mut S,
+    scope: &Scope,
+    reward: &Reward,
+    params_hash: &str,
+    now: u64,
+    request_id: &str,
+) -> Result<String, ExecError> {
+    run_rule(store, scope, params_hash, request_id, |pet| {
+        pet_core::grant(pet, reward, now, request_id)
+    })
+}
+
+fn run_rule<S: Store>(
+    store: &mut S,
+    scope: &Scope,
+    params_hash: &str,
+    request_id: &str,
+    rule: impl Fn(Pet) -> Result<Outcome, ActError>,
+) -> Result<String, ExecError> {
     for _ in 0..16 {
         let cur = store.load(scope)?.ok_or(ExecError::NoPet)?;
         let pet: Pet = serde_json::from_str(&cur.state).map_err(|_| ExecError::Corrupt)?;
-        let out = pet_core::act(pet, action, now, request_id).map_err(ExecError::Act)?;
+        let out = rule(pet).map_err(ExecError::Act)?;
         let state = serde_json::to_string(&out.pet).map_err(|_| ExecError::Corrupt)?;
         let result = serde_json::to_string(&out).map_err(|_| ExecError::Corrupt)?;
         let cs = Changeset {
             state,
             result,
-            params_hash: params_hash.clone(),
+            params_hash: params_hash.into(),
         };
         match store.commit(scope, cur.version, request_id, &cs)? {
             Commit::Committed { .. } => return Ok(cs.result),
