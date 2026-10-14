@@ -13,6 +13,17 @@ An electronic pet that lives in your site. Pets are born, need care, grow, evolv
 
 > **The birth protocol has not had an independent security review.** Until it does, do not describe births as formally verifiable. Known limitations are listed in [docs/operations/service.md](docs/operations/service.md) and [docs/design/birth-protocol.md](docs/design/birth-protocol.md) (both in Chinese).
 
+## What a pet does
+
+- **Care and life.** Hunger, energy, mood, illness and medicine. Time away is settled when you come back, and a pet is never found dead after an absence, only sick at worst. Neglect while you watch can kill it; it is then kept as a memorial, and a new adoption is a new individual.
+- **Growth and evolution.** Experience and levels, a personality that drifts with how you care for it, and evolution you choose: each of the 8 species has a body for each of 3 stages and 16 forms in all, decided by the branches you pick.
+- **Outfits and scenes.** Each level from 2 to 10 unlocks an item: glasses, a scarf, hats, a backpack, a cape, a meadow or a starry night. Items change only the picture, never the numbers.
+- **Expeditions.** Send the pet off on a topic for 4, 12 or 24 hours; it comes back with experience and a souvenir.
+- **Friends.** Become friends with an invite code, visit each other's pets and go on joint expeditions. No resources ever move between accounts.
+- **Rewards from your site.** In account mode, your site's activity (reading, commenting, publishing) feeds the pet, within daily caps. In local mode, a daily ration does the same, offline and without an account.
+
+Pixel art is drawn the same way on a web canvas, in a terminal (half blocks) and in the CLI.
+
 ## Use it
 
 | You want to | Use |
@@ -29,14 +40,14 @@ npm install @violetjs/pet
 
 | Part | Location | Notes |
 |---|---|---|
-| Rules core | `crates/core/pet-core` | Integer-only, no clock (time is passed in); birth, life, growth, evolution, rewards; one JSON entry point, `execute` |
-| Art | `crates/core/pet-term`, `catalog/` | 8 species; terminal character art and pixel art |
+| Rules core | `crates/core/pet-core` | Integer-only, no clock (time is passed in); birth, life, growth, evolution, rewards, outfits, expeditions; one JSON entry point, `execute` |
+| Art | `crates/core/pet-term`, `assets/catalog/` | 8 species × 16 forms, outfits and scenes; pixel art, half-block terminal art and character art |
 | Storage | `crates/service/pet-store` | SQLite and Postgres behind one storage contract and one test suite |
-| Service | `crates/service/pet-service` | Holds the authoritative state of account pets |
+| Service | `crates/service/pet-service` | Holds the authoritative state of account pets: adoption, device login for the CLI, activity rewards, memorials, friends |
 | Certificates | `crates/service/pet-issuer` | Signs birth certificates; verification stays in the core |
-| CLI | `crates/runtimes/pet-cli` | `pet-cli live`, `exec`, `capabilities` |
+| CLI | `crates/runtimes/pet-cli` | `pet-cli live`, `exec`, `capabilities`; `login`, `status`, `act` and `live --account` for account pets |
 | WebAssembly | `crates/runtimes/pet-wasm` | The wasm-bindgen wrapper the SDK loads |
-| SDK | `packages/pet-sdk` | `@violetjs/pet`: WebAssembly, types, schema, terminal embedding |
+| SDK | `packages/pet-sdk` | `@violetjs/pet`: WebAssembly, types, schema, canvas rendering, terminal embedding, offline local mode |
 
 [docs/architecture.md](docs/architecture.md) explains the layers, the dependency rules, how a command flows through the system, and how each guarantee is checked.
 
