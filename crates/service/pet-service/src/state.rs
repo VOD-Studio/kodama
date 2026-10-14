@@ -19,6 +19,8 @@ pub struct Config {
     pub eligibility_secret: Vec<u8>,
     /// 供验证者获取的出生证书公钥集(含轮换后的旧钥),原样公开。
     pub published_keys: Vec<Value>,
+    /// 设备授权的确认页面（接入方实现）。未配置时设备授权关闭。
+    pub device_verification_uri: Option<String>,
 }
 
 pub struct AppState<S: Store> {

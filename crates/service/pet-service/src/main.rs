@@ -53,8 +53,19 @@ fn config() -> (Config, SigningKey) {
         token_secret: hex32("PET_TOKEN_SECRET").to_vec(),
         eligibility_secret: hex32("PET_ELIGIBILITY_SECRET").to_vec(),
         published_keys: published,
+        device_verification_uri: device_uri(),
     };
     (cfg, signing)
+}
+
+/// 设备授权（CLI 登录）的确认页面，由接入方实现；不配置则关闭设备授权。
+fn device_uri() -> Option<String> {
+    let uri = std::env::var("PET_DEVICE_VERIFICATION_URI").ok()?;
+    if !(uri.starts_with("https://") || uri.starts_with("http://")) {
+        eprintln!("PET_DEVICE_VERIFICATION_URI must be an http(s) URL");
+        std::process::exit(2);
+    }
+    Some(uri)
 }
 
 fn clock() -> Arc<dyn Fn() -> u64 + Send + Sync> {

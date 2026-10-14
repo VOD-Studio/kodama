@@ -1,7 +1,7 @@
 //! 用接入方签发的身份断言换取本服务的访问令牌。
 use crate::error::{ok, ApiError};
 use crate::http::parse_json;
-use crate::identity::{issue_token, verify_assertion};
+use crate::identity::{issue_token, verify_assertion, TOKEN_TTL};
 use crate::state::AppState;
 use axum::body::Bytes;
 use axum::extract::State;
@@ -37,7 +37,7 @@ pub(crate) async fn exchange<S: Store + Send + 'static>(
             "identity assertion rejected",
         )
     })?;
-    let (token, exp) = issue_token(&st.cfg.token_secret, &who, now);
+    let (token, exp) = issue_token(&st.cfg.token_secret, &who, None, now, TOKEN_TTL);
     Ok(ok(
         json!({"access_token": token, "token_type": "Bearer", "expires_at": exp}),
     ))
