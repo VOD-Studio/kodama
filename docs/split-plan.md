@@ -42,7 +42,7 @@ kodama/
 └── .github/workflows/ ci.yml（由 pet.yml 迁入）、release
 ```
 
-Violet 里保留：PRD-0036、ADR-0021、活动连接器（VOD-Studio/violet#528）、站点挂载（VOD-Studio/violet#531）和 `/pet` 演示页。
+Violet 里只保留活动连接器（VOD-Studio/violet#528）、站点挂载（VOD-Studio/violet#531）和 `/pet` 演示页。PRD-0036、ADR-0021、调研与领域术语已迁入本仓库的 `docs/` 与 `CONTEXT.md`。
 
 ## 仓库自己的调试
 
@@ -122,7 +122,7 @@ git push git@github.com:VOD-Studio/kodama.git kodama-split:main
 
 ## 留在 Violet
 
-PRD-0036、ADR-0021、CONTEXT 中的术语、Violet 活动连接器（VOD-Studio/violet#528）、主页挂载（VOD-Studio/violet#531）、`/pet` 演示页与 `pet:sync`。迁出后删除 `pet/` 与 `pet.yml`，PRD 中的路径引用改为新仓库链接。
+活动连接器（VOD-Studio/violet#528）、主页挂载（VOD-Studio/violet#531）、`/pet` 演示页与 `pet:sync`。`pet/` 目录与 `pet.yml` 已从 Violet 删除，`pet:sync` 的默认路径指向并排检出的 `../kodama`。
 
 ## 迁移清单
 
@@ -131,9 +131,10 @@ PRD-0036、ADR-0021、CONTEXT 中的术语、Violet 活动连接器（VOD-Studio
 - [x] 按上面步骤拆分并校验树一致（44 个提交）
 - [ ] 新仓库配置 CI：安装 `wasm-bindgen-cli@0.2.129`、Postgres 服务、Chrome；`RUNNER_STATUS_TOKEN` 与 `SELF_HOSTED_RUNNER` 是否沿用另议
 - [ ] 新仓库配置 release-please（独立版本，不再牵动 Violet 的发版）
-- [ ] 新仓库首次 CI 全绿后，再从 Violet 删除 `pet/` 与 `pet.yml`
+- [x] 新仓库首次 CI 全绿（PR #1）
+- [x] 从 Violet 删除 `pet/` 与 `pet.yml`
 - [ ] 转移下游 issue（#10 至 #21）：`gh issue transfer <n> <新仓库>`；评审类 issue（#3 至 #9）按内容决定留在 Violet 还是迁出
-- [ ] 更新 PRD、ADR 与 CONTEXT 中的路径和链接
+- [x] PRD、ADR 与领域术语迁入本仓库，路径与 issue 引用已改写
 - [ ] crate 改名为 `violet-pet-*`，npm 与 crates.io 的发布流程与令牌（目前没有任何包发布）
 - [ ] 许可文件：`LICENSE` 随仓库根，素材许可另附
 
