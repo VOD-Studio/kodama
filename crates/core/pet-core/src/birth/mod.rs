@@ -1,7 +1,11 @@
-use crate::codec::{hex, u64_string, unhex};
-use crate::growth::Growth;
-use crate::life::Pet;
+//! 出生:由出生输入派生个体身份、稀有度、物种与基因(`derive_birth`),
+//! 以及出生证书的承诺—揭示核验(`proof`)。签发在 pet-issuer,不进入核心。
+pub mod proof;
+
+use crate::protocol::codec::{hex, u64_string, unhex};
 use crate::rng::{hkdf, Channel};
+use crate::rules::growth::Growth;
+use crate::rules::life::Pet;
 use crate::RULES_VERSION;
 use alloc::string::String;
 use alloc::vec::Vec;

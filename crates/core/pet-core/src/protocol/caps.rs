@@ -1,4 +1,4 @@
-use crate::codec::ErrorCode;
+use crate::protocol::codec::ErrorCode;
 use crate::RULES_VERSION;
 use serde::Serialize;
 
