@@ -5,7 +5,6 @@
 
 ### Bug Fixes
 
-* **npm:** 包元数据声明 repository ([0b5f513](https://github.com/VOD-Studio/kodama/commit/0b5f51380fdaae118a2caea7ee907440f5a0567c))
 * **npm:** 包元数据声明 repository ([001b902](https://github.com/VOD-Studio/kodama/commit/001b902990ce6960dc2323ed1dc310fb3cd22d2b))
 
 ## 0.1.0 (2026-10-14)

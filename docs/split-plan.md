@@ -35,11 +35,11 @@
 kodama/
 ├── Cargo.toml  Makefile  README.md
 ├── crates/            规则核心、存储、素材、签发、schema、CLI、WebAssembly、服务
-├── packages/          @violetjs/pet（SDK）、@violetjs/pet-cli（npm 打包）
+├── packages/          @violetjs/pet（SDK）
 ├── catalog/ docs/     素材清单、参数、版本、分发、协议文档
 ├── scenario/ scripts/ 三端场景、开发与测试脚本
 ├── consumers/         外部消费方验收（npm CLI、Node 嵌入、Rust 宿主、TanStack Start、服务）
-└── .github/workflows/ ci.yml（由 pet.yml 迁入）、release
+└── .github/workflows/ ci.yml（由 pet.yml 迁入）、发版与发布、提交信息、安全、开发环境
 ```
 
 Violet 里只保留活动连接器（VOD-Studio/violet#528）、站点挂载（VOD-Studio/violet#531）和 `/pet` 演示页。PRD-0036、ADR-0021、调研与领域术语已迁入本仓库的 `docs/` 与 `CONTEXT.md`。
@@ -130,18 +130,18 @@ git push git@github.com:VOD-Studio/kodama.git kodama-split:main
 - [x] 由有权限的人创建 `VOD-Studio/kodama`
 - [x] 按上面步骤拆分并校验树一致（44 个提交）
 - [ ] 新仓库配置 CI：安装 `wasm-bindgen-cli@0.2.129`、Postgres 服务、Chrome；`RUNNER_STATUS_TOKEN` 与 `SELF_HOSTED_RUNNER` 是否沿用另议
-- [ ] 新仓库配置 release-please（独立版本，不再牵动 Violet 的发版）
+- [x] 新仓库配置 release-please（独立版本，不再牵动 Violet 的发版）
 - [x] 新仓库首次 CI 全绿（PR #1）
 - [x] 从 Violet 删除 `pet/` 与 `pet.yml`
 - [ ] 转移下游 issue（#10 至 #21）：`gh issue transfer <n> <新仓库>`；评审类 issue（#3 至 #9）按内容决定留在 Violet 还是迁出
 - [x] PRD、ADR 与领域术语迁入本仓库，路径与 issue 引用已改写
-- [ ] crate 改名为 `violet-pet-*`，npm 与 crates.io 的发布流程与令牌（目前没有任何包发布）
+- [x] npm 发布流程与令牌（0.1.0 起发布 `@violetjs/pet`；CLI 改由 GitHub Release 分发，见 `distribution.md`）
+- [ ] crate 改名为 `violet-pet-*` 并发布到 crates.io（届时一并拆出协议层，见 `architecture.md`）
 - [ ] 许可文件：`LICENSE` 随仓库根，素材许可另附
 
 ## 待办（未做）
 
 - **独立的像素预览页**：目前像素画只能在 Violet 的 `/pet` 看。拆分后建议在新仓库加一个 `apps/demo`（Vite），复用同一批展示组件，并考虑把它们抽成 `@violetjs/pet-react`，让 Violet 的 `/pet` 退化为薄封装。这是一次独立的设计与提交，不应混进拆分本身。
-- **README**：新仓库根的 README 在拆分时写，内容以本文“仓库自己的调试”为骨架。
 - **阶段 3 的连接器**（VOD-Studio/violet#528）与 Violet 开发公钥的来源还没有实现，上文只是约定。
 
 ## 不在本文范围
