@@ -59,7 +59,7 @@ npm install @violetjs/pet
 make test      # 全部 Rust 测试
 make lint      # 格式、clippy、架构、版本、脚本、工作流、许可
 make term      # 在终端里养一只宠物
-make preview   # 打印全部物种与姿态
+make preview   # 在终端里看全部物种的像素画；ARGS="forms 3"、"poses 3"、"outfits 3"
 make dev       # 启动本地服务（SQLite，127.0.0.1:8787）
 ```
 
