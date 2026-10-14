@@ -59,7 +59,7 @@ Everything runs through `make`; `make help` lists the targets by group.
 make test      # all Rust tests
 make lint      # format, clippy, architecture, versions, scripts, workflows, licenses
 make term      # raise a pet in your terminal
-make preview   # print every species and pose
+make preview   # pixel art of every species in the terminal; ARGS="forms 3", "poses 3", "outfits 3"
 make dev       # start a local service (SQLite, 127.0.0.1:8787)
 ```
 

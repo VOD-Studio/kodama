@@ -19,8 +19,8 @@ help: ## 列出全部目标
 term: ## 在终端里养一只宠物
 	cargo run -p pet-cli -- live
 
-preview: ## 打印全部物种与姿态的字符画
-	cargo run -p pet-term --example preview
+preview: ## 在终端里预览像素画：ARGS="forms 3" 全部外形，"poses 3" 姿态，"outfits 3" 装扮，"ascii" 字符画
+	cargo run -q -p pet-term --example preview -- $(ARGS)
 
 dev-init: ## 生成 .dev/ 里的开发密钥与环境(已存在则保留)
 	node scripts/dev/dev.mjs init
