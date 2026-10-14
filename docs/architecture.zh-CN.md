@@ -244,7 +244,7 @@ CAPABILITIES（pet-core::caps）────────────────
 |---|---|---|---|---|
 | 进化形态与精细画风（#6、#11、#14） | `rules/growth.rs`：条件不变；`Stage` 与 `Branch` 在 `pet_term::form` | **像素画风已完成**（[设计](design/evolution.md)）：每阶段一副身体、分支特征、每物种 16 种外形，名称在 `assets/catalog/`；终端以半格字符绘制同一套像素画（`charset: "blocks"`） | 入口仍是 `GET /v1/pets/me/evolution` | SDK 把 `lineage` 传给 `sprite` |
 | #5 规则版本迁移 | `rules/migrate.rs`：显式的 `migrate(pet, from, to)` 与不变量测试 | — | 加载时迁移并持久化；表结构变更以编号迁移放在 `pet-store` | — |
-| #10 账号服务 | — | — | **登录会话已完成**：`session.rs`（刷新令牌轮换、重用即撤销）、`record.rs`（存储契约上的小记录）；待做：连接池、速率限制、固化存储契约签名 | — |
+| #10 账号服务 | — | — | **登录会话已完成**：`session.rs`（刷新令牌轮换、重用即撤销）、`record.rs`（存储契约上的小记录）；连接池已完成；待做：速率限制、固化存储契约签名 | — |
 | #12 活动与奖励 | `grant`（已有） | — | **已完成**：`activity.rs`（签名、奖励表、每日账本）与 `routes/activity.rs`（收件 → 预留 → 发放，按资格去重）；`pet-store` 的 `run_grant` | 接入方的连接器发送签名事件 |
 | #13 浏览器本地模式 | 不变 | — | 契约向量（`tests/fixtures/store-contract.json`）也对 SQLite 与 Postgres 运行 | **已完成**（[设计](design/local-mode.md)）：`@violetjs/pet/local` 与 `/store`，IndexedDB 存储、每日口粮与活动奖励、多标签页并发 |
 | #15 CLI 账号 | — | — | **已完成**：设备授权 `device.rs` 与 `routes/device.rs`（[说明](operations/service.md#登录会话与设备授权)）；投影带上外形 | **已完成**：`pet-cli` 的 `account/`（登录、凭据、自动刷新、`live --account`），经 HTTP 访问，不链接服务端 crate |

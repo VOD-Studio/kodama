@@ -35,6 +35,9 @@ impl ApiError {
     pub(crate) fn bad_request(code: &str, message: &str) -> Self {
         Self::new(StatusCode::BAD_REQUEST, code, message)
     }
+    pub(crate) fn is_internal(&self) -> bool {
+        self.status == StatusCode::INTERNAL_SERVER_ERROR
+    }
     pub(crate) fn internal(e: impl std::fmt::Debug) -> Self {
         eprintln!("internal error: {e:?}");
         Self::new(

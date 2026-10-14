@@ -67,6 +67,11 @@ pub trait Store {
         request_id: &str,
         cs: &Changeset,
     ) -> Result<Commit, StoreError>;
+
+    /// 连接是否还能用。连接池只放回还能用的连接；缺省总是能用（例如本地文件）。
+    fn is_usable(&self) -> bool {
+        true
+    }
 }
 
 mod pg;

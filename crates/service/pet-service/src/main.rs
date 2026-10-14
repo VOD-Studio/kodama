@@ -92,6 +92,7 @@ async fn serve<S: Store + Send + 'static>(new_store: Arc<dyn Fn() -> S + Send + 
         cfg,
         signing,
         new_store,
+        pool: Default::default(),
         clock: clock(),
         replay: Default::default(),
     });
@@ -122,13 +123,13 @@ fn main() {
     };
     if db.starts_with("postgres://") || db.contains("host=") {
         let schema = std::env::var("PET_DB_SCHEMA").unwrap_or_else(|_| "pet".into());
-        // 启动时先建一次表，失败立即退出，而不是等到第一个请求。
-        PgStore::open(&db, &schema).unwrap_or_else(|e| {
+        // 启动时建一次表，失败立即退出，而不是等到第一个请求；之后的连接不再执行 DDL
+        PgStore::migrate(&db, &schema).unwrap_or_else(|e| {
             eprintln!("cannot open postgres: {e:?}");
             std::process::exit(1);
         });
         runtime().block_on(serve::<PgStore>(Arc::new(move || {
-            PgStore::open(&db, &schema).expect("postgres connection")
+            PgStore::connect(&db, &schema).expect("postgres connection")
         })));
     } else {
         let path = PathBuf::from(&db);

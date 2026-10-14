@@ -45,8 +45,13 @@ where
 {
     let st = st.clone();
     tokio::task::spawn_blocking(move || {
-        let mut store = (st.new_store)();
-        f(&st, &mut store)
+        let mut store = st.pool.take().unwrap_or_else(|| (st.new_store)());
+        let result = f(&st, &mut store);
+        // 内部错误可能来自坏掉的连接：不放回，下次换一个新的
+        if !matches!(&result, Err(e) if e.is_internal()) {
+            st.pool.give(store);
+        }
+        result
     })
     .await
     .map_err(ApiError::internal)?
