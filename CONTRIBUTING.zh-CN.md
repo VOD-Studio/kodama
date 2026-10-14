@@ -63,16 +63,11 @@ make lint test       # 或：make docker-ci
 
 破坏性变更在冒号前加 `!`，例如 `feat(sdk)!: …`；1.0 之前，破坏性变更升次版本。常用 scope 有 `core`、`term`、`store`、`service`、`cli`、`sdk`、`release`、`deps`。描述可以用中文或英文。
 
-**合并方式。** 仓库允许两种合并方式；不允许 merge commit，因为 GitHub 总会把 PR 标题写进 merge commit，release-please 会把同一改动记两次。
+**合并方式。** 只允许 **Rebase and merge**：PR 的每个提交原样进入 `main`，历史完整保留，每个 `feat`、`fix` 各成一条 CHANGELOG。squash（会把历史压成一个提交）与 merge commit（会带上 PR 标题，release-please 会把同一改动记两次）都已关闭。
 
-| 方式 | 适用 | 进入 `main` 的内容 |
-|---|---|---|
-| Squash and merge | 改动小，或提交是零碎的中间过程 | 一个提交，标题为 PR 标题 |
-| Rebase and merge | 提交已整理成原子步骤的较大功能 | 每个提交原样进入，每个 `feat`、`fix` 各成一条 CHANGELOG |
+请把 PR 整理成一系列原子提交，每个提交信息都符合 Conventional Commits。必需检查 **Commit messages** 校验每个提交；需要修改时用 `git rebase -i` 改写后强推分支。PR 内不允许出现从 `main` 合并进来的 merge commit，请改为 rebase 到 `main`。
 
-两项检查配合使用：**PR title** 是必需检查，校验 PR 标题；**Commit messages** 是提示性检查，校验每个提交，它失败时请用 squash 合并。
-
-Dependabot 每月开分组的依赖更新 PR，标题前缀为 `chore(deps)`。如果某次更新修复了随产物发布的依赖漏洞，合并前把标题改成 `fix(deps): …`，以便触发发版。`wasm-bindgen` 不在 Dependabot 范围内：需要手动在 `crates/runtimes/pet-wasm/Cargo.toml`、各工作流与 `docker/dev.Dockerfile` 中同时升级，版本不一致时 `make check-versions` 会报错。
+Dependabot 每月开分组的依赖更新 PR。cargo 依赖编译进所有产物，提交前缀为 `fix(deps)`，合并后随补丁版本发布；npm 开发工具、Actions 与镜像的更新前缀为 `chore(deps)` 或 `ci`，不触发发版。`wasm-bindgen` 不在 Dependabot 范围内：需要手动在 `crates/runtimes/pet-wasm/Cargo.toml`、各工作流与 `docker/dev.Dockerfile` 中同时升级，版本不一致时 `make check-versions` 会报错。
 
 ## 发版
 

@@ -76,7 +76,7 @@
 ```
 
 - `feat` 升次版本，`fix` 升补丁版本；1.0 之前破坏性变更也只升次版本。`docs`、`chore`、`ci`、`test`、`style`、`refactor` 不触发发版。
-- 合并方式只允许 squash 与 rebase。merge commit 总会带上 PR 标题，release-please 会把同一改动记两次（0.1.1 的 CHANGELOG 出现过）。squash 以 PR 标题为准；rebase 时每个提交各自进入 CHANGELOG。
+- 合并方式只允许 rebase：每个提交原样进入 main，历史完整，每个 `feat`、`fix` 各成一条 CHANGELOG。squash 会压掉历史；merge commit 总会带上 PR 标题，release-please 会把同一改动记两次（0.1.1 的 CHANGELOG 出现过）。
 - PR 修改了产物相关文件时，`package.yml` 以 dry-run 跑一遍（打包、文件清单与归档验收，不需要凭据），问题在合并前暴露。
 - 发布可以重跑：npm 上同名同版本已存在则跳过；Release 附件覆盖上传；镜像标签重新指向同一构建。
 - crates 的 `publish = false`，**不会**发布到 crates.io。
@@ -89,8 +89,8 @@
 | `NPM_TOKEN` | 上述 `npm` 环境的 Environment secrets | 只有声明了该环境的作业能读到，PR 与构建作业读不到。Granular access token，对 `@violetjs` 内的包授予 Read and write，并允许在 CI 中绕过 2FA |
 | `@violetjs` 组织 | npmjs.com | 令牌所属账号必须是该组织成员且有发布权限 |
 | GHCR 包可见性 | 组织 Packages → `pet-service` → Package settings | 首次发布后包默认可能是私有的，改为 Public；镜像的 `org.opencontainers.image.source` 标签已把它关联到本仓库 |
-| 合并方式 | 仓库 Settings → General → Pull Requests | 只勾选 squash（标题用 PR 标题、正文留空）与 rebase |
-| 分支保护 | 仓库 Settings → Branches → `main` | 要求通过 PR 合并；必需检查：`Lint`、`Core, storage and schema`、`External consumption`、`Platform (…)`、`PR title` |
+| 合并方式 | 仓库 Settings → General → Pull Requests | 只勾选 Allow rebase merging |
+| 分支保护 | 仓库 Settings → Branches → `main` | 要求通过 PR 合并；必需检查：`Lint`、`Core, storage and schema`、`External consumption`、`Platform (…)`、`Commit messages` |
 
 缺少令牌时 npm 作业会失败并提示，其余作业不受影响；配好后重跑即可，已发布的包会跳过。
 
