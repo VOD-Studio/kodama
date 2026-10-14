@@ -1,6 +1,7 @@
 # 依赖自动更新：每月一次；minor/patch 合并为一个 PR，major 单独开 PR 便于评估。
-# 标题前缀符合提交信息检查。默认 chore 不触发发版；修复了已发布产物的漏洞时，
-# 合并前把标题改成 fix(deps): …（squash 合并以 PR 标题为准）。
+# 仓库只允许 rebase 合并，Dependabot 的提交信息会原样进入 main，前缀决定是否发版：
+#   cargo 依赖编译进所有产物（SDK、CLI、服务镜像），用 fix(deps) 让更新随补丁版本发布；
+#   SDK 的 npm 依赖只是开发工具、Actions 与镜像只影响 CI 与构建，用 chore/ci，不触发发版。
 version: 2
 updates:
   - package-ecosystem: cargo
@@ -8,7 +9,7 @@ updates:
     schedule:
       interval: monthly
     commit-message:
-      prefix: chore(deps)
+      prefix: fix(deps)
     groups:
       minor-patch:
         applies-to: version-updates

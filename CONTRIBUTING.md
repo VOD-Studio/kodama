@@ -63,16 +63,11 @@ Run the narrower checks that match your change as well: `make three-end` for rul
 
 Add `!` before the colon for a breaking change, for example `feat(sdk)!: …`. Before 1.0, a breaking change bumps the minor version. Common scopes are `core`, `term`, `store`, `service`, `cli`, `sdk`, `release` and `deps`. Descriptions may be in Chinese or English.
 
-**Merging.** The repository allows two merge methods. Merge commits are disabled, because GitHub always puts the pull request title into a merge commit, and release-please would then count the same change twice.
+**Merging.** Only **Rebase and merge** is allowed. Every commit of a pull request lands on `main` as it is, so history stays complete and each `feat` or `fix` becomes its own CHANGELOG entry. Squash merging (which collapses history into one commit) and merge commits (which carry the pull request title, so release-please would count the change twice) are disabled.
 
-| Method | Use it when | What lands on `main` |
-|---|---|---|
-| Squash and merge | The change is small, or its commits are work in progress | One commit, titled with the pull request title |
-| Rebase and merge | A larger feature whose commits are already clean, atomic steps | Every commit as is; each `feat` or `fix` becomes its own CHANGELOG entry |
+Shape each pull request as a series of clean, atomic commits, each with a Conventional Commits message. The required **Commit messages** check validates every commit; to fix one, rewrite it with `git rebase -i` and force-push the branch. Merge commits from `main` are not allowed inside a pull request: rebase onto `main` instead.
 
-Two checks support this. **PR title** is required and validates the title. **Commit messages** is advisory and validates every commit; when it fails, use squash.
-
-Dependabot opens grouped update pull requests monthly with `chore(deps)` titles. If an update fixes a vulnerability in something that ships, retitle it `fix(deps): …` before merging so that it triggers a release. `wasm-bindgen` is excluded from Dependabot: update it by hand in `crates/runtimes/pet-wasm/Cargo.toml`, the workflows and `docker/dev.Dockerfile` together. `make check-versions` catches any mismatch.
+Dependabot opens grouped update pull requests monthly. Cargo updates use the `fix(deps)` prefix, because Rust dependencies ship inside every artifact, so merging them triggers a patch release; npm dev tooling, Actions and image updates use `chore(deps)` or `ci` and do not. `wasm-bindgen` is excluded from Dependabot: update it by hand in `crates/runtimes/pet-wasm/Cargo.toml`, the workflows and `docker/dev.Dockerfile` together. `make check-versions` catches any mismatch.
 
 ## Releases
 
