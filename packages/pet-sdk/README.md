@@ -7,7 +7,8 @@ The browser and Node SDK for [kodama](https://github.com/VOD-Studio/kodama), an 
 - **Deterministic.** Integer-only rules with no clock and no random source of their own: you pass in the time and the seeds. Output in the browser, in Node and in the native build is compared byte for byte in CI.
 - **Explicit initialization.** Importing the package does not load or instantiate WebAssembly, so it is safe to import during SSR. Call `initPet()` on the client; after that, every call is synchronous.
 - **Typed commands.** TypeScript types, the JSON Schema and the capability catalog are generated from the Rust types, so they cannot drift from the implementation.
-- **Terminal embedding.** `@violetjs/pet/terminal` draws the pet inside a rectangle of your own Node terminal tool, without taking over its input or screen.
+- **Canvas and terminal rendering.** `@violetjs/pet/web` animates the pet on a `<canvas>`; `@violetjs/pet/terminal` draws it inside a rectangle of your own Node terminal tool, without taking over its input or screen.
+- **Local mode.** `@violetjs/pet/local` keeps a pet in the browser's IndexedDB with no account or backend.
 
 > The birth protocol has not had an independent security review yet. Until it does, do not describe births as formally verifiable.
 
@@ -80,7 +81,7 @@ Every result is either `{ ok: true, value }` or `{ ok: false, code, message }`. 
 
 The [capability catalog](https://github.com/VOD-Studio/kodama/blob/main/packages/pet-sdk/docs/capabilities.md) (shipped in the package as `docs/capabilities.md`) lists each command's result type and possible errors. The JSON Schema is exported as `@violetjs/pet/schema.json`.
 
-Commands that change state (`birth`, `act`, `grant`) return the new state; the SDK stores nothing. In account mode, the [pet service](https://github.com/VOD-Studio/kodama/blob/main/docs/operations/service.md) holds the authoritative state, and the client only renders it.
+Commands that change state (`birth`, `act`, `grant`) return the new state; the commands store nothing. In local mode, `@violetjs/pet/local` keeps the state in the browser. In account mode, the [pet service](https://github.com/VOD-Studio/kodama/blob/main/docs/operations/service.md) holds the authoritative state, and the client only renders it.
 
 ## Web rendering
 
@@ -108,6 +109,33 @@ pet.dispose();
 - The import has no side effects and is safe during SSR; call `mountPet` on the client.
 
 A canvas of at least 56×36 logical pixels (the default is 96×40) never clips a form; the extra width is room to walk.
+
+## Local mode
+
+`@violetjs/pet/local` keeps a pet in the browser with no account, backend or network. Every action is settled by the same rules core as the service and written in one atomic commit to IndexedDB:
+
+```js
+import { initPet } from "@violetjs/pet";
+import { createLocalPet, openIndexedDbStore } from "@violetjs/pet/local";
+
+await initPet();
+const local = createLocalPet({ store: await openIndexedDbStore() });
+if (!(await local.get())) await local.adopt();
+await local.claimDaily();             // the daily ration: 3 food, once per local day
+const fed = await local.act("feed");  // { ok: true, value } or { ok: false, code, message }
+await local.reward("read:post-42", { exp: 10, topic: "rust" }); // an activity on your site
+const view = await local.get();       // settled up to now, for display only
+```
+
+- Logical time is the device clock in minutes. Time away is settled by the rules: however long the pet is left, it comes back sick at worst, never dead. If the clock is set backwards, the pet's time stays at its last settlement instead of rewinding.
+- Several tabs can act at once: a version conflict reloads and settles again, so the same food is never spent twice. Passing the same request id again returns the first result without charging twice (`act(action, requestId)`).
+- Without a service, resources come from fixed local rules: `claimDaily()` gives 3 food once per local day (plus 1 medicine when the pet has none), and `reward(source, { exp, topic })` gives experience and topics for activities you report, once per `source`, at most 20 times and 100 experience per day. Rewards never give food. `get()` reports what is left today in `allowance`.
+- Errors use the core's codes, the service's names for storage cases (`not_found`, `already_has_pet`, `request_conflict`, `busy`), and `already_claimed` and `daily_limit` for the local allowances.
+- A local pet lives in the `"local"` world and has no birth certificate. It is not a pet issued by the service, and it is not uploaded or merged into an account.
+- `createMemoryStore()` keeps everything in memory, for tests and previews. Both stores run the same contract vectors as the service's SQLite and Postgres stores (`@violetjs/pet/store`).
+- The import has no side effects and is safe during SSR; open the store on the client.
+
+The rules and their reasons are in the [local mode design](https://github.com/VOD-Studio/kodama/blob/main/docs/design/local-mode.md). In account mode the SDK keeps no offline queue: while offline, keep animating the last projection with `mountPet`, and read the authoritative state again when back online.
 
 ## Server-side rendering
 
