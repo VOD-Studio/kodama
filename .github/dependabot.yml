@@ -46,3 +46,7 @@ updates:
       interval: monthly
     commit-message:
       prefix: chore(deps)
+    ignore:
+      # 开发镜像的 Node 必须与 CI 一致；主版本升级需要同时改 CI、开发镜像与 SDK 的 engines，手动处理
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
