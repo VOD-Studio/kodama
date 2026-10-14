@@ -141,15 +141,19 @@ fn logout() -> Result<Value, Failure> {
     Ok(json!({ "revoked": revoked }))
 }
 
-/// `act <feed|rest|play|heal|wait|evolve BRANCH|equip ITEM|unequip SLOT> [--request-id ID]`。
+/// `act <feed|rest|play|heal|wait|return|recall|evolve BRANCH|equip ITEM|unequip SLOT|depart TOPIC TIER> [--request-id ID]`。
 fn parse_action(args: &[String]) -> Result<(Value, String), String> {
-    const USAGE: &str = "usage: pet-cli act <feed|rest|play|heal|wait|evolve BRANCH|equip ITEM|unequip SLOT> [--request-id ID]";
+    const USAGE: &str = "usage: pet-cli act <feed|rest|play|heal|wait|return|recall|evolve BRANCH|equip ITEM|unequip SLOT|depart TOPIC short|medium|long> [--request-id ID]";
     let arg = args
         .get(1)
         .filter(|a| !a.starts_with('-'))
         .ok_or_else(|| USAGE.to_string());
     let action = match args.first().map(String::as_str) {
-        Some(a @ ("feed" | "rest" | "play" | "heal" | "wait")) => json!(a),
+        Some(a @ ("feed" | "rest" | "play" | "heal" | "wait" | "return" | "recall")) => json!(a),
+        Some("depart") => match args.get(2).filter(|t| !t.starts_with('-')) {
+            Some(tier) => json!({ "depart": { "topic": arg?, "tier": tier } }),
+            None => return Err(USAGE.into()),
+        },
         Some("evolve") => json!({ "evolve": { "branch": arg? } }),
         Some("equip") => json!({ "equip": { "item": arg? } }),
         Some("unequip") => json!({ "unequip": { "slot": arg? } }),
@@ -208,6 +212,10 @@ mod tests {
         let (a, _) = parse_action(&args(&["unequip", "head"])).unwrap();
         assert_eq!(a, json!({"unequip": {"slot": "head"}}));
         assert!(parse_action(&args(&["equip"])).is_err());
+        let (a, _) = parse_action(&args(&["depart", "rust", "long"])).unwrap();
+        assert_eq!(a, json!({"depart": {"topic": "rust", "tier": "long"}}));
+        assert_eq!(parse_action(&args(&["return"])).unwrap().0, json!("return"));
+        assert!(parse_action(&args(&["depart", "rust"])).is_err());
         assert!(parse_action(&[]).is_err());
     }
 

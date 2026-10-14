@@ -193,7 +193,7 @@ pub fn run_act<S: Store>(
     // 与升级前的 format!("{:x}") 相同：小写十六进制；已落库的指纹保持可比对
     let params_hash = pet_core::hex(&Sha256::digest(action_name));
     run_rule(store, scope, &params_hash, request_id, |pet| {
-        pet_core::act(pet, action, now, request_id)
+        pet_core::act(pet, action.clone(), now, request_id)
     })
 }
 

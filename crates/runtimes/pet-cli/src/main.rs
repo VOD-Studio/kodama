@@ -33,7 +33,7 @@ fn help() {
     println!("  login         sign in to a pet service: --service URL or PET_SERVICE");
     println!("  logout        sign out and forget the saved credentials");
     println!("  status        your account pet as one JSON line");
-    println!("  act ACTION    feed|rest|play|heal|wait|evolve BRANCH|equip ITEM|unequip SLOT [--request-id ID]");
+    println!("  act ACTION    feed|rest|play|heal|wait|return|recall|evolve BRANCH|equip ITEM|unequip SLOT|depart TOPIC TIER [--request-id ID]");
     println!("  capabilities  print the machine-readable capability catalog");
     println!("  version       print the release version and the rules version\n");
     println!("ops accepted by exec (rules v{}):", pet_core::RULES_VERSION);

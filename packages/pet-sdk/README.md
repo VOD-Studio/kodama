@@ -71,7 +71,7 @@ Every result is either `{ ok: true, value }` or `{ ok: false, code, message }`. 
 | `op` | What it does |
 |---|---|
 | `birth` | Derives a pet's identity, rarity, species and genes from the birth input |
-| `act` | Feeds, rests, plays with, heals or waits for a pet, evolves it, or puts on and takes off outfits (`equip`, `unequip`), and settles illness up to the given logical time. Each level from 2 to 10 unlocks an outfit item |
+| `act` | Feeds, rests, plays with, heals or waits for a pet, evolves it, puts on and takes off outfits (`equip`, `unequip`), or sends it on an expedition (`depart`, `return`, `recall`), and settles illness up to the given logical time. Each level from 2 to 10 unlocks an outfit item |
 | `grant` | Applies a reward that the service has already decided on |
 | `evolution_options` | Lists evolution branches for the current stage, with what is still missing |
 | `frame` | Renders a pose into a grid of character cells for terminals |

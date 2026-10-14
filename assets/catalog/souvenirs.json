@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "note": "探险见闻的种类与名称（#18）。种类在 crates/core/pet-core/src/rules/expedition.rs，由测试保证与本文件一致；见闻由宠物与探险编号经独立随机通道确定，约十六分之一闪亮。",
+  "souvenirs": [
+    {
+      "id": "postcard",
+      "name": {
+        "zh": "明信片",
+        "en": "Postcard"
+      }
+    },
+    {
+      "id": "pebble",
+      "name": {
+        "zh": "彩色石子",
+        "en": "Painted Pebble"
+      }
+    },
+    {
+      "id": "feather",
+      "name": {
+        "zh": "羽毛",
+        "en": "Feather"
+      }
+    },
+    {
+      "id": "seashell",
+      "name": {
+        "zh": "贝壳",
+        "en": "Seashell"
+      }
+    },
+    {
+      "id": "star_fragment",
+      "name": {
+        "zh": "星星碎片",
+        "en": "Star Fragment"
+      }
+    },
+    {
+      "id": "old_map",
+      "name": {
+        "zh": "旧地图",
+        "en": "Old Map"
+      }
+    },
+    {
+      "id": "pressed_leaf",
+      "name": {
+        "zh": "叶子标本",
+        "en": "Pressed Leaf"
+      }
+    },
+    {
+      "id": "ticket",
+      "name": {
+        "zh": "车票",
+        "en": "Ticket"
+      }
+    }
+  ]
+}

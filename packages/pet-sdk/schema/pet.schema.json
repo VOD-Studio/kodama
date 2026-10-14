@@ -74,6 +74,41 @@
             "unequip"
           ],
           "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "带着一个主题去探险（4、12 或 24 小时），出发消耗食物。",
+          "properties": {
+            "depart": {
+              "properties": {
+                "tier": {
+                  "$ref": "#/$defs/Tier"
+                },
+                "topic": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "topic",
+                "tier"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "depart"
+          ],
+          "type": "object"
+        },
+        {
+          "const": "return",
+          "description": "探险到时间后领取：少量经验与一件见闻。",
+          "type": "string"
+        },
+        {
+          "const": "recall",
+          "description": "领取前召回：返还出发消耗的食物，没有产出。",
+          "type": "string"
         }
       ]
     },
@@ -614,6 +649,31 @@
           "const": "incompatible_item",
           "description": "物品不适合宠物的身体结构。",
           "type": "string"
+        },
+        {
+          "const": "on_expedition",
+          "description": "宠物正在探险，要等它回来。",
+          "type": "string"
+        },
+        {
+          "const": "no_expedition",
+          "description": "宠物没有在探险。",
+          "type": "string"
+        },
+        {
+          "const": "still_away",
+          "description": "探险还没到时间。",
+          "type": "string"
+        },
+        {
+          "const": "daily_limit",
+          "description": "当天的次数已用完。",
+          "type": "string"
+        },
+        {
+          "const": "unwell",
+          "description": "生病时不能出发。",
+          "type": "string"
         }
       ]
     },
@@ -942,6 +1002,20 @@
       ],
       "type": "string"
     },
+    "Keepsake": {
+      "description": "见闻的种类。名称在 `assets/catalog/souvenirs.json`。",
+      "enum": [
+        "postcard",
+        "pebble",
+        "feather",
+        "seashell",
+        "star_fragment",
+        "old_map",
+        "pressed_leaf",
+        "ticket"
+      ],
+      "type": "string"
+    },
     "Missing": {
       "description": "未满足的进化条件:还差多少。",
       "properties": {
@@ -1181,6 +1255,10 @@
             "null"
           ]
         },
+        "travels": {
+          "$ref": "#/$defs/Travels",
+          "description": "探险：进行中的一次、当天出发次数与收藏册。空时不写出。"
+        },
         "wardrobe": {
           "$ref": "#/$defs/Wardrobe",
           "description": "衣橱：拥有的物品与身上的装扮。空时不写出，旧存档与出生结果保持原样。"
@@ -1410,6 +1488,30 @@
       ],
       "type": "string"
     },
+    "Souvenir": {
+      "description": "一件见闻：在哪个主题的探险里得到的什么东西。约十六分之一会是闪亮的。",
+      "properties": {
+        "found_at": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/Keepsake"
+        },
+        "shiny": {
+          "type": "boolean"
+        },
+        "topic": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "topic",
+        "shiny",
+        "found_at"
+      ],
+      "type": "object"
+    },
     "Stage": {
       "enum": [
         "baby",
@@ -1417,6 +1519,25 @@
         "adult"
       ],
       "type": "string"
+    },
+    "Tier": {
+      "oneOf": [
+        {
+          "const": "short",
+          "description": "4 小时。",
+          "type": "string"
+        },
+        {
+          "const": "medium",
+          "description": "12 小时。",
+          "type": "string"
+        },
+        {
+          "const": "long",
+          "description": "24 小时。",
+          "type": "string"
+        }
+      ]
     },
     "TopicCount": {
       "description": "主题倾向:接入方映射后的主题标签及累计次数。",
@@ -1433,6 +1554,78 @@
       "required": [
         "topic",
         "count"
+      ],
+      "type": "object"
+    },
+    "Travels": {
+      "description": "探险的全部状态：进行中的一次、当天出发次数、收藏册。空时不写出，旧存档保持原样。",
+      "properties": {
+        "album": {
+          "description": "每种见闻累计得到的件数，顺序同 `KEEPSAKES`。",
+          "items": {
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "day": {
+          "description": "出发次数所属的逻辑日（逻辑时间 / 1440）与次数。",
+          "type": "string"
+        },
+        "departures": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "recent": {
+          "description": "最近得到的见闻，新的在后。",
+          "items": {
+            "$ref": "#/$defs/Souvenir"
+          },
+          "type": "array"
+        },
+        "trip": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Trip"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Trip": {
+      "description": "进行中的探险。",
+      "properties": {
+        "back_at": {
+          "description": "什么时候可以领取。",
+          "type": "string"
+        },
+        "departed_at": {
+          "type": "string"
+        },
+        "id": {
+          "description": "探险编号，即出发那次请求的标识；收藏品由它复算。",
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "topic": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "topic",
+        "tier",
+        "departed_at",
+        "back_at"
       ],
       "type": "object"
     },
@@ -1524,11 +1717,16 @@
           "unsupported_rules",
           "not_eligible",
           "not_owned",
-          "incompatible_item"
+          "incompatible_item",
+          "on_expedition",
+          "no_expedition",
+          "still_away",
+          "daily_limit",
+          "unwell"
         ],
         "mutates_state": true,
         "op": "act",
-        "summary": "对宠物执行喂食、休息、玩耍、治疗、等待、进化或穿脱装扮,按逻辑时间结算病程;升级时解锁装扮"
+        "summary": "对宠物执行喂食、休息、玩耍、治疗、等待、进化、穿脱装扮或探险(出发、领取、召回),按逻辑时间结算病程;升级时解锁装扮"
       },
       {
         "errors": [

@@ -71,7 +71,7 @@ await initPet(await readFile(new URL(import.meta.resolve("@violetjs/pet/wasm")))
 | `op` | 作用 |
 |---|---|
 | `birth` | 由出生输入派生个体身份、稀有度、物种与基因 |
-| `act` | 喂食、休息、玩耍、治疗、等待、进化，或穿脱装扮（`equip`、`unequip`），并按给定的逻辑时间结算病程。2 到 10 级每升一级解锁一件装扮 |
+| `act` | 喂食、休息、玩耍、治疗、等待、进化，穿脱装扮（`equip`、`unequip`）或去探险（`depart`、`return`、`recall`），并按给定的逻辑时间结算病程。2 到 10 级每升一级解锁一件装扮 |
 | `grant` | 发放已由服务裁决的奖励 |
 | `evolution_options` | 列出当前阶段的进化分支，以及每个分支还缺什么 |
 | `frame` | 把姿态合成为终端用的字符网格 |

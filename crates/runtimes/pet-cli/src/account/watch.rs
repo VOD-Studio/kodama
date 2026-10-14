@@ -35,6 +35,8 @@ pub struct View {
     pub food: u32,
     pub medicine: u32,
     pub level: u8,
+    /// 正在探险时：主题与回来的逻辑时间（分钟）。
+    pub away: Option<(String, u64)>,
     /// 本版本之前领取的个体没有外形记录。
     pub known_look: bool,
 }
@@ -61,6 +63,11 @@ impl View {
             food: pet.food,
             medicine: pet.medicine,
             level: pet.growth.level(),
+            away: pet
+                .travels
+                .trip
+                .as_ref()
+                .map(|t| (t.topic.clone(), t.back_at)),
             known_look,
         })
     }
@@ -172,10 +179,28 @@ impl Watch {
 
     pub fn status(&self) -> String {
         let pet = match &self.view {
-            Some(v) => format!(
-                "Lv{} food {} med {} {} {}",
-                v.level, v.food, v.medicine, v.phase, v.mood
-            ),
+            Some(v) => {
+                let away = match &v.away {
+                    // 逻辑时间是 Unix 分钟：换算成还要多久
+                    Some((topic, back)) => {
+                        let left = back.saturating_sub(super::client::now() / 60);
+                        if left == 0 {
+                            format!(" · back from {topic}, run `pet-cli act return`")
+                        } else {
+                            format!(
+                                " · exploring {topic}, back in {}h{:02}m",
+                                left / 60,
+                                left % 60
+                            )
+                        }
+                    }
+                    None => String::new(),
+                };
+                format!(
+                    "Lv{} food {} med {} {} {}{away}",
+                    v.level, v.food, v.medicine, v.phase, v.mood
+                )
+            }
             None => String::new(),
         };
         format!(
