@@ -125,6 +125,7 @@ await local.claimDaily();             // 每日口粮：3 份食物，每个本�
 const fed = await local.act("feed");  // { ok: true, value } 或 { ok: false, code, message }
 await local.reward("read:post-42", { exp: 10, topic: "rust" }); // 你站点里的一次活动
 const view = await local.get();       // 结算到现在的投影，只用于展示
+mountPet(canvas, { pet: { ...view.appearance, lineage: view.pet.growth.lineage } }); // 画出它
 ```
 
 - 逻辑时间取本机时钟的分钟数，离开期间按规则结算：离开再久，回来最多生病，不会直接死亡。本机时钟被调回过去时，宠物的时间停在最近一次结算，不会倒流。

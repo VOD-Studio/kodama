@@ -125,6 +125,7 @@ await local.claimDaily();             // the daily ration: 3 food, once per loca
 const fed = await local.act("feed");  // { ok: true, value } or { ok: false, code, message }
 await local.reward("read:post-42", { exp: 10, topic: "rust" }); // an activity on your site
 const view = await local.get();       // settled up to now, for display only
+mountPet(canvas, { pet: { ...view.appearance, lineage: view.pet.growth.lineage } }); // draw it
 ```
 
 - Logical time is the device clock in minutes. Time away is settled by the rules: however long the pet is left, it comes back sick at worst, never dead. If the clock is set backwards, the pet's time stays at its last settlement instead of rewinding.

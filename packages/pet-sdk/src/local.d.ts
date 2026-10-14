@@ -21,6 +21,8 @@ export interface LocalView {
   version: number;
   /** 本地宠物没有出生证书，不是服务签发的正式个体。 */
   local: true;
+  /** 出生时确定的外形，交给 `mountPet` 画出这只宠物。 */
+  appearance: { species: number; genes: number[]; rarity: number } | null;
   /** 本地自然日内还剩的资源：今天的口粮能否领取，活动奖励还能给多少经验、多少次。 */
   allowance: { ration: boolean; exp: number; rewards: number };
 }
