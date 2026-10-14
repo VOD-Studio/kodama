@@ -1,50 +1,90 @@
 # kodama
 
-住在站点里的电子宠物。规则核心用 Rust 写成，同一份代码编译为原生、浏览器 WebAssembly 与 Node WebAssembly，三端输出逐字节一致。
+English | [简体中文](README.zh-CN.md)
 
-> **出生协议尚未经过独立安全评审**，评审通过前不要对外宣称“正式可验证发行”。已知限制见 [docs/service.md](docs/service.md) 与 [docs/birth-protocol.md](docs/birth-protocol.md)。
+[![CI](https://github.com/VOD-Studio/kodama/actions/workflows/ci.yml/badge.svg)](https://github.com/VOD-Studio/kodama/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/VOD-Studio/kodama)](https://github.com/VOD-Studio/kodama/releases)
+[![npm](https://img.shields.io/npm/v/@violetjs/pet)](https://www.npmjs.com/package/@violetjs/pet)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## 有什么
+An electronic pet that lives in your site. Pets are born, need care, grow, evolve and can die. The rules core is written in Rust and compiled to native code, browser WebAssembly and Node WebAssembly, and all three produce byte-identical output.
 
-| 部分 | 位置 | 说明 |
-|---|---|---|
-| 规则核心 | `crates/pet-core` | 整数运算，不读系统时钟（时间由调用方传入）；出生、生命、成长、进化、奖励；单一 JSON 入口 `execute` |
-| 素材 | `crates/pet-term`、`catalog/` | 8 个物种；终端字符画与像素画两种画风，`sprite` 命令输出调色板与像素网格 |
-| 存储 | `crates/pet-store` | SQLite 与 Postgres 共用一套契约测试 |
-| 服务 | `crates/pet-service` | 持有账号宠物的唯一权威状态，见 [docs/service.md](docs/service.md) |
-| 终端 | `crates/pet-cli` | `pet-cli live` 在终端里养一只；二进制随 GitHub Release 发布 |
-| SDK | `packages/pet-sdk` | npm `@violetjs/pet`：WebAssembly、类型、schema |
-| 发布 | GitHub Release、GHCR | CLI 各平台归档见 [crates/pet-cli](crates/pet-cli/README.zh-CN.md)；服务镜像 `ghcr.io/vod-studio/pet-service` |
+*Kodama* (木霊) is a small spirit that lives in a tree, in the way this pet lives in a site.
 
-## 开始
+> **The birth protocol has not had an independent security review.** Until it does, do not describe births as formally verifiable. Known limitations are listed in [docs/service.md](docs/service.md) and [docs/birth-protocol.md](docs/birth-protocol.md) (both in Chinese).
+
+## Use it
+
+| You want to | Use |
+|---|---|
+| Show and raise a pet in a web app, or embed one in a Node terminal tool | [`@violetjs/pet`](packages/pet-sdk/README.md) on npm |
+| Run a pet in your terminal, or drive the rules from scripts and agents | [`pet-cli`](crates/pet-cli/README.md) from [GitHub Releases](https://github.com/VOD-Studio/kodama/releases) |
+| Share one pet per account between web and CLI | The pet service image `ghcr.io/vod-studio/pet-service` ([docs](docs/service.md)) |
 
 ```sh
-make help      # 列出全部入口
-make test      # 全部 Rust 测试
-make term      # 在终端里养一只宠物
-make preview   # 打印全部物种与姿态
-make dev       # 启动本地服务（SQLite，127.0.0.1:8787）
+npm install @violetjs/pet
 ```
 
-`make dev` 之后，另开终端：
+## What's inside
+
+| Part | Location | Notes |
+|---|---|---|
+| Rules core | `crates/pet-core` | Integer-only, no clock (time is passed in); birth, life, growth, evolution, rewards; one JSON entry point, `execute` |
+| Art | `crates/pet-term`, `catalog/` | 8 species; terminal character art and pixel art |
+| Storage | `crates/pet-store` | SQLite and Postgres behind one storage contract and one test suite |
+| Service | `crates/pet-service` | Holds the authoritative state of account pets |
+| Certificates | `crates/pet-issuer` | Signs birth certificates; verification stays in the core |
+| CLI | `crates/pet-cli` | `pet-cli live`, `exec`, `capabilities` |
+| WebAssembly | `crates/pet-wasm` | The wasm-bindgen wrapper the SDK loads |
+| SDK | `packages/pet-sdk` | `@violetjs/pet`: WebAssembly, types, schema, terminal embedding |
+
+[docs/architecture.md](docs/architecture.md) explains the layers, the dependency rules, how a command flows through the system, and how each guarantee is checked.
+
+## Develop
+
+Everything runs through `make`; `make help` lists the targets by group.
 
 ```sh
-T=$(make token SUB=alice)
+make test      # all Rust tests
+make lint      # format, clippy, architecture, versions, scripts, workflows, licenses
+make term      # raise a pet in your terminal
+make preview   # print every species and pose
+make dev       # start a local service (SQLite, 127.0.0.1:8787)
+```
+
+No Rust or Node on your machine? Only Docker is needed. Prefix any target with `docker-` to run it in the dev container, which has the same toolchain as CI:
+
+```sh
+make docker-build   # once
+make docker-test
+make docker-ci      # the checks of the CI Lint and Core jobs, including Postgres
+make docker-shell
+```
+
+After `make dev` (or `make docker-dev`), in another terminal:
+
+```sh
+T=$(make -s token SUB=alice)   # or: make -s docker-token SUB=alice
 curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 ```
 
-不需要任何外部站点：`scripts/dev.mjs` 在 `.dev/` 里生成密钥，并扮演接入方签发断言。要对着真实接入方调试，用 `PET_DEV_TRUST_KEY=<对方公钥> node scripts/dev.mjs init --force`。
+No integrating site is needed: `scripts/dev.mjs` generates keys in `.dev/` and plays the integrating site that issues identity assertions.
 
-构建 SDK 需要 `wasm32-unknown-unknown` 目标与 `wasm-bindgen-cli@0.2.129`；schema 与类型的检查需要 pnpm。
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the toolchain, the commit and pull request conventions, and how releases work.
 
-## 调试与联调
+## Documentation
 
-按层次验证规则、画风、协议、三端一致、服务与外部消费方的命令，以及开发阶段与接入方（如 [Violet](https://github.com/VOD-Studio/violet)）联调的方式，见 [docs/split-plan.md](docs/split-plan.md) 的“仓库自己的调试”与“开发阶段与 Violet 联调”。
+| Document | Content |
+|---|---|
+| [Architecture](docs/architecture.md) | Layers, dependency rules, data flow, verification |
+| [Distribution](docs/distribution.md) | Package names, channels, platforms, release process (Chinese) |
+| [Service](docs/service.md) | Running the service, endpoints, identity, known limitations (Chinese) |
+| [Capabilities](packages/pet-sdk/docs/capabilities.md) | Every command, result type and error code (Chinese, generated) |
+| [PRD-0036](docs/prd/0036-独立电子宠物.md), [ADR-0021](docs/adr/0021-pet-service-identity-and-activity-contract.md), [CONTEXT.md](CONTEXT.md) | Product requirements, the contract with integrating sites, domain terms (Chinese) |
+| [docs/](docs/) | Parameters, growth rules, versioning, birth protocol, art baseline, extensions (Chinese) |
 
-## 文档
+[Violet](https://github.com/VOD-Studio/violet) is the reference integration.
 
-[docs/](docs/) 下有 [PRD-0036](docs/prd/0036-独立电子宠物.md)、参数、成长规则、版本策略、出生协议、分发与许可、素材基线与服务说明；领域术语见 [CONTEXT.md](CONTEXT.md)。与接入方的契约（身份断言、活动事件）定义在 [ADR-0021](docs/adr/0021-pet-service-identity-and-activity-contract.md)。
+## License
 
-## 许可
-
-代码为 MIT，见 [LICENSE](LICENSE)。素材的许可记录在 `catalog/species.json`。
+The code is MIT; see [LICENSE](LICENSE). Licenses for art assets are recorded in `catalog/species.json`.
