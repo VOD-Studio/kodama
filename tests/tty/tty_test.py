@@ -64,14 +64,16 @@ def head_cols(b):
         for seg in re.split(rb"\x1b\[(\d+);1H", fr):
             pass
         m = re.search(rb"\x1b\[(\d+);1H((?:\x1b\[[0-9;]*m|[^\x1b])*)", fr)
-        # 取含 '(' 的那一行:去掉 SGR 后找列
+        # 每一帧里宠物最左侧的列：字符画找 '('，半格像素画找半格字符；去掉 SGR 后按字符计列
+        first = None
         for row in re.finditer(rb"\x1b\[\d+;1H((?:\x1b\[[0-9;]*m|[^\x1b])*)", fr):
-            plain = re.sub(rb"\x1b\[[0-9;]*m", b"", row.group(1))
-            i = plain.find(b"(")
-            if i >= 0: cols.add(i)
+            plain = re.sub(rb"\x1b\[[0-9;]*m", b"", row.group(1)).decode("utf-8", "ignore")
+            hits = [plain.find(c) for c in "(\u2580\u2584\u2588" if plain.find(c) >= 0]
+            if hits: first = min(hits) if first is None else min(first, min(hits))
+        if first is not None: cols.add(first)
     return cols
 ok(len(head_cols(buf)) > 2, f"pet position changes across frames ({sorted(head_cols(buf))[:6]})")
-ok("\u25cf".encode() in buf, "UTF-8 locale uses unicode eyes")
+ok("\u2580".encode() in buf and b"48;5;" in buf, "UTF-8 + 256 colours draws half-block pixel art with backgrounds")
 
 # 2. q
 buf, _, st, b, a = run(full, 12, 40, lambda p, fd: os.write(fd, b"q"))
@@ -91,6 +93,10 @@ ok(all(c < 0x80 or True for c in buf) and "●".encode() not in buf, "non-UTF8 l
 # 5. 16 colours
 buf, _, st, b, a = run({"TERM": "xterm", "LANG": "C"}, 12, 40, lambda p, fd: os.write(fd, b"q"))
 ok(b"38;5;" in buf and re.search(rb"38;5;[1-6]m", buf) is not None, "16-colour fallback uses low palette")
+
+# 5b. UTF-8 但只有 16 色：退回字符画，眼睛用 Unicode
+buf, _, st, b, a = run({"TERM": "xterm", "LANG": "en_US.UTF-8"}, 12, 40, lambda p, fd: os.write(fd, b"q"))
+ok("\u25cf".encode() in buf and "\u2580".encode() not in buf, "UTF-8 with 16 colours uses unicode glyph eyes, not blocks")
 
 # 6. tiny terminal
 buf, _, st, b, a = run(full, 2, 5, lambda p, fd: os.write(fd, b"\x03"))

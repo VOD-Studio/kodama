@@ -43,7 +43,7 @@ cargo install --locked --git https://github.com/VOD-Studio/kodama pet-cli
 ## 用法
 
 ```sh
-pet-cli live                     # 动态宠物；q 退出，n 切换物种
+pet-cli live                     # 动态宠物；q 退出，n 切换物种，g 切换进化外形
 pet-cli capabilities             # exec 接受的命令与错误码
 echo '{"op":"frame","species":1,"genes":[1,2,3,4,5,6,7,8],"pose":"idle","charset":"ascii","w":10,"h":3,"t":"0"}' | pet-cli exec
 pet-cli --version                # 发布版本与规则版本
@@ -55,9 +55,10 @@ pet-cli --version                # 发布版本与规则版本
 
 | 条件 | 行为 |
 |---|---|
+| UTF-8、256 色且不少于 11 行 | 半格像素画：与网页相同的进化外形与动作，每个字符格显示上下两个像素 |
 | 输出不是终端 | `live` 输出一行 JSON 状态后退出，不含控制码 |
 | 设置了 `NO_COLOR`，或 `TERM` 为 `dumb`、为空 | 不输出颜色 |
-| `COLORTERM=truecolor` 或 `TERM` 含 `256color` | 256 色；否则用 16 色调色板 |
+| `COLORTERM=truecolor` 或 `TERM` 含 `256color` | 256 色；否则用 16 色调色板与字符画 |
 | 区域设置不是 UTF-8 | 只输出 ASCII |
 | 终端尺寸变化 | 画面随新尺寸调整，极小的终端也不会崩溃 |
 

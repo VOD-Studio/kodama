@@ -7,6 +7,7 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use serde::{Deserialize, Serialize};
 
+mod blocks;
 pub mod form;
 mod pixel;
 pub use form::{Branch, Form, Stage};
@@ -56,12 +57,15 @@ pub const fn body_of(species: u8) -> Body {
     }
 }
 
-#[derive(Clone, Copy, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum Charset {
     Ascii,
     Unicode,
+    /// 半格像素画：每个字符格显示上下两个像素（上半格前景色、下半格背景色），与 `sprite` 是同一套外形与动作。
+    /// 需要 UTF-8 与 256 色；高度不小于 10 行时完整显示幼体，约 20 行显示带翅膀的成年形态。
+    Blocks,
 }
 
 /// 帧合成输入:投影字段 + 呈现时钟。呈现时钟只影响动作相位,不影响任何养成结果。
@@ -78,6 +82,11 @@ pub struct FrameInput {
     #[serde(with = "u64_string")]
     #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub t: u64,
+    /// 成长阶段与进化记录，含义与 `sprite` 相同；只有 `blocks` 画风按外形绘制。
+    #[serde(default)]
+    pub stage: u8,
+    #[serde(default)]
+    pub lineage: Vec<Branch>,
 }
 
 #[derive(Serialize)]
@@ -88,6 +97,8 @@ pub struct Frame {
     pub rows: Vec<String>,
     /// 与 rows 逐字符对应的 256 色索引;0 表示不着色。
     pub colors: Vec<Vec<u8>>,
+    /// 与 rows 逐字符对应的背景 256 色索引；0 表示不设背景。只有 `blocks` 画风使用。
+    pub bg: Vec<Vec<u8>>,
 }
 
 mod u64_string {
@@ -211,6 +222,9 @@ fn sprite(i: &FrameInput, blink: bool, step: u64) -> [String; 3] {
 
 /// 合成一帧字符单元网格。尺寸小于精灵时裁剪,不 panic。
 pub fn render(i: &FrameInput) -> Frame {
+    if i.charset == Charset::Blocks {
+        return blocks::render(i);
+    }
     let (w, h) = (i.w.max(1), i.h.max(1));
     let mut cells: Vec<Vec<(char, u8)>> =
         (0..h).map(|_| (0..w).map(|_| (' ', 0)).collect()).collect();
@@ -272,6 +286,10 @@ pub fn render(i: &FrameInput) -> Frame {
         colors: cells
             .iter()
             .map(|r| r.iter().map(|c| c.1).collect())
+            .collect(),
+        bg: cells
+            .iter()
+            .map(|r| r.iter().map(|_| 0).collect())
             .collect(),
     }
 }

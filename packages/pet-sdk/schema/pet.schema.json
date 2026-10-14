@@ -283,11 +283,20 @@
       "type": "object"
     },
     "Charset": {
-      "enum": [
-        "ascii",
-        "unicode"
-      ],
-      "type": "string"
+      "oneOf": [
+        {
+          "enum": [
+            "ascii",
+            "unicode"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "blocks",
+          "description": "半格像素画：每个字符格显示上下两个像素（上半格前景色、下半格背景色），与 `sprite` 是同一套外形与动作。\n需要 UTF-8 与 256 色；高度不小于 10 行时完整显示幼体，约 20 行显示带翅膀的成年形态。",
+          "type": "string"
+        }
+      ]
     },
     "Command": {
       "description": "线上命令:`op` 为判别字段。",
@@ -599,6 +608,19 @@
     },
     "Frame": {
       "properties": {
+        "bg": {
+          "description": "与 rows 逐字符对应的背景 256 色索引；0 表示不设背景。只有 `blocks` 画风使用。",
+          "items": {
+            "items": {
+              "format": "uint8",
+              "maximum": 255,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
         "colors": {
           "description": "与 rows 逐字符对应的 256 色索引;0 表示不着色。",
           "items": {
@@ -635,7 +657,8 @@
         "w",
         "h",
         "rows",
-        "colors"
+        "colors",
+        "bg"
       ],
       "type": "object"
     },
@@ -662,10 +685,25 @@
           "minimum": 0,
           "type": "integer"
         },
+        "lineage": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Branch"
+          },
+          "type": "array"
+        },
         "pose": {
           "$ref": "#/$defs/Pose"
         },
         "species": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "stage": {
+          "default": 0,
+          "description": "成长阶段与进化记录，含义与 `sprite` 相同；只有 `blocks` 画风按外形绘制。",
           "format": "uint8",
           "maximum": 255,
           "minimum": 0,
