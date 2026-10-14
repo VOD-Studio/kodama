@@ -1,0 +1,682 @@
+//! 八个物种 × 三个阶段的身体，设计说明见 docs/design/evolution.md。
+//! 改动后用 `cargo run -p pet-term --example sprites` 导出预览图目视检查。
+//!
+//! 身体只画左半边，渲染时镜像成左右对称的整体；尾巴、胡须等不对称的部分是补丁。
+//! 键：b 身体  l 浅色  a 点缀  d 深色花纹  t 花盆  e 眼  w 眼睛高光  m 嘴  k 腮红  n 鼻  W 胡须线
+//! 描边与明暗不画在模板里，由渲染按统一规则生成（见 `grid.rs`）。
+use super::{BodyDef, Patch, SpeciesArt};
+
+pub(crate) const SPECIES_ART: [SpeciesArt; 8] = [
+    // 0 余烬狐
+    SpeciesArt {
+        hue: 22,
+        sat: 88,
+        accent: (8, 90),
+        forms: [
+            // 幼体
+            BodyDef {
+                half: &[
+                    "........", "..b.....", ".bab....", ".baab...", ".bbbbbbb", "bbbbbbbb",
+                    "bbbewbbb", "bbbeebbb", "bkkbblll", ".bbbllle", "..bbllml", "...bllll",
+                    "..bbllll", "..bbllll", "..bb..bb", "........",
+                ],
+                back: &[Patch {
+                    x: 14,
+                    y: 3,
+                    rows: &[
+                        "...aa", "..aaa", "..aaa", ".bba.", ".bb..", "bbb..", "bbb..", "bb...",
+                    ],
+                }],
+                front: &[],
+            },
+            // 少年
+            BodyDef {
+                half: &[
+                    "..........",
+                    "..b.......",
+                    "..bb......",
+                    ".bab......",
+                    ".baab.....",
+                    ".baaab....",
+                    "..bbbbbbbb",
+                    ".bbbbbbbbb",
+                    ".bbbewbbbb",
+                    ".bbbeebbbb",
+                    "bbkkbbblll",
+                    "bbbbblllle",
+                    ".bbbbbllml",
+                    "...bbbbll.",
+                    "....bbllll",
+                    "...bbbllll",
+                    "...bbbllll",
+                    "...bbbllll",
+                    "...bb..bb.",
+                    "...bb..bb.",
+                    "..........",
+                ],
+                back: &[Patch {
+                    x: 17,
+                    y: 2,
+                    rows: &[
+                        "......aa", ".....aaa", "....aaa.", "...baaa.", "..bbba..", ".bbbb...",
+                        "bbbbb...", "bbbb....", "bbb.....",
+                    ],
+                }],
+                front: &[],
+            },
+            // 成年
+            BodyDef {
+                half: &[
+                    "............",
+                    "..b.........",
+                    "..bb........",
+                    ".bab........",
+                    ".baab.......",
+                    ".baaab......",
+                    ".baaabb.....",
+                    "..bbbbbbbbbb",
+                    ".bbbbbbbbbbb",
+                    ".bbbbbbbbbbb",
+                    ".bbbbeewbbbb",
+                    ".bbbbeeebbbb",
+                    "bbbkkbbbbbll",
+                    "bbbbbbbbllll",
+                    ".bbbbbbbllle",
+                    "..bbbbbbllml",
+                    ".llllbbbllll",
+                    "..llllllllll",
+                    "....bbbllll.",
+                    "....bbblllll",
+                    "....bbbbblll",
+                    "....bbbbbbbb",
+                    "....dd...dd.",
+                    "....dd...dd.",
+                    "....dd...dd.",
+                    "............",
+                ],
+                back: &[Patch {
+                    x: 19,
+                    y: 2,
+                    rows: &[
+                        ".........aa.",
+                        "........aaaa",
+                        ".......aaaa.",
+                        "......aaaaa.",
+                        ".....baaaa..",
+                        "....bbbba...",
+                        "...bbbbb....",
+                        "..bbbbbb....",
+                        ".bbbbbbb....",
+                        ".bbbbbb.....",
+                        "bbbbbb......",
+                        "bbbbb.......",
+                        ".bbb........",
+                    ],
+                }],
+                front: &[],
+            },
+        ],
+    },
+    // 1 云絮
+    SpeciesArt {
+        hue: 205,
+        sat: 58,
+        accent: (340, 70),
+        forms: [
+            // 幼体
+            BodyDef {
+                half: &[
+                    "........", "...ll...", "..llbb..", ".lbbbbb.", ".bbbbbbb", "bbbewbbb",
+                    "bbbeebbb", "bkkbbbbb", "bbbbbbmm", ".bbbbbbb", "..bb.bbb", "........",
+                ],
+                back: &[],
+                front: &[],
+            },
+            // 少年
+            BodyDef {
+                half: &[
+                    "..........",
+                    ".....ll...",
+                    "....llbb.l",
+                    "...lbbbbbl",
+                    "..lbbbbbbb",
+                    "..bbbbbbbb",
+                    "..bbbewbbb",
+                    "..bbbeebbb",
+                    "ll.bkkbbbb",
+                    "lbb.bbbbmm",
+                    ".bb.bbbbbb",
+                    "....bbbbbb",
+                    ".....bb.bb",
+                    "..........",
+                ],
+                back: &[Patch {
+                    x: 13,
+                    y: 12,
+                    rows: &["..l..", ".lll.", "..ll.", "...l."],
+                }],
+                front: &[],
+            },
+            // 成年
+            BodyDef {
+                half: &[
+                    "............",
+                    "......ll....",
+                    ".....llbb.ll",
+                    "..ll.lbbbbbb",
+                    ".llbblbbbbbb",
+                    ".lbbbbbbbbbb",
+                    ".bbbbbbbbbbb",
+                    "..bbbbeewbbb",
+                    "..bbbbeeebbb",
+                    "ll.bbkkbbbbb",
+                    "lbb.bbbbbbmm",
+                    "lbbb.bbbbbbb",
+                    ".bbb.bbbbbbb",
+                    "......bbbbbb",
+                    ".......bb.bb",
+                    "............",
+                ],
+                back: &[Patch {
+                    x: 14,
+                    y: 12,
+                    rows: &[
+                        "....ll....",
+                        "...llll...",
+                        "..llll....",
+                        "...ll.....",
+                        "....l.....",
+                    ],
+                }],
+                front: &[],
+            },
+        ],
+    },
+    // 2 家猫
+    SpeciesArt {
+        hue: 30,
+        sat: 28,
+        accent: (350, 60),
+        forms: [
+            // 幼体
+            BodyDef {
+                half: &[
+                    "........", "........", ".b......", ".bab....", ".bbbbdbb", "bbbbbbbb",
+                    "bbbewbbb", "bbbeebbb", "bkkbbbnn", ".bbbbbml", "..bbllll", "..dbllll",
+                    "..bbllll", "..bb..bb", "........",
+                ],
+                back: &[Patch {
+                    x: 14,
+                    y: 1,
+                    rows: &[
+                        "....b", "...bb", "...b.", "..bb.", ".bb..", "bb...", "bb...", "b....",
+                    ],
+                }],
+                front: &[
+                    Patch {
+                        x: 0,
+                        y: 8,
+                        rows: &["WW", ".."],
+                    },
+                    Patch {
+                        x: 0,
+                        y: 10,
+                        rows: &["WW"],
+                    },
+                ],
+            },
+            // 少年
+            BodyDef {
+                half: &[
+                    "..........",
+                    "..........",
+                    "..b.......",
+                    "..bb......",
+                    ".babb.....",
+                    ".bbbbbbdbb",
+                    ".bbbbbbbbb",
+                    ".bbbewbbbb",
+                    ".bbbeebbbb",
+                    "bbkkbbbbnn",
+                    ".bbbbbbbml",
+                    "..bbbbllll",
+                    "...dbbllll",
+                    "...bbbllll",
+                    "...dbbllll",
+                    "...bbbllll",
+                    "...bb..bb.",
+                    "...bb..bb.",
+                    "..........",
+                ],
+                back: &[Patch {
+                    x: 18,
+                    y: 0,
+                    rows: &[
+                        ".....bb", "....bb.", "....b..", "...bb..", "..bb...", ".bb....",
+                        "bb.....", "bb.....", "b......",
+                    ],
+                }],
+                front: &[
+                    Patch {
+                        x: 0,
+                        y: 9,
+                        rows: &["WWW"],
+                    },
+                    Patch {
+                        x: 0,
+                        y: 11,
+                        rows: &["WWW"],
+                    },
+                ],
+            },
+            // 成年
+            BodyDef {
+                half: &[
+                    "...........",
+                    "...b.......",
+                    "...bb......",
+                    "..babb.....",
+                    "..bbbbbbddb",
+                    "..bbbbbbbbb",
+                    "..bbbeewbbb",
+                    "..bbbeeebbb",
+                    ".bbkkbbbbnn",
+                    "..bbbbbbbml",
+                    "...bbbbllll",
+                    "....bbbllll",
+                    "...dbbbllll",
+                    "..bbbbbllll",
+                    "..dbbbbllll",
+                    "..bbbbbllll",
+                    ".dbbbbbllll",
+                    ".bbbbbbllll",
+                    ".bbbbbbbbbb",
+                    ".bbbbbbbbbb",
+                    "..bbb...bbb",
+                    "...........",
+                ],
+                back: &[Patch {
+                    x: 21,
+                    y: 2,
+                    rows: &[
+                        "......bb", ".....bb.", ".....b..", "....bb..", "....b...", "...bb...",
+                        "..bb....", ".bb.....", "bb......", "bb......", "b.......",
+                    ],
+                }],
+                front: &[
+                    Patch {
+                        x: 0,
+                        y: 9,
+                        rows: &["WWW."],
+                    },
+                    Patch {
+                        x: 0,
+                        y: 11,
+                        rows: &["WWW."],
+                    },
+                ],
+            },
+        ],
+    },
+    // 3 家犬
+    SpeciesArt {
+        hue: 34,
+        sat: 58,
+        accent: (0, 70),
+        forms: [
+            // 幼体
+            BodyDef {
+                half: &[
+                    "........", "..bbbbbb", ".bbbbbbb", "dbbbbbbb", "ddbewbbb", "ddbeebbb",
+                    "ddkblllb", "dd.bllle", "...bllml", "..bbllll", "..bbllll", "..bb..bb",
+                    "........",
+                ],
+                back: &[Patch {
+                    x: 14,
+                    y: 5,
+                    rows: &["..bb", ".bb.", "bb..", "b..."],
+                }],
+                front: &[],
+            },
+            // 少年
+            BodyDef {
+                half: &[
+                    "..........",
+                    "...bbbbbbb",
+                    "..bbbbbbbb",
+                    ".dbbbbbbbb",
+                    "ddbbbbbbbb",
+                    "ddbbewbbbb",
+                    "ddbbeebbbb",
+                    "ddbkkblllb",
+                    "dd.bbbllle",
+                    "d...bbllml",
+                    "....aaaaaa",
+                    "...bbbllll",
+                    "...bbbllll",
+                    "...bbbllll",
+                    "...bb..bb.",
+                    "...bb..bb.",
+                    "..........",
+                ],
+                back: &[Patch {
+                    x: 18,
+                    y: 6,
+                    rows: &["...bb", "..bb.", ".bb..", "bb...", "b...."],
+                }],
+                front: &[],
+            },
+            // 成年
+            BodyDef {
+                half: &[
+                    "............",
+                    "....bbbbbbbb",
+                    "...bbbbbbbbb",
+                    "..dbbbbbbbbb",
+                    ".ddbbbbbbbbb",
+                    "dddbbbewbbbb",
+                    "dddbbbeebbbb",
+                    "dddbkkbblllb",
+                    "ddd.bbblllll",
+                    "dd...bblllle",
+                    "d....bbbllml",
+                    "....aaaaaaaa",
+                    "...lllbbllll",
+                    "..llllllllll",
+                    "...bbbllllll",
+                    "...bbbllllll",
+                    "...bbbbbllll",
+                    "...bbbbbbbbb",
+                    "...dd....dd.",
+                    "...dd....dd.",
+                    "............",
+                ],
+                back: &[Patch {
+                    x: 22,
+                    y: 6,
+                    rows: &[
+                        "....bbb", "...bbb.", "..bbb..", ".bbb...", "bbb....", "bb.....",
+                    ],
+                }],
+                front: &[],
+            },
+        ],
+    },
+    // 4 方块机器人
+    SpeciesArt {
+        hue: 215,
+        sat: 22,
+        accent: (186, 80),
+        forms: [
+            // 幼体
+            BodyDef {
+                half: &[
+                    ".......a", ".......b", "..bbbbbb", ".bbbbbbb", ".bllllll", ".blewlll",
+                    ".blewlll", ".bllllll", ".bbbbbmm", "..bbbbbb", "..ddbbbb", "...bb..b",
+                    "........",
+                ],
+                back: &[],
+                front: &[],
+            },
+            // 少年
+            BodyDef {
+                half: &[
+                    "......a...",
+                    "......b...",
+                    "...bbbbbbb",
+                    "..bbbbbbbb",
+                    "..bbllllll",
+                    "..blewllll",
+                    "..blewllll",
+                    "..bbllllll",
+                    "..bbbbbbmm",
+                    "....bbbbbb",
+                    "bb.bbbbbbb",
+                    "bbbbbbaabb",
+                    "bb.bbbaabb",
+                    "bb.bbbbbbb",
+                    "...ddbbbbb",
+                    "...bb...bb",
+                    "...bb...bb",
+                    "..........",
+                ],
+                back: &[],
+                front: &[],
+            },
+            // 成年
+            BodyDef {
+                half: &[
+                    ".....a......",
+                    ".....b......",
+                    "....bbbbbbbb",
+                    "...bbbbbbbbb",
+                    "...bblllllll",
+                    "...blewwllll",
+                    "...blewwllll",
+                    "...bblllllll",
+                    "...bbbbbbbbm",
+                    ".....bbbbbbb",
+                    "bbb.bbbbbbbb",
+                    "bbbbbbbbbbbb",
+                    "bbbbbbbaaabb",
+                    "bbb.bbbaaaab",
+                    "bbb.bbbaaaab",
+                    "bbb.bbbbbbbb",
+                    ".b..bbbbbbbb",
+                    "....ddbbbbbb",
+                    "....bbb...bb",
+                    "....bbb...bb",
+                    "...bbbb..bbb",
+                    "............",
+                ],
+                back: &[],
+                front: &[],
+            },
+        ],
+    },
+    // 5 悬浮无人机
+    SpeciesArt {
+        hue: 268,
+        sat: 26,
+        accent: (28, 95),
+        forms: [
+            // 幼体
+            BodyDef {
+                half: &[
+                    "..WWWWWW", ".......b", ".....bbb", "...bbbbb", "..bbbbbb", "..bbblll",
+                    "..bblaal", "..bblaaw", "..bbblll", "...bbbbb", ".....bbb", "........",
+                ],
+                back: &[],
+                front: &[],
+            },
+            // 少年
+            BodyDef {
+                half: &[
+                    "WWWWW.....",
+                    "..b.......",
+                    "..b.......",
+                    "..bb..bbbb",
+                    "...bbbbbbb",
+                    "....bbbbbb",
+                    "...bbbblll",
+                    "...bbblaal",
+                    "...bbblaaw",
+                    "...bbbblll",
+                    "....bbbbbb",
+                    "......bbbb",
+                    ".......a.a",
+                    "..........",
+                ],
+                back: &[Patch {
+                    x: 8,
+                    y: 12,
+                    rows: &["..bb..", ".bbbb.", "..bb.."],
+                }],
+                front: &[],
+            },
+            // 成年
+            BodyDef {
+                half: &[
+                    "...a........",
+                    "...b........",
+                    "WWWbWW......",
+                    "...b........",
+                    "...b..WWWWW.",
+                    "...bb...b...",
+                    "....bbbbbbbb",
+                    "...ddbbbbbbb",
+                    "..dd.bbbllll",
+                    ".dd..bbllaal",
+                    "dd...bbllaaw",
+                    ".dd..bbbllll",
+                    "..dd.bbbbbbb",
+                    "...ddbbbbbbb",
+                    "....bbbbbbbb",
+                    ".....bbb.bbb",
+                    "......a...a.",
+                    "............",
+                ],
+                back: &[],
+                front: &[],
+            },
+        ],
+    },
+    // 6 芽苗
+    SpeciesArt {
+        hue: 108,
+        sat: 52,
+        accent: (330, 75),
+        forms: [
+            // 幼体
+            BodyDef {
+                half: &[
+                    ".bb.....", "bbbb....", ".bbbb...", "...bbb.b", "....bbbb", "...bbbbb",
+                    "..bbbbbb", "..bewbbb", "..beebbb", "..bkkbbm", "...bbbbb", ".ttttttt",
+                    "tttttttt", "........",
+                ],
+                back: &[],
+                front: &[],
+            },
+            // 少年
+            BodyDef {
+                half: &[
+                    "..........",
+                    ".bb....aa.",
+                    "bbbb..aaaa",
+                    ".bbbb..aa.",
+                    "..bbbb..b.",
+                    "....bbbbbb",
+                    "...bbbbbbb",
+                    "..bbbbbbbb",
+                    "..bbewbbbb",
+                    "..bbeebbbb",
+                    "..bkkbbbbm",
+                    "...bbbbbbb",
+                    "..t.bbbbbb",
+                    ".ttttttttt",
+                    "tttttttttt",
+                    "..........",
+                ],
+                back: &[],
+                front: &[],
+            },
+            // 成年
+            BodyDef {
+                half: &[
+                    "..........aa",
+                    ".........aaa",
+                    "......aa.aac",
+                    ".....aaaaaaa",
+                    ".bb...aaaaaa",
+                    "bbbb...aaaaa",
+                    ".bbbb....bbb",
+                    "..bbbbbbbbbb",
+                    "...bbbbbbbbb",
+                    "..bbbbbbbbbb",
+                    ".bbbbbbbbbbb",
+                    ".bbbbeewbbbb",
+                    ".bbbbeeebbbb",
+                    ".bbbkkbbbbbm",
+                    "..bbbbbbbbbb",
+                    "...bbbbbbbbb",
+                    "..tt.bbbbbbb",
+                    ".ttttttttttt",
+                    "tttttttttttt",
+                    "............",
+                ],
+                back: &[],
+                front: &[],
+            },
+        ],
+    },
+    // 7 余火
+    SpeciesArt {
+        hue: 24,
+        sat: 95,
+        accent: (48, 100),
+        forms: [
+            // 幼体
+            BodyDef {
+                half: &[
+                    ".......a", "......aa", ".....aab", "....aabb", "...abbbb", "..bbbbbb",
+                    ".bbbbbbb", ".bbewbbb", ".bbeebbb", ".bkkbbbm", "..bbllll", "..bbllll",
+                    "...bb.bb", "........",
+                ],
+                back: &[],
+                front: &[],
+            },
+            // 少年
+            BodyDef {
+                half: &[
+                    "...a......",
+                    "...aa...aa",
+                    "...aab.aab",
+                    "....abbabb",
+                    "...aabbbbb",
+                    "...abbbbbb",
+                    "..bbbbbbbb",
+                    ".bbbbbbbbb",
+                    ".bbbewbbbb",
+                    ".bbbeebbbb",
+                    "bbbkkbbbbm",
+                    "bb.bbbllll",
+                    "...bbbllll",
+                    "...bbbllll",
+                    "...bb..bb.",
+                    "...bb..bb.",
+                    "..........",
+                ],
+                back: &[],
+                front: &[],
+            },
+            // 成年
+            BodyDef {
+                half: &[
+                    "..a.........",
+                    "..aa....a...",
+                    "..aab..aa..a",
+                    "...aab.aab.a",
+                    "...aabbaabaa",
+                    "....abbbbbab",
+                    "...aabbbbbbb",
+                    "...abbbbbbbb",
+                    "..bbbbbbbbbb",
+                    ".bbbbbbbbbbb",
+                    ".bbbbeewbbbb",
+                    ".bbbbeeebbbb",
+                    "bbbbkkbbbbbm",
+                    "bbb.bbbbllll",
+                    "bb..bbbbllll",
+                    "....bbbbllll",
+                    "....bbbbllll",
+                    "....bbbbbbbb",
+                    "....bbb...bb",
+                    "....bbb...bb",
+                    "............",
+                ],
+                back: &[],
+                front: &[],
+            },
+        ],
+    },
+];
