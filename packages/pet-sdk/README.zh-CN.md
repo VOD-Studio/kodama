@@ -102,7 +102,7 @@ pet.dispose(); // 停止绘制并清空区域
 
 宠物只在 `region` 内绘制，只用保存/恢复光标与绝对定位；不读取 stdin、不进入备用屏、不隐藏光标、不修改终端模式，输出不是 TTY 时什么都不做。宿主负责让自己的输出避开该区域（例如设置滚动区域），并在退出前调用 `dispose()`。
 
-需要独立运行的终端宠物时，请改用原生的 [`pet-cli`](https://github.com/VOD-Studio/kodama/blob/main/crates/pet-cli/README.zh-CN.md)。
+需要独立运行的终端宠物时，请改用原生的 [`pet-cli`](https://github.com/VOD-Studio/kodama/blob/main/crates/runtimes/pet-cli/README.zh-CN.md)。
 
 ## 版本
 

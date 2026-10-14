@@ -9,7 +9,7 @@
 **本机。** 需要安装：
 
 - Rust stable，含 `rustfmt`、`clippy`，以及 `wasm32-unknown-unknown`、`thumbv7em-none-eabihf` 两个目标
-- `wasm-bindgen-cli` 0.2.129，必须与 `crates/pet-wasm` 锁定的版本一致（`make check-versions` 校验）
+- `wasm-bindgen-cli` 0.2.129，必须与 `crates/runtimes/pet-wasm` 锁定的版本一致（`make check-versions` 校验）
 - Node 22 及以上、pnpm 10
 - Python 3（真实 TTY 测试用）
 - Docker：只有 `test-pg`、`e2e-pg` 与 `image` 在没有现成 Postgres 时需要
@@ -72,7 +72,7 @@ make lint test       # 或：make docker-ci
 
 两项检查配合使用：**PR title** 是必需检查，校验 PR 标题；**Commit messages** 是提示性检查，校验每个提交，它失败时请用 squash 合并。
 
-Dependabot 每月开分组的依赖更新 PR，标题前缀为 `chore(deps)`。如果某次更新修复了随产物发布的依赖漏洞，合并前把标题改成 `fix(deps): …`，以便触发发版。`wasm-bindgen` 不在 Dependabot 范围内：需要手动在 `crates/pet-wasm/Cargo.toml`、各工作流与 `Dockerfile.dev` 中同时升级，版本不一致时 `make check-versions` 会报错。
+Dependabot 每月开分组的依赖更新 PR，标题前缀为 `chore(deps)`。如果某次更新修复了随产物发布的依赖漏洞，合并前把标题改成 `fix(deps): …`，以便触发发版。`wasm-bindgen` 不在 Dependabot 范围内：需要手动在 `crates/runtimes/pet-wasm/Cargo.toml`、各工作流与 `Dockerfile.dev` 中同时升级，版本不一致时 `make check-versions` 会报错。
 
 ## 发版
 

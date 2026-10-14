@@ -18,7 +18,7 @@ An electronic pet that lives in your site. Pets are born, need care, grow, evolv
 | You want to | Use |
 |---|---|
 | Show and raise a pet in a web app, or embed one in a Node terminal tool | [`@violetjs/pet`](packages/pet-sdk/README.md) on npm |
-| Run a pet in your terminal, or drive the rules from scripts and agents | [`pet-cli`](crates/pet-cli/README.md) from [GitHub Releases](https://github.com/VOD-Studio/kodama/releases) |
+| Run a pet in your terminal, or drive the rules from scripts and agents | [`pet-cli`](crates/runtimes/pet-cli/README.md) from [GitHub Releases](https://github.com/VOD-Studio/kodama/releases) |
 | Share one pet per account between web and CLI | The pet service image `ghcr.io/vod-studio/pet-service` ([docs](docs/service.md)) |
 
 ```sh
@@ -29,13 +29,13 @@ npm install @violetjs/pet
 
 | Part | Location | Notes |
 |---|---|---|
-| Rules core | `crates/pet-core` | Integer-only, no clock (time is passed in); birth, life, growth, evolution, rewards; one JSON entry point, `execute` |
-| Art | `crates/pet-term`, `catalog/` | 8 species; terminal character art and pixel art |
-| Storage | `crates/pet-store` | SQLite and Postgres behind one storage contract and one test suite |
-| Service | `crates/pet-service` | Holds the authoritative state of account pets |
-| Certificates | `crates/pet-issuer` | Signs birth certificates; verification stays in the core |
-| CLI | `crates/pet-cli` | `pet-cli live`, `exec`, `capabilities` |
-| WebAssembly | `crates/pet-wasm` | The wasm-bindgen wrapper the SDK loads |
+| Rules core | `crates/core/pet-core` | Integer-only, no clock (time is passed in); birth, life, growth, evolution, rewards; one JSON entry point, `execute` |
+| Art | `crates/core/pet-term`, `catalog/` | 8 species; terminal character art and pixel art |
+| Storage | `crates/service/pet-store` | SQLite and Postgres behind one storage contract and one test suite |
+| Service | `crates/service/pet-service` | Holds the authoritative state of account pets |
+| Certificates | `crates/service/pet-issuer` | Signs birth certificates; verification stays in the core |
+| CLI | `crates/runtimes/pet-cli` | `pet-cli live`, `exec`, `capabilities` |
+| WebAssembly | `crates/runtimes/pet-wasm` | The wasm-bindgen wrapper the SDK loads |
 | SDK | `packages/pet-sdk` | `@violetjs/pet`: WebAssembly, types, schema, terminal embedding |
 
 [docs/architecture.md](docs/architecture.md) explains the layers, the dependency rules, how a command flows through the system, and how each guarantee is checked.

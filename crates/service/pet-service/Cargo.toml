@@ -6,9 +6,9 @@ publish.workspace = true
 license.workspace = true
 
 [dependencies]
-pet-core = { path = "../pet-core" }
-pet-store = { path = "../pet-store" }
-pet-issuer = { path = "../pet-issuer" }
+pet-core = { workspace = true }
+pet-store = { workspace = true }
+pet-issuer = { workspace = true }
 axum = "0.8"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
 serde = { version = "1", features = ["derive"] }

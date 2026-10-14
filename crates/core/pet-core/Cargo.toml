@@ -7,7 +7,7 @@ license.workspace = true
 
 [dependencies]
 schemars = { version = "1", optional = true }
-pet-term = { path = "../pet-term" }
+pet-term = { workspace = true }
 sha2 = { workspace = true }
 hmac = { workspace = true }
 serde = { workspace = true }

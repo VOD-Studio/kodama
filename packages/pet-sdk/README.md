@@ -102,7 +102,7 @@ pet.dispose(); // stops drawing and clears the region
 
 The pet draws only inside `region`, using save and restore cursor plus absolute positioning. It never reads stdin, switches to the alternate screen, hides the cursor or changes terminal modes, and it does nothing when the stream is not a TTY. Your tool keeps its own output out of the region, for example with a scroll region, and calls `dispose()` before it exits.
 
-For a standalone terminal pet, use the native [`pet-cli`](https://github.com/VOD-Studio/kodama/blob/main/crates/pet-cli/README.md) instead.
+For a standalone terminal pet, use the native [`pet-cli`](https://github.com/VOD-Studio/kodama/blob/main/crates/runtimes/pet-cli/README.md) instead.
 
 ## Versions
 

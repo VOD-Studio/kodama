@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "素材清单。结构、动作覆盖与许可由 crates/pet-term/tests/catalog.rs 校验；声明为 ready 的画风必须真有实现。",
+  "note": "素材清单。结构、动作覆盖与许可由 crates/core/pet-term/tests/catalog.rs 校验；声明为 ready 的画风必须真有实现。",
   "required_actions": [
     "idle",
     "blink",

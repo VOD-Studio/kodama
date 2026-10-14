@@ -1,13 +1,13 @@
 [package]
-name = "pet-issuer"
+name = "pet-cli"
 edition.workspace = true
 version.workspace = true
 publish.workspace = true
 license.workspace = true
 
 [dependencies]
-pet-core = { path = "../pet-core" }
-ed25519-dalek = { version = "2", features = ["std"] }
-
-[dev-dependencies]
+pet-core = { workspace = true }
+pet-term = { workspace = true }
+crossterm = "0.29"
+signal-hook = "0.3"
 serde_json = "1"

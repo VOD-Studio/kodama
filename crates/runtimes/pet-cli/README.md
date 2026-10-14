@@ -1,6 +1,6 @@
 # pet-cli
 
-English | [简体中文](https://github.com/VOD-Studio/kodama/blob/main/crates/pet-cli/README.zh-CN.md)
+English | [简体中文](https://github.com/VOD-Studio/kodama/blob/main/crates/runtimes/pet-cli/README.zh-CN.md)
 
 The native command-line entry to [kodama](https://github.com/VOD-Studio/kodama), the electronic pet that lives in your site. It runs the same Rust rules core as the browser and Node SDK, so the same input produces byte-identical output on every platform.
 
