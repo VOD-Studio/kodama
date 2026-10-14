@@ -13,6 +13,17 @@
 
 > **出生协议尚未经过独立安全评审**，评审通过前不要对外宣称「正式可验证发行」。已知限制见 [docs/operations/service.md](docs/operations/service.md) 与 [docs/design/birth-protocol.md](docs/design/birth-protocol.md)。
 
+## 宠物能做什么
+
+- **照料与生命**：饱食、精力、情绪、生病与药品。离开期间的时间在回来时结算，离开再久回来最多生病，不会直接死亡；在看着的时候持续失养才会死亡，逝去的宠物保留为纪念，新领养是新个体。
+- **成长与进化**：经验与等级，随照料方式缓慢漂移的性格，由主人选择的进化：8 个物种在 3 个阶段各有一副身体，按所选分支共 16 种外形。
+- **装扮与场景**：2 到 10 级每升一级解锁一件：眼镜、围巾、帽子、背包、披风、晴日草地、星夜。装扮只改变画面，不改变任何数值。
+- **探险**：带着一个主题出门 4、12 或 24 小时，带回经验与一件见闻。
+- **好友**：用邀请码成为好友，互相拜访、一起探险；账号之间从不转移任何资源。
+- **来自站点的奖励**：账号模式下，站点里的活动（阅读、评论、发布）按每日上限喂养宠物；本地模式下，每日口粮起同样的作用，离线、无需账号。
+
+同一套像素画在网页画布、终端（半格字符）与 CLI 里画法相同。
+
 ## 使用
 
 | 想要 | 使用 |
@@ -29,14 +40,14 @@ npm install @violetjs/pet
 
 | 部分 | 位置 | 说明 |
 |---|---|---|
-| 规则核心 | `crates/core/pet-core` | 只用整数，不读系统时钟（时间由调用方传入）；出生、生命、成长、进化、奖励；单一 JSON 入口 `execute` |
-| 素材 | `crates/core/pet-term`、`catalog/` | 8 个物种；终端字符画与像素画两种画风 |
+| 规则核心 | `crates/core/pet-core` | 只用整数，不读系统时钟（时间由调用方传入）；出生、生命、成长、进化、奖励、装扮、探险；单一 JSON 入口 `execute` |
+| 素材 | `crates/core/pet-term`、`assets/catalog/` | 8 个物种 × 16 种外形、装扮与场景；像素画、终端半格画与字符画 |
 | 存储 | `crates/service/pet-store` | SQLite 与 Postgres 共用一份存储契约与一套契约测试 |
-| 服务 | `crates/service/pet-service` | 持有账号宠物的唯一权威状态 |
+| 服务 | `crates/service/pet-service` | 持有账号宠物的唯一权威状态：领取、CLI 的设备登录、活动奖励、纪念、好友 |
 | 证书 | `crates/service/pet-issuer` | 签发出生证书；核验留在核心里 |
-| CLI | `crates/runtimes/pet-cli` | `pet-cli live`、`exec`、`capabilities` |
+| CLI | `crates/runtimes/pet-cli` | `pet-cli live`、`exec`、`capabilities`；账号宠物的 `login`、`status`、`act` 与 `live --account` |
 | WebAssembly | `crates/runtimes/pet-wasm` | SDK 加载的 wasm-bindgen 包装 |
-| SDK | `packages/pet-sdk` | `@violetjs/pet`：WebAssembly、类型、schema、终端嵌入 |
+| SDK | `packages/pet-sdk` | `@violetjs/pet`：WebAssembly、类型、schema、画布呈现、终端嵌入、离线的本地模式 |
 
 分层、依赖规则、命令如何流经系统以及每项保证如何检查，见 [docs/architecture.zh-CN.md](docs/architecture.zh-CN.md)。
 
