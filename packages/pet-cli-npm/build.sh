@@ -11,12 +11,12 @@ cargo build --release -q -p pet-cli --manifest-path "$HERE/../../Cargo.toml"
 rm -rf "$OUT/main" "$OUT/platform" && mkdir -p "$OUT/main/bin" "$OUT/platform/bin"
 cp "$HERE/../../target/release/pet-cli" "$OUT/platform/bin/pet-cli"
 cat > "$OUT/platform/package.json" <<JSON
-{"name":"@violetjs/pet-cli-$KEY","version":"$V","license":"MIT","os":["$OS"],"cpu":["$ARCH"],"bin":{"pet-cli-native":"bin/pet-cli"},"files":["bin","LICENSE"]}
+{"name":"@violetjs/pet-cli-$KEY","version":"$V","license":"MIT","repository":{"type":"git","url":"git+https://github.com/VOD-Studio/kodama.git","directory":"packages/pet-cli-npm"},"os":["$OS"],"cpu":["$ARCH"],"bin":{"pet-cli-native":"bin/pet-cli"},"files":["bin","LICENSE"]}
 JSON
 cp "$HERE/../../LICENSE" "$OUT/platform/LICENSE"
 cp "$HERE/launcher.cjs" "$OUT/main/bin/pet-cli.cjs"
 cat > "$OUT/main/package.json" <<JSON
-{"name":"@violetjs/pet-cli","version":"$V","license":"MIT","bin":{"pet-cli":"bin/pet-cli.cjs"},"files":["bin","LICENSE"],
+{"name":"@violetjs/pet-cli","version":"$V","license":"MIT","repository":{"type":"git","url":"git+https://github.com/VOD-Studio/kodama.git","directory":"packages/pet-cli-npm"},"bin":{"pet-cli":"bin/pet-cli.cjs"},"files":["bin","LICENSE"],
  "optionalDependencies":{
   "@violetjs/pet-cli-darwin-arm64":"$V","@violetjs/pet-cli-linux-x64":"$V","@violetjs/pet-cli-linux-arm64":"$V"}}
 JSON

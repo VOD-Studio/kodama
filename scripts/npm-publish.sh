@@ -8,6 +8,16 @@ MODE=${2:?usage: npm-publish.sh <pkg.tgz> <dry-run|publish>}
 NAME=$(tar -xzOf "$TGZ" package/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).name")
 VERSION=$(tar -xzOf "$TGZ" package/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
 
+# npm 的来源证明(provenance)要求 repository 与构建仓库一致,缺失会在上传时才报 E422,这里提前拦下
+REPO_URL=$(tar -xzOf "$TGZ" package/package.json | node -p "(JSON.parse(require('fs').readFileSync(0,'utf8')).repository||{}).url||''")
+case "$REPO_URL" in
+  *github.com/VOD-Studio/kodama*) ;;
+  *)
+    echo "$NAME@$VERSION 的 package.json 缺少指向 VOD-Studio/kodama 的 repository.url(当前: '$REPO_URL')" >&2
+    exit 1
+    ;;
+esac
+
 case "$MODE" in
   dry-run)
     echo "dry-run: $NAME@$VERSION"
