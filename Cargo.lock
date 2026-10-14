@@ -809,7 +809,7 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "pet-cli"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "crossterm",
  "pet-core",
@@ -820,7 +820,7 @@ dependencies = [
 
 [[package]]
 name = "pet-core"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ed25519-dalek",
  "hmac 0.12.1",
@@ -833,7 +833,7 @@ dependencies = [
 
 [[package]]
 name = "pet-issuer"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ed25519-dalek",
  "pet-core",
@@ -842,7 +842,7 @@ dependencies = [
 
 [[package]]
 name = "pet-schema"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "pet-core",
  "pet-term",
@@ -852,7 +852,7 @@ dependencies = [
 
 [[package]]
 name = "pet-service"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "axum",
  "base64",
@@ -873,7 +873,7 @@ dependencies = [
 
 [[package]]
 name = "pet-store"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "pet-core",
  "postgres",
@@ -885,7 +885,7 @@ dependencies = [
 
 [[package]]
 name = "pet-term"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "schemars",
  "serde",
@@ -894,7 +894,7 @@ dependencies = [
 
 [[package]]
 name = "pet-wasm"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "pet-core",
  "wasm-bindgen",
