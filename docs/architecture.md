@@ -246,7 +246,7 @@ Each open issue already has a place in this layout. A feature adds modules where
 | #10 Account service | — | — | **Login sessions done**: `session.rs` (rotating refresh tokens, reuse revokes), `record.rs` (small records on the storage contract); to do: connection pool, rate limits, freezing the storage contract signatures | — |
 | #12 Activity and rewards | `grant` (exists) | — | `routes/activity.rs`: durable inbox, deduplication, per-world caps | Integrator connectors send signed events |
 | #13 Browser local mode | Unchanged | — | The contract vectors (`tests/fixtures/store-contract.json`) also run against SQLite and Postgres | **Done** ([design](design/local-mode.md)): `@violetjs/pet/local` and `/store`, an IndexedDB store, a daily ration and activity rewards, multiple tabs |
-| #15 CLI accounts | — | — | **Device authorization done**: `device.rs` and `routes/device.rs` ([details](operations/service.md)) | `pet-cli`: `account` module talking HTTP; no service crate linked |
+| #15 CLI accounts | — | — | **Done**: device authorization in `device.rs` and `routes/device.rs` ([details](operations/service.md)); projections carry the appearance | **Done**: `pet-cli`'s `account/` (login, credentials, automatic refresh, `live --account`), talking HTTP; no service crate linked |
 | #16 Skill | Capability catalog (exists) | — | — | `packages/pet-sdk/skill/`, generated parts from the catalog |
 | #17 Outfits and home | `rules/outfit.rs`: slots and body compatibility | Item art and anchors; `assets/catalog/items.json` | `routes/outfit.rs` | Rendering layers in the SDK |
 | #18 Expeditions | `rules/expedition.rs`: its own RNG channel | Souvenir art | `routes/expeditions.rs`, daily caps | — |
