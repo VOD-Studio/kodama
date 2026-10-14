@@ -59,7 +59,8 @@
           "path": "Cargo.lock",
           "jsonpath": "$.package[?(@.name=='pet-service')].version"
         }
-      ]
+      ],
+      "initial-version": "0.1.0"
     }
   }
 }
