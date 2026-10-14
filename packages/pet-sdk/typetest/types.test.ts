@@ -35,3 +35,14 @@ assert<Equal<ErrorBody["code"], ErrorCode>>();
 const bad: ErrorCode = "oops";
 const good: ErrorCode = "no_food";
 void bad; void good;
+
+// 网页渲染：分支与姿态必须是线上协议里的取值
+import { mountPet } from "../src/web";
+declare const canvas: HTMLCanvasElement;
+const mounted = mountPet(canvas, { pet: { species: 0, genes: [1, 2, 3, 4, 5, 6, 7, 8], lineage: ["curious", "sage"] }, pose: () => "idle" });
+mounted.setPose("sleep");
+mounted.dispose();
+// @ts-expect-error 未知的进化分支
+mountPet(canvas, { pet: { species: 0, genes: [], lineage: ["dragon"] } });
+// @ts-expect-error 未知的姿态
+mountPet(canvas, { pet: { species: 0, genes: [] }, pose: "fly" });
