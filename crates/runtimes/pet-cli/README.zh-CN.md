@@ -7,6 +7,7 @@
 - `pet-cli live`：在终端里动起来的宠物。按 `q`、Ctrl+C 或收到 SIGTERM 时恢复屏幕、光标与终端模式。
 - `pet-cli exec`：标准输入每行一个 JSON 命令，标准输出每行一个 JSON 结果，供脚本与 agent 调用。
 - `pet-cli capabilities`：机器可读的能力目录，与 SDK 的 schema 同源。
+- `pet-cli login`、`status`、`act`、`live --account`：宠物服务上的账号宠物，与网页上是同一只。
 
 ## 安装
 
@@ -62,7 +63,27 @@ pet-cli --version                # 发布版本与规则版本
 | 区域设置不是 UTF-8 | 只输出 ASCII |
 | 终端尺寸变化 | 画面随新尺寸调整，极小的终端也不会崩溃 |
 
-只有无法捕获的终止（SIGKILL）会让终端停留在备用屏，此时执行 `reset` 即可。
+只有无法捕获的终止（SIGKILL）会让终端停留在备用屏，光标隐藏、输入处于原始模式；此时执行 `reset` 即可。
+
+## 账号模式
+
+在接入了 kodama 的站点的宠物服务上登录一次后，CLI 与网页读写的是同一只宠物、同一份库存，两端都不各存一份。
+
+```sh
+pet-cli login --service https://pet.example.com   # 也可以设置 PET_SERVICE
+# 终端提示：打开这个页面并确认用户码 BCDF-GHJK：https://example.com/pet/device?code=BCDF-GHJK
+pet-cli status                        # 一行 JSON：你的宠物
+pet-cli act feed                      # feed|rest|play|heal|wait|evolve BRANCH
+pet-cli act feed --request-id tap-1   # 用同一个请求标识重试，返回第一次的结果
+pet-cli live --account                # 动画；f 喂食，p 玩耍，r 休息，h 治疗，q 退出
+pet-cli logout                        # 撤销会话并删除保存的凭据
+```
+
+- 登录用设备授权：打开 `login` 打印的页面，登录站点后确认用户码。确认前核对页面上的用户码与终端显示的一致。
+- 每个命令在标准输出打印一行 JSON 结果（`{"ok":true,"value":…}` 或 `{"ok":false,"code":…,"message":…}`），提示写到标准错误；成功退出码 0，失败 1，用法错误 2。`not_logged_in` 表示需要先 `pet-cli login`。
+- 凭据保存在 `~/.config/kodama/credentials.json`（或 `$XDG_CONFIG_HOME/kodama`、`$PET_CONFIG_DIR`），只有本人可读。令牌会自动刷新，可以同时运行多个 `pet-cli`。
+- HTTPS 使用操作系统信任的根证书，公司代理安装的根证书也能生效。
+- 可以在站点的「已登录的设备」里登出 CLI，之后需要重新 `login`。
 
 ## 嵌入到自己的工具
 

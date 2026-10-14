@@ -7,6 +7,7 @@ The native command-line entry to [kodama](https://github.com/VOD-Studio/kodama),
 - `pet-cli live`: an animated pet in your terminal. It restores the screen, cursor and terminal mode on `q`, Ctrl+C and SIGTERM.
 - `pet-cli exec`: one JSON command per line on stdin, one JSON result per line on stdout. Use it from scripts and agents.
 - `pet-cli capabilities`: the machine-readable capability catalog. It comes from the same source as the SDK schema.
+- `pet-cli login`, `status`, `act`, `live --account`: your account pet from a pet service, the same pet you see on the web.
 
 ## Install
 
@@ -62,7 +63,27 @@ pet-cli --version                # release version and rules version
 | Locale is not UTF-8 | ASCII only |
 | Terminal is resized | The frame follows the new size; very small terminals do not crash |
 
-Only uncatchable termination (SIGKILL) can leave the terminal in the alternate screen; run `reset` if that happens.
+Only uncatchable termination (SIGKILL) can leave the terminal in the alternate screen with the cursor hidden and input in raw mode; run `reset` if that happens.
+
+## Account mode
+
+Sign in once to the pet service of a site that hosts kodama. The CLI and the web then read and change the same pet with the same inventory; neither keeps its own copy.
+
+```sh
+pet-cli login --service https://pet.example.com   # or set PET_SERVICE
+# To sign in, open this page and confirm the code BCDF-GHJK: https://example.com/pet/device?code=BCDF-GHJK
+pet-cli status                        # your pet as one JSON line
+pet-cli act feed                      # feed|rest|play|heal|wait|evolve BRANCH
+pet-cli act feed --request-id tap-1   # retrying the same id replays the first result
+pet-cli live --account                # animated; f feed, p play, r rest, h heal, q quit
+pet-cli logout                        # revoke the session and delete the saved credentials
+```
+
+- Login uses device authorization: open the page that `login` prints, sign in to the site and confirm the code. Check that the code matches what your terminal shows.
+- Each command prints one JSON result on stdout, `{"ok":true,"value":…}` or `{"ok":false,"code":…,"message":…}`, and hints on stderr. It exits 0 on success, 1 on failure and 2 on a usage error. `not_logged_in` means run `pet-cli login`.
+- Credentials are saved in `~/.config/kodama/credentials.json` (or `$XDG_CONFIG_HOME/kodama`, or `$PET_CONFIG_DIR`), readable only by you. Tokens refresh on their own. Several `pet-cli` processes can run at once.
+- HTTPS uses your operating system's trusted certificates, including roots that a company proxy installs.
+- You can sign the CLI out from the site's list of signed-in devices; it then needs `login` again.
 
 ## Embedding instead
 
