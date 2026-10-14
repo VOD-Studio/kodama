@@ -9,7 +9,7 @@ You can work either with a local toolchain or with only Docker.
 **Local.** Install:
 
 - Rust stable with `rustfmt`, `clippy` and the targets `wasm32-unknown-unknown` and `thumbv7em-none-eabihf`
-- `wasm-bindgen-cli` 0.2.129. It must match the version pinned in `crates/pet-wasm`, and `make check-versions` verifies that.
+- `wasm-bindgen-cli` 0.2.129. It must match the version pinned in `crates/runtimes/pet-wasm`, and `make check-versions` verifies that.
 - Node 22 or later and pnpm 10
 - Python 3, for the real-TTY tests
 - Docker, only for `test-pg`, `e2e-pg` and `image` when you have no Postgres of your own
@@ -72,7 +72,7 @@ Add `!` before the colon for a breaking change, for example `feat(sdk)!: …`. B
 
 Two checks support this. **PR title** is required and validates the title. **Commit messages** is advisory and validates every commit; when it fails, use squash.
 
-Dependabot opens grouped update pull requests monthly with `chore(deps)` titles. If an update fixes a vulnerability in something that ships, retitle it `fix(deps): …` before merging so that it triggers a release. `wasm-bindgen` is excluded from Dependabot: update it by hand in `crates/pet-wasm/Cargo.toml`, the workflows and `Dockerfile.dev` together. `make check-versions` catches any mismatch.
+Dependabot opens grouped update pull requests monthly with `chore(deps)` titles. If an update fixes a vulnerability in something that ships, retitle it `fix(deps): …` before merging so that it triggers a release. `wasm-bindgen` is excluded from Dependabot: update it by hand in `crates/runtimes/pet-wasm/Cargo.toml`, the workflows and `Dockerfile.dev` together. `make check-versions` catches any mismatch.
 
 ## Releases
 

@@ -174,9 +174,9 @@ Other open items are tracked in the PRD and in [service](service.md) ("Known lim
 
 | Change | Touch |
 |---|---|
-| A rule (growth, illness, rewards) | `crates/pet-core/src/{life,growth}.rs` and their tests; keep `make three-end` green; a change to existing results needs a new `rules_version` |
+| A rule (growth, illness, rewards) | `crates/core/pet-core/src/{life,growth}.rs` and their tests; keep `make three-end` green; a change to existing results needs a new `rules_version` |
 | A new command | `Command` and `execute` in `pet-core`, register it in `CAPABILITIES`, then `make schema` |
-| Art for a species or pose | `crates/pet-term`, `catalog/species.json`; preview with `make preview` |
+| Art for a species or pose | `crates/core/pet-term`, `catalog/species.json`; preview with `make preview` |
 | A storage backend | Implement `Store` in `pet-store` and run the shared contract tests against it |
-| An HTTP endpoint | `crates/pet-service/src/lib.rs` (router) and `tests/api.rs`; document it in [service](service.md) |
+| An HTTP endpoint | `crates/service/pet-service/src/lib.rs` (router) and `tests/api.rs`; document it in [service](service.md) |
 | A supported CLI platform | The `cli` matrix in `.github/workflows/package.yml`, the CLI README tables, and [distribution](distribution.md) |

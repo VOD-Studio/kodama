@@ -4,7 +4,7 @@ use serde_json::Value;
 use std::collections::BTreeSet;
 
 fn manifest() -> Value {
-    serde_json::from_str(include_str!("../../../catalog/species.json")).unwrap()
+    serde_json::from_str(include_str!("../../../../catalog/species.json")).unwrap()
 }
 
 fn rows(species: u8, pose: &str, t: u64, w: u16) -> Vec<String> {

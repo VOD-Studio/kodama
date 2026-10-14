@@ -174,9 +174,9 @@ CAPABILITIES（pet-core::caps）────────────────
 
 | 改动 | 涉及 |
 |---|---|
-| 规则（成长、病程、奖励） | `crates/pet-core/src/{life,growth}.rs` 及其测试；保持 `make three-end` 通过；改变既有结果需要新的 `rules_version` |
+| 规则（成长、病程、奖励） | `crates/core/pet-core/src/{life,growth}.rs` 及其测试；保持 `make three-end` 通过；改变既有结果需要新的 `rules_version` |
 | 新命令 | `pet-core` 的 `Command` 与 `execute`，在 `CAPABILITIES` 登记，然后 `make schema` |
-| 物种或姿态的画面 | `crates/pet-term`、`catalog/species.json`；用 `make preview` 预览 |
+| 物种或姿态的画面 | `crates/core/pet-term`、`catalog/species.json`；用 `make preview` 预览 |
 | 存储后端 | 在 `pet-store` 实现 `Store`，并对它运行共享的契约测试 |
-| HTTP 接口 | `crates/pet-service/src/lib.rs`（路由）与 `tests/api.rs`；在[服务说明](service.md)里记录 |
+| HTTP 接口 | `crates/service/pet-service/src/lib.rs`（路由）与 `tests/api.rs`；在[服务说明](service.md)里记录 |
 | CLI 支持的平台 | `.github/workflows/package.yml` 的 `cli` 矩阵、CLI README 的平台表、[分发](distribution.md) |

@@ -18,7 +18,7 @@
 | 想要 | 使用 |
 |---|---|
 | 在网页里展示、养成宠物，或嵌入 Node 终端工具 | npm 上的 [`@violetjs/pet`](packages/pet-sdk/README.zh-CN.md) |
-| 在终端里养一只，或从脚本、agent 调用规则 | [GitHub Releases](https://github.com/VOD-Studio/kodama/releases) 里的 [`pet-cli`](crates/pet-cli/README.zh-CN.md) |
+| 在终端里养一只，或从脚本、agent 调用规则 | [GitHub Releases](https://github.com/VOD-Studio/kodama/releases) 里的 [`pet-cli`](crates/runtimes/pet-cli/README.zh-CN.md) |
 | 同一账号在网页与 CLI 共享一只宠物 | 宠物服务镜像 `ghcr.io/vod-studio/pet-service`（[说明](docs/service.md)） |
 
 ```sh
@@ -29,13 +29,13 @@ npm install @violetjs/pet
 
 | 部分 | 位置 | 说明 |
 |---|---|---|
-| 规则核心 | `crates/pet-core` | 只用整数，不读系统时钟（时间由调用方传入）；出生、生命、成长、进化、奖励；单一 JSON 入口 `execute` |
-| 素材 | `crates/pet-term`、`catalog/` | 8 个物种；终端字符画与像素画两种画风 |
-| 存储 | `crates/pet-store` | SQLite 与 Postgres 共用一份存储契约与一套契约测试 |
-| 服务 | `crates/pet-service` | 持有账号宠物的唯一权威状态 |
-| 证书 | `crates/pet-issuer` | 签发出生证书；核验留在核心里 |
-| CLI | `crates/pet-cli` | `pet-cli live`、`exec`、`capabilities` |
-| WebAssembly | `crates/pet-wasm` | SDK 加载的 wasm-bindgen 包装 |
+| 规则核心 | `crates/core/pet-core` | 只用整数，不读系统时钟（时间由调用方传入）；出生、生命、成长、进化、奖励；单一 JSON 入口 `execute` |
+| 素材 | `crates/core/pet-term`、`catalog/` | 8 个物种；终端字符画与像素画两种画风 |
+| 存储 | `crates/service/pet-store` | SQLite 与 Postgres 共用一份存储契约与一套契约测试 |
+| 服务 | `crates/service/pet-service` | 持有账号宠物的唯一权威状态 |
+| 证书 | `crates/service/pet-issuer` | 签发出生证书；核验留在核心里 |
+| CLI | `crates/runtimes/pet-cli` | `pet-cli live`、`exec`、`capabilities` |
+| WebAssembly | `crates/runtimes/pet-wasm` | SDK 加载的 wasm-bindgen 包装 |
 | SDK | `packages/pet-sdk` | `@violetjs/pet`：WebAssembly、类型、schema、终端嵌入 |
 
 分层、依赖规则、命令如何流经系统以及每项保证如何检查，见 [docs/architecture.zh-CN.md](docs/architecture.zh-CN.md)。

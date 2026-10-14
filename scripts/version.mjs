@@ -19,7 +19,7 @@ function read() {
 function wasmBindgen() {
 	const at = (f) => fs.readFileSync(path.join(root, f), "utf8");
 	const found = {
-		"crates/pet-wasm/Cargo.toml": at("crates/pet-wasm/Cargo.toml").match(/^wasm-bindgen\s*=\s*"=([^"]+)"/m)?.[1],
+		"crates/runtimes/pet-wasm/Cargo.toml": at("crates/runtimes/pet-wasm/Cargo.toml").match(/^wasm-bindgen\s*=\s*"=([^"]+)"/m)?.[1],
 		"Dockerfile.dev": at("Dockerfile.dev").match(/^ARG WASM_BINDGEN_VERSION=(\S+)/m)?.[1],
 	};
 	const wf = path.join(root, ".github/workflows");

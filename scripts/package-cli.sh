@@ -11,7 +11,7 @@ NAME=pet-cli-$TARGET
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/$NAME" "$OUT"
-cp "$ROOT/target/$TARGET/release/pet-cli" "$ROOT/LICENSE" "$ROOT/crates/pet-cli/README.md" "$ROOT/crates/pet-cli/README.zh-CN.md" "$STAGE/$NAME/"
+cp "$ROOT/target/$TARGET/release/pet-cli" "$ROOT/LICENSE" "$ROOT/crates/runtimes/pet-cli/README.md" "$ROOT/crates/runtimes/pet-cli/README.zh-CN.md" "$STAGE/$NAME/"
 OUT=$(cd "$OUT" && pwd)
 # COPYFILE_DISABLE:macOS 的 tar 不写入 ._ 扩展属性文件
 COPYFILE_DISABLE=1 tar -czf "$OUT/$NAME.tar.gz" -C "$STAGE" "$NAME"

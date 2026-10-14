@@ -9,5 +9,5 @@ license.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-pet-core = { path = "../pet-core" }
+pet-core = { workspace = true }
 wasm-bindgen = "=0.2.129"

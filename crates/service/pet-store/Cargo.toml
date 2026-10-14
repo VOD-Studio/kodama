@@ -6,7 +6,7 @@ publish.workspace = true
 license.workspace = true
 
 [dependencies]
-pet-core = { path = "../pet-core" }
+pet-core = { workspace = true }
 rusqlite = { version = "0.37", features = ["bundled"] }
 postgres = "0.19"
 serde_json = "1"

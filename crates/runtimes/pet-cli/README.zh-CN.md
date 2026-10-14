@@ -1,6 +1,6 @@
 # pet-cli
 
-[English](https://github.com/VOD-Studio/kodama/blob/main/crates/pet-cli/README.md) | 简体中文
+[English](https://github.com/VOD-Studio/kodama/blob/main/crates/runtimes/pet-cli/README.md) | 简体中文
 
 [kodama](https://github.com/VOD-Studio/kodama)（住在站点里的电子宠物）的原生命令行入口。它与浏览器、Node SDK 运行同一份 Rust 规则核心，同样的输入在任何平台上得到逐字节相同的输出。
 
