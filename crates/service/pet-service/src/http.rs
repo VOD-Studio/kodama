@@ -1,6 +1,6 @@
 //! 各路由共用的请求处理：认证、请求体解析、作用域，以及在阻塞线程池里使用存储。
 use crate::error::ApiError;
-use crate::identity::{verify_token, Subject};
+use crate::identity::{verify_token, Bearer, Subject};
 use crate::state::{AppState, Config};
 use axum::body::Bytes;
 use axum::http::{header, HeaderMap};
@@ -59,6 +59,11 @@ pub(crate) fn parse_json<T: serde::de::DeserializeOwned>(body: &Bytes) -> Result
 }
 
 pub(crate) fn authed<S: Store>(st: &AppState<S>, headers: &HeaderMap) -> Result<Subject, ApiError> {
+    bearer(st, headers).map(|b| b.who)
+}
+
+/// 同 `authed`，另外给出令牌所属的会话（如果有）。
+pub(crate) fn bearer<S: Store>(st: &AppState<S>, headers: &HeaderMap) -> Result<Bearer, ApiError> {
     let raw = headers
         .get(header::AUTHORIZATION)
         .and_then(|v| v.to_str().ok())

@@ -1,171 +1,18 @@
 //! 服务的 HTTP 层验收：完整请求经过路由、认证与真实 SQLite 文件存储。
+mod common;
+
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
-use axum::Router;
-use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
-use ed25519_dalek::{Signer, SigningKey};
+use common::*;
+use ed25519_dalek::SigningKey;
 use http_body_util::BodyExt;
 use pet_core::proof::{verify, Certificate, IssuerKey, Verdict};
-use pet_service::identity::TrustedIssuer;
 use pet_service::{router, AppState, Config};
 use pet_store::{Changeset, Scope, SqliteStore, Store};
 use serde_json::{json, Value};
-use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use tower::ServiceExt;
-
-const T0: u64 = 1_800_000_000;
-const AUD: &str = "pet-service-test";
-const WORLD: &str = "world-a";
-
-struct Env {
-    app: Router,
-    clock: Arc<AtomicU64>,
-    db: PathBuf,
-    violet: SigningKey,
-    _dir: tempfile::TempDir,
-}
-
-fn hex32(b: u8) -> Vec<u8> {
-    vec![b; 32]
-}
-
-fn issuer_keys(violet: &SigningKey, not_after: Option<u64>) -> Vec<TrustedIssuer> {
-    let k: IssuerKey = serde_json::from_value(json!({
-        "kid": "v1", "public_key": pet_core::hex(&violet.verifying_key().to_bytes()), "not_before": "0",
-        "not_after": not_after.map(|n| n.to_string()),
-    }))
-    .unwrap();
-    vec![TrustedIssuer {
-        iss: "violet".into(),
-        keys: vec![k],
-    }]
-}
-
-fn state(db: &Path, clock: Arc<AtomicU64>, violet: &SigningKey, world: &str) -> Router {
-    let signing = SigningKey::from_bytes(&[5u8; 32]);
-    let published = vec![
-        json!({"kid": "p1", "public_key": pet_core::hex(&signing.verifying_key().to_bytes()), "not_before": "0"}),
-    ];
-    let cfg = Config {
-        world: world.into(),
-        audience: AUD.into(),
-        issuer_name: "pet-service".into(),
-        kid: "p1".into(),
-        issuers: issuer_keys(violet, None),
-        token_secret: hex32(1),
-        eligibility_secret: hex32(2),
-        published_keys: published,
-    };
-    let path = db.to_path_buf();
-    let c = clock.clone();
-    let st = Arc::new(AppState {
-        cfg,
-        signing,
-        new_store: Arc::new(move || SqliteStore::open(&path).unwrap()),
-        clock: Arc::new(move || c.load(Ordering::SeqCst)),
-        replay: Default::default(),
-    });
-    router(st)
-}
-
-fn env() -> Env {
-    let dir = tempfile::tempdir().unwrap();
-    let db = dir.path().join("pet.db");
-    let clock = Arc::new(AtomicU64::new(T0));
-    let violet = SigningKey::from_bytes(&[9u8; 32]);
-    Env {
-        app: state(&db, clock.clone(), &violet, WORLD),
-        clock,
-        db,
-        violet,
-        _dir: dir,
-    }
-}
-
-fn assertion_with(key: &SigningKey, claims: Value) -> String {
-    let payload = serde_json::to_vec(&claims).unwrap();
-    let mut msg = b"pet/assertion/v1\n".to_vec();
-    msg.extend_from_slice(&payload);
-    format!(
-        "v1.{}.{}",
-        URL_SAFE_NO_PAD.encode(&payload),
-        URL_SAFE_NO_PAD.encode(key.sign(&msg).to_bytes())
-    )
-}
-
-fn claims(sub: &str, jti: &str, now: u64) -> Value {
-    json!({"iss": "violet", "sub": sub, "aud": AUD, "kid": "v1", "jti": jti, "iat": now, "exp": now + 120})
-}
-
-async fn call(
-    app: &Router,
-    method: &str,
-    uri: &str,
-    token: Option<&str>,
-    body: Option<Value>,
-) -> (StatusCode, Value) {
-    let mut req = Request::builder().method(method).uri(uri);
-    if let Some(t) = token {
-        req = req.header("authorization", format!("Bearer {t}"));
-    }
-    let req = match body {
-        Some(b) => req
-            .header("content-type", "application/json")
-            .body(Body::from(b.to_string()))
-            .unwrap(),
-        None => req.body(Body::empty()).unwrap(),
-    };
-    let resp = app.clone().oneshot(req).await.unwrap();
-    let status = resp.status();
-    let bytes = resp.into_body().collect().await.unwrap().to_bytes();
-    (
-        status,
-        serde_json::from_slice(&bytes).unwrap_or(Value::Null),
-    )
-}
-
-async fn login(e: &Env, sub: &str) -> String {
-    let now = e.clock.load(Ordering::SeqCst);
-    let jti = format!("{sub}-{now}-{}", rand_suffix());
-    let (s, v) = call(
-        &e.app,
-        "POST",
-        "/v1/auth/exchange",
-        None,
-        Some(json!({"assertion": assertion_with(&e.violet, claims(sub, &jti, now))})),
-    )
-    .await;
-    assert_eq!(s, StatusCode::OK, "{v}");
-    v["value"]["access_token"].as_str().unwrap().to_string()
-}
-
-fn rand_suffix() -> u64 {
-    static N: AtomicU64 = AtomicU64::new(0);
-    N.fetch_add(1, Ordering::SeqCst)
-}
-
-fn seed(b: u8) -> String {
-    format!("{b:02x}").repeat(32)
-}
-
-/// 完整领取一只宠物，返回（出生标识，响应值）。
-async fn adopt(e: &Env, token: &str, client: u8) -> (String, Value) {
-    let (s, v) = call(&e.app, "POST", "/v1/births", Some(token), None).await;
-    assert_eq!(s, StatusCode::CREATED, "{v}");
-    let id = v["value"]["request_id"].as_str().unwrap().to_string();
-    let (s, v) = call(
-        &e.app,
-        "POST",
-        &format!("/v1/births/{id}/accept"),
-        Some(token),
-        Some(json!({"client_seed": seed(client)})),
-    )
-    .await;
-    assert_eq!(s, StatusCode::OK, "{v}");
-    (id, v["value"].clone())
-}
 
 // ---------------------------------------------------------------- 公开入口
 
@@ -320,6 +167,7 @@ async fn a_key_used_outside_its_window_is_rejected() {
         token_secret: hex32(1),
         eligibility_secret: hex32(2),
         published_keys: vec![],
+        device_verification_uri: None,
     };
     let app = router(Arc::new(AppState {
         cfg,
@@ -495,16 +343,6 @@ async fn racing_accepts_with_the_same_seed_create_exactly_one_pet() {
         .map(|(_, v)| v["value"]["certificate"]["id"].to_string())
         .collect();
     assert_eq!(certs.len(), 1, "every racer sees the same individual");
-}
-
-async fn futures_join(
-    tasks: Vec<tokio::task::JoinHandle<(StatusCode, Value)>>,
-) -> Vec<(StatusCode, Value)> {
-    let mut out = vec![];
-    for t in tasks {
-        out.push(t.await.unwrap());
-    }
-    out
 }
 
 #[tokio::test]

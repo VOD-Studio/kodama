@@ -2,5 +2,7 @@
 //! 新的服务能力（活动收件、好友、繁育、AI 对话）各自成为这里的一个文件。
 pub(crate) mod auth;
 pub(crate) mod births;
+pub(crate) mod device;
 pub(crate) mod meta;
 pub(crate) mod pets;
+pub(crate) mod sessions;

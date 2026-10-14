@@ -11,6 +11,7 @@ const ASSERTION_DOMAIN: &[u8] = b"pet/assertion/v1\n";
 pub const MAX_ASSERTION_TTL: u64 = 300;
 /// 允许的时钟偏差。
 const SKEW: u64 = 30;
+/// 用身份断言换取的访问令牌的有效期。会话签发的令牌更短，见 `session::SESSION_TOKEN_TTL`。
 pub const TOKEN_TTL: u64 = 3600;
 
 /// 一个受信任的发行者及其公钥集(支持轮换)。
@@ -172,22 +173,40 @@ struct TokenBody {
     iss: String,
     sub: String,
     exp: u64,
+    /// 由登录会话签发时的会话标识；用断言换取的令牌没有。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    sid: Option<String>,
 }
 
-/// 签发服务访问令牌:无状态、带过期。撤销需要令牌存储,见 docs/operations/service.md。
-pub fn issue_token(secret: &[u8], who: &Subject, now: u64) -> (String, u64) {
-    let exp = now + TOKEN_TTL;
+/// 通过校验的访问令牌持有者。
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Bearer {
+    pub who: Subject,
+    pub sid: Option<String>,
+}
+
+/// 签发服务访问令牌：无状态、带过期。会话被撤销后，它签发的令牌在过期前仍然有效，
+/// 所以会话令牌的有效期很短（见 `session`）。
+pub fn issue_token(
+    secret: &[u8],
+    who: &Subject,
+    sid: Option<&str>,
+    now: u64,
+    ttl: u64,
+) -> (String, u64) {
+    let exp = now + ttl;
     let body = b64(&serde_json::to_vec(&TokenBody {
         iss: who.iss.clone(),
         sub: who.sub.clone(),
         exp,
+        sid: sid.map(Into::into),
     })
     .unwrap());
     let tag = b64(&hmac_sha256(secret, &[b"pet/token/v1\n", body.as_bytes()]));
     (format!("t1.{body}.{tag}"), exp)
 }
 
-pub fn verify_token(secret: &[u8], raw: &str, now: u64) -> Option<Subject> {
+pub fn verify_token(secret: &[u8], raw: &str, now: u64) -> Option<Bearer> {
     let mut it = raw.split('.');
     let (Some("t1"), Some(body), Some(tag), None) = (it.next(), it.next(), it.next(), it.next())
     else {
@@ -197,8 +216,11 @@ pub fn verify_token(secret: &[u8], raw: &str, now: u64) -> Option<Subject> {
         return None;
     }
     let b: TokenBody = serde_json::from_slice(&unb64(body)?).ok()?;
-    (b.exp > now).then_some(Subject {
-        iss: b.iss,
-        sub: b.sub,
+    (b.exp > now).then_some(Bearer {
+        who: Subject {
+            iss: b.iss,
+            sub: b.sub,
+        },
+        sid: b.sid,
     })
 }
