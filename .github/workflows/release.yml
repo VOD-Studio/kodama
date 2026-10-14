@@ -1,0 +1,92 @@
+name: Release
+
+# 合并到 main 后由 release-please 维护「发版 PR」(版本号、CHANGELOG)。
+# 合并发版 PR 会打标签、建 GitHub Release,并在同一个工作流里构建并发布 npm 包。
+# 发布放在这里而不是监听 release 事件:GITHUB_TOKEN 创建的 Release 不会触发其他工作流。
+# 构建作业接触不到凭据;只有 publish 作业声明了 npm 环境,NPM_TOKEN 只配置在该环境里。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+# release-please 会改写 git 状态,串行排队,不取消进行中的 run
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    outputs:
+      release_created: ${{ steps.rp.outputs.release_created }}
+      tag_name: ${{ steps.rp.outputs.tag_name }}
+      version: ${{ steps.rp.outputs.version }}
+    steps:
+      - id: rp
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+      # GITHUB_TOKEN 创建或更新的 PR 不会触发 CI,而合并需要 CI 状态;
+      # 手动对发版分支触发一次,检查结果会挂在该提交上。
+      - name: Run CI on the release PR
+        if: steps.rp.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ fromJSON(steps.rp.outputs.pr).headBranchName }}
+        run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
+
+  package:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package.yml
+    with:
+      version: ${{ needs.release-please.outputs.version }}
+      ref: ${{ needs.release-please.outputs.tag_name }}
+
+  publish:
+    name: Publish to npm
+    needs: [release-please, package]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # 环境限制只有 main 能触发,并要求人工批准;npm 的版本一旦发布不能重发
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: npm-*
+          merge-multiple: true
+          path: pkgs
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ needs.release-please.outputs.version }}
+        run: |
+          ls pkgs
+          # CLI 主包依赖各平台包,放在最后
+          main="pkgs/violetjs-pet-cli-$VERSION.tgz"
+          test -f "$main"
+          for f in pkgs/*.tgz; do
+            [ "$f" = "$main" ] && continue
+            scripts/npm-publish.sh "$f" publish
+          done
+          scripts/npm-publish.sh "$main" publish
