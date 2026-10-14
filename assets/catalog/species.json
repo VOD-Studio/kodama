@@ -1,6 +1,6 @@
 {
-  "schema": 1,
-  "note": "素材清单。结构、动作覆盖与许可由 crates/core/pet-term/tests/catalog.rs 校验；声明为 ready 的画风必须真有实现。",
+  "schema": 2,
+  "note": "素材清单。结构、动作覆盖与许可由 crates/core/pet-term/tests/catalog.rs 校验；声明为 ready 的画风必须真有实现。forms 为每个阶段与进化分支的外形名称：成年外形由成年分支决定，少年时的分支作为次要特征保留。",
   "required_actions": [
     "idle",
     "blink",
@@ -25,6 +25,44 @@
         "尖耳",
         "四足行走"
       ],
+      "forms": {
+        "baby": {
+          "zh": "火团幼狐",
+          "en": "Ember Kit"
+        },
+        "young": {
+          "curious": {
+            "zh": "焰尾狐",
+            "en": "Flicker Fox"
+          },
+          "gentle": {
+            "zh": "暖绒狐",
+            "en": "Cinder Fluff"
+          },
+          "steady": {
+            "zh": "炉石狐",
+            "en": "Hearth Fox"
+          }
+        },
+        "adult": {
+          "sage": {
+            "zh": "灵焰狐",
+            "en": "Oracle Fox"
+          },
+          "guardian": {
+            "zh": "炎甲狐",
+            "en": "Blaze Warden"
+          },
+          "wanderer": {
+            "zh": "翔焰狐",
+            "en": "Firewing Fox"
+          },
+          "radiant": {
+            "zh": "曜日狐",
+            "en": "Solar Fox"
+          }
+        }
+      },
       "styles": {
         "terminal": "ready",
         "pixel": "ready",
@@ -72,6 +110,44 @@
         "云状身体",
         "没有脚，漂移"
       ],
+      "forms": {
+        "baby": {
+          "zh": "小云絮",
+          "en": "Puff"
+        },
+        "young": {
+          "curious": {
+            "zh": "卷云",
+            "en": "Curl Cloud"
+          },
+          "gentle": {
+            "zh": "棉云",
+            "en": "Cotton Cloud"
+          },
+          "steady": {
+            "zh": "层云",
+            "en": "Strato"
+          }
+        },
+        "adult": {
+          "sage": {
+            "zh": "雷云贤者",
+            "en": "Storm Sage"
+          },
+          "guardian": {
+            "zh": "云盾",
+            "en": "Cumulus Guard"
+          },
+          "wanderer": {
+            "zh": "风行云",
+            "en": "Gale Rider"
+          },
+          "radiant": {
+            "zh": "霞光云",
+            "en": "Aurora Cloud"
+          }
+        }
+      },
       "styles": {
         "terminal": "ready",
         "pixel": "ready",
@@ -119,6 +195,44 @@
         "须与尖耳",
         "尾巴"
       ],
+      "forms": {
+        "baby": {
+          "zh": "奶猫",
+          "en": "Kitten"
+        },
+        "young": {
+          "curious": {
+            "zh": "探险猫",
+            "en": "Prowler"
+          },
+          "gentle": {
+            "zh": "绒绒猫",
+            "en": "Fluffcat"
+          },
+          "steady": {
+            "zh": "虎斑猫",
+            "en": "Tabby"
+          }
+        },
+        "adult": {
+          "sage": {
+            "zh": "智者猫",
+            "en": "Mystic Cat"
+          },
+          "guardian": {
+            "zh": "卫士猫",
+            "en": "Guard Cat"
+          },
+          "wanderer": {
+            "zh": "翼猫",
+            "en": "Wingcat"
+          },
+          "radiant": {
+            "zh": "金曜猫",
+            "en": "Golden Cat"
+          }
+        }
+      },
       "styles": {
         "terminal": "ready",
         "pixel": "ready",
@@ -166,6 +280,44 @@
         "垂耳",
         "四足行走"
       ],
+      "forms": {
+        "baby": {
+          "zh": "奶狗",
+          "en": "Puppy"
+        },
+        "young": {
+          "curious": {
+            "zh": "嗅嗅犬",
+            "en": "Sniffer"
+          },
+          "gentle": {
+            "zh": "绒毛犬",
+            "en": "Fluffhound"
+          },
+          "steady": {
+            "zh": "守门犬",
+            "en": "Stout Pup"
+          }
+        },
+        "adult": {
+          "sage": {
+            "zh": "智犬",
+            "en": "Sage Hound"
+          },
+          "guardian": {
+            "zh": "护卫犬",
+            "en": "Guardian Hound"
+          },
+          "wanderer": {
+            "zh": "天翼犬",
+            "en": "Skyhound"
+          },
+          "radiant": {
+            "zh": "金辉犬",
+            "en": "Radiant Hound"
+          }
+        }
+      },
       "styles": {
         "terminal": "ready",
         "pixel": "ready",
@@ -213,6 +365,44 @@
         "方形头",
         "双足"
       ],
+      "forms": {
+        "baby": {
+          "zh": "方块芽",
+          "en": "Cubit"
+        },
+        "young": {
+          "curious": {
+            "zh": "探测型",
+            "en": "Scout Bot"
+          },
+          "gentle": {
+            "zh": "护理型",
+            "en": "Care Bot"
+          },
+          "steady": {
+            "zh": "工程型",
+            "en": "Builder Bot"
+          }
+        },
+        "adult": {
+          "sage": {
+            "zh": "智核型",
+            "en": "Core Mind"
+          },
+          "guardian": {
+            "zh": "堡垒型",
+            "en": "Bastion"
+          },
+          "wanderer": {
+            "zh": "推进型",
+            "en": "Thruster"
+          },
+          "radiant": {
+            "zh": "光核型",
+            "en": "Lumen Core"
+          }
+        }
+      },
       "styles": {
         "terminal": "ready",
         "pixel": "ready",
@@ -260,6 +450,44 @@
         "双旋翼",
         "没有脚，悬浮"
       ],
+      "forms": {
+        "baby": {
+          "zh": "镜头球",
+          "en": "Lensling"
+        },
+        "young": {
+          "curious": {
+            "zh": "侦察机",
+            "en": "Scout Drone"
+          },
+          "gentle": {
+            "zh": "伴飞机",
+            "en": "Escort"
+          },
+          "steady": {
+            "zh": "运输机",
+            "en": "Hauler"
+          }
+        },
+        "adult": {
+          "sage": {
+            "zh": "天眼",
+            "en": "Oracle Eye"
+          },
+          "guardian": {
+            "zh": "护航舰",
+            "en": "Warden"
+          },
+          "wanderer": {
+            "zh": "疾风翼",
+            "en": "Gale Wing"
+          },
+          "radiant": {
+            "zh": "曜光舰",
+            "en": "Halo Ship"
+          }
+        }
+      },
       "styles": {
         "terminal": "ready",
         "pixel": "ready",
@@ -307,6 +535,44 @@
         "叶冠",
         "扎根，原地摇摆"
       ],
+      "forms": {
+        "baby": {
+          "zh": "嫩芽",
+          "en": "Seedling"
+        },
+        "young": {
+          "curious": {
+            "zh": "卷须苗",
+            "en": "Tendril"
+          },
+          "gentle": {
+            "zh": "花苞苗",
+            "en": "Budling"
+          },
+          "steady": {
+            "zh": "硬杆苗",
+            "en": "Stalk"
+          }
+        },
+        "adult": {
+          "sage": {
+            "zh": "灵花",
+            "en": "Bloom Sage"
+          },
+          "guardian": {
+            "zh": "树甲花",
+            "en": "Barkguard"
+          },
+          "wanderer": {
+            "zh": "风铃花",
+            "en": "Windbloom"
+          },
+          "radiant": {
+            "zh": "金盏花",
+            "en": "Sunbloom"
+          }
+        }
+      },
       "styles": {
         "terminal": "ready",
         "pixel": "ready",
@@ -354,6 +620,44 @@
         "火冠",
         "四足行走"
       ],
+      "forms": {
+        "baby": {
+          "zh": "火星",
+          "en": "Spark"
+        },
+        "young": {
+          "curious": {
+            "zh": "跳焰",
+            "en": "Flicker"
+          },
+          "gentle": {
+            "zh": "暖焰",
+            "en": "Warmflame"
+          },
+          "steady": {
+            "zh": "炉焰",
+            "en": "Forgeflame"
+          }
+        },
+        "adult": {
+          "sage": {
+            "zh": "灵焰",
+            "en": "Wisdom Flame"
+          },
+          "guardian": {
+            "zh": "炎铠",
+            "en": "Flame Bulwark"
+          },
+          "wanderer": {
+            "zh": "炎翼",
+            "en": "Blazewing"
+          },
+          "radiant": {
+            "zh": "日焰",
+            "en": "Solar Flame"
+          }
+        }
+      },
       "styles": {
         "terminal": "ready",
         "pixel": "ready",

@@ -229,3 +229,53 @@ fn tiny_regions_never_panic_for_any_species_or_pose() {
         }
     }
 }
+
+#[test]
+fn every_stage_and_branch_has_a_named_form() {
+    // 键必须与线上协议的分支名一致：直接取 Branch 的序列化结果，而不是另写一份
+    let name = |b: Branch| {
+        serde_json::to_value(b)
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_string()
+    };
+    let young: BTreeSet<String> = Branch::ALL
+        .iter()
+        .filter(|b| b.target_stage() == Stage::Young)
+        .map(|b| name(*b))
+        .collect();
+    let adult: BTreeSet<String> = Branch::ALL
+        .iter()
+        .filter(|b| b.target_stage() == Stage::Adult)
+        .map(|b| name(*b))
+        .collect();
+    for s in manifest()["species"].as_array().unwrap() {
+        let key = s["key"].as_str().unwrap();
+        let forms = &s["forms"];
+        let mut names = vec![&forms["baby"]];
+        for (stage, expected) in [("young", &young), ("adult", &adult)] {
+            let got: BTreeSet<String> = forms[stage].as_object().unwrap().keys().cloned().collect();
+            assert_eq!(
+                &got, expected,
+                "{key}: {stage} forms must cover exactly the {stage} branches"
+            );
+            names.extend(forms[stage].as_object().unwrap().values());
+        }
+        for lang in ["zh", "en"] {
+            let all: Vec<&str> = names
+                .iter()
+                .map(|n| n[lang].as_str().unwrap_or(""))
+                .collect();
+            assert!(
+                all.iter().all(|n| !n.trim().is_empty()),
+                "{key}: every form needs a {lang} name"
+            );
+            assert_eq!(
+                all.iter().collect::<BTreeSet<_>>().len(),
+                all.len(),
+                "{key}: {lang} form names must be unique"
+            );
+        }
+    }
+}
