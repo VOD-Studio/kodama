@@ -1,53 +1,114 @@
-// 架构守护：workspace 内 crate 的依赖方向与规则核心的依赖范围，见 docs/architecture.md。
+// 架构与目录守护，见 docs/architecture.md 的「目录结构」与「依赖规则」。
 //   node scripts/check/check-arch.mjs
-// 只读取 Cargo.toml 声明（cargo metadata --no-deps），不解析依赖树、不联网。
+// 检查四件事：
+//   1. 根目录只有白名单里的文件与目录，新内容必须放进按用途划分的目录；
+//   2. 只能放子目录的位置（crates/、crates/<层>/、tests/、scripts/、packages/）没有散落的文件；
+//   3. 每个 crate 位于 crates/<层>/<crate 名>/，层与登记一致；
+//   4. crate 之间的依赖方向、规则核心的依赖范围与 no_std 声明。
+// 只读取 Cargo.toml 声明（cargo metadata --no-deps）与 git 文件列表，不解析依赖树、不联网。
 // 核心 crate 确实不依赖 std，由 Makefile 的 check-arch 在无 std 目标上编译来保证。
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-// 每个 crate 允许依赖的 workspace crate。新增 crate 必须在这里登记，并同步架构文档。
-const LAYERS = {
-	"pet-term": [],
-	"pet-core": ["pet-term"],
-	"pet-issuer": ["pet-core"],
-	"pet-store": ["pet-core"],
-	"pet-service": ["pet-core", "pet-store", "pet-issuer"],
-	"pet-wasm": ["pet-core"],
-	"pet-cli": ["pet-core", "pet-term"],
-	"pet-schema": ["pet-core", "pet-term"],
-};
-
-// 三端一致的前提：规则核心与帧合成只用摘要、HMAC、签名验证与序列化（PRD-0036 前提 1）。
-// 只约束正常依赖；测试用的 dev-dependencies 不进入产物。
-const CORE = {
-	"pet-term": ["serde", "serde_json", "schemars"],
-	"pet-core": ["pet-term", "sha2", "hmac", "ed25519-dalek", "serde", "serde_json", "schemars"],
-};
-const CORE_ATTRS = ["#![no_std]", "#![forbid(unsafe_code)]"];
-
-const meta = JSON.parse(execFileSync("cargo", ["metadata", "--format-version", "1", "--no-deps", "--locked"], { encoding: "utf8" }));
-const members = new Map(meta.packages.map((p) => [p.name, p]));
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const problems = [];
 
-for (const name of members.keys()) {
-	if (!(name in LAYERS)) problems.push(`${name}: 未在 scripts/check/check-arch.mjs 的 LAYERS 中登记`);
+// ---------- 目录结构 ----------
+
+// 根目录白名单：工具约定必须在根目录的文件，以及按用途划分的顶层目录。
+const ROOT_ENTRIES = new Set([
+	// 目录
+	".github", "assets", "crates", "docker", "docs", "packages", "scripts", "tests",
+	// Rust 工具约定的位置
+	"Cargo.toml", "Cargo.lock", "rustfmt.toml", "deny.toml",
+	// 入口与说明
+	"Makefile", "README.md", "README.zh-CN.md", "CONTRIBUTING.md", "CONTRIBUTING.zh-CN.md",
+	"CHANGELOG.md", "CONTEXT.md", "LICENSE",
+	// 仓库级配置
+	".editorconfig", ".gitattributes", ".gitignore", ".git-blame-ignore-revs",
+]);
+// 这些目录下只允许子目录（分组），文件放进具体的分组里。
+const DIRS_ONLY = ["crates", "tests", "scripts", "packages"];
+// crate 的层：目录名即层名，含义见架构文档。
+const LAYER_DIRS = ["core", "service", "runtimes", "tools"];
+
+// 已提交的文件，加上尚未提交但未被忽略的新文件（本地运行时也能提前发现）。
+const files = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard"], { cwd: root, encoding: "utf8" })
+	.split("\n")
+	.filter((f) => f && fs.existsSync(path.join(root, f)));
+
+for (const top of new Set(files.map((f) => f.split("/")[0]))) {
+	if (!ROOT_ENTRIES.has(top)) problems.push(`${top}: 根目录不允许新增内容，请放进按用途划分的目录（见 docs/architecture.md「目录结构」）`);
 }
-for (const name of Object.keys(LAYERS)) {
+for (const dir of DIRS_ONLY) {
+	for (const f of files.filter((f) => f.startsWith(`${dir}/`) && f.split("/").length === 2)) {
+		problems.push(`${f}: ${dir}/ 下只放分组目录，文件请放进对应的子目录`);
+	}
+}
+for (const f of files.filter((f) => f.startsWith("crates/") && f.split("/").length === 3)) {
+	problems.push(`${f}: crates/<层>/ 下只放 crate 目录`);
+}
+for (const layer of new Set(files.filter((f) => f.startsWith("crates/")).map((f) => f.split("/")[1]))) {
+	if (!LAYER_DIRS.includes(layer)) problems.push(`crates/${layer}/: 未知的层，允许的是 ${LAYER_DIRS.join("、")}`);
+}
+
+// ---------- crate 与依赖 ----------
+
+// 每个 crate 的层，以及允许依赖的 workspace crate。新增 crate 必须在这里登记，并同步架构文档。
+const CRATES = {
+	"pet-term": { layer: "core", deps: [] },
+	"pet-core": { layer: "core", deps: ["pet-term"] },
+	"pet-store": { layer: "service", deps: ["pet-core"] },
+	"pet-issuer": { layer: "service", deps: ["pet-core"] },
+	"pet-service": { layer: "service", deps: ["pet-core", "pet-store", "pet-issuer"] },
+	"pet-cli": { layer: "runtimes", deps: ["pet-core", "pet-term"] },
+	"pet-wasm": { layer: "runtimes", deps: ["pet-core"] },
+	"pet-schema": { layer: "tools", deps: ["pet-core", "pet-term"] },
+};
+// 层之间的方向：每层只能依赖自己与列出的层。核心不知道服务与运行入口的存在。
+const LAYER_DEPS = {
+	core: ["core"],
+	service: ["core", "service"],
+	runtimes: ["core"],
+	tools: ["core"],
+};
+// 三端一致的前提：核心层只用摘要、HMAC、签名验证与序列化（PRD-0036 前提 1）。
+// 只约束正常依赖；测试用的 dev-dependencies 不进入产物。
+const CORE_EXTERNAL = ["sha2", "hmac", "ed25519-dalek", "serde", "serde_json", "schemars"];
+const CORE_ATTRS = ["#![no_std]", "#![forbid(unsafe_code)]"];
+
+const meta = JSON.parse(execFileSync("cargo", ["metadata", "--format-version", "1", "--no-deps", "--locked"], { cwd: root, encoding: "utf8" }));
+const members = new Map(meta.packages.map((p) => [p.name, p]));
+
+for (const name of members.keys()) {
+	if (!(name in CRATES)) problems.push(`${name}: 未在 scripts/check/check-arch.mjs 的 CRATES 中登记`);
+}
+for (const name of Object.keys(CRATES)) {
 	if (!members.has(name)) problems.push(`${name}: 已登记但不在 workspace 中`);
 }
 
 for (const [name, pkg] of members) {
-	const allowed = LAYERS[name] ?? [];
+	const spec = CRATES[name];
+	if (!spec) continue;
+	const dir = path.relative(root, path.dirname(pkg.manifest_path)).split(path.sep).join("/");
+	if (dir !== `crates/${spec.layer}/${name}`) problems.push(`${name}: 应位于 crates/${spec.layer}/${name}，实际在 ${dir}`);
 	for (const dep of pkg.dependencies) {
-		if (members.has(dep.name) && !allowed.includes(dep.name)) {
-			problems.push(`${name} -> ${dep.name}${dep.kind ? ` (${dep.kind})` : ""}: 不允许的依赖方向，允许的是 [${allowed.join(", ") || "无"}]`);
+		if (!members.has(dep.name)) continue;
+		const kind = dep.kind ? ` (${dep.kind})` : "";
+		if (!spec.deps.includes(dep.name)) {
+			problems.push(`${name} -> ${dep.name}${kind}: 不允许的依赖，允许的是 [${spec.deps.join(", ") || "无"}]`);
+		}
+		const depLayer = CRATES[dep.name]?.layer;
+		if (depLayer && !LAYER_DEPS[spec.layer].includes(depLayer)) {
+			problems.push(`${name} -> ${dep.name}${kind}: ${spec.layer} 层不能依赖 ${depLayer} 层`);
 		}
 	}
-	if (name in CORE) {
+	if (spec.layer === "core") {
 		for (const dep of pkg.dependencies) {
-			if (dep.kind === "dev") continue;
-			if (!CORE[name].includes(dep.name)) problems.push(`${name} -> ${dep.name}: 规则核心不允许的依赖`);
+			if (dep.kind === "dev" || members.has(dep.name)) continue;
+			if (!CORE_EXTERNAL.includes(dep.name)) problems.push(`${name} -> ${dep.name}: 核心层不允许的外部依赖`);
 		}
 		const lib = fs.readFileSync(path.join(path.dirname(pkg.manifest_path), "src/lib.rs"), "utf8");
 		for (const attr of CORE_ATTRS) {
@@ -60,4 +121,4 @@ if (problems.length) {
 	console.error(problems.join("\n"));
 	process.exit(1);
 }
-console.log(`arch OK: ${members.size} crates, dependency directions and core dependency allowlist hold`);
+console.log(`arch OK: ${members.size} crates in ${LAYER_DIRS.length} layers, dependency rules and directory layout hold`);
