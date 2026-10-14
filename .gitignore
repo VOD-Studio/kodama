@@ -1,6 +1,58 @@
+# 构建产物 ———————————————————————————————————————————
+# Rust：workspace 与独立的验收工程（tests/consumers/rust-host）各有自己的 target/
 target/
-node_modules/
-packages/pet-sdk/LICENSE
-/.dev/
+**/*.rs.bk
+*.pdb
+# SDK 构建输出与打包
 dist/
+*.tgz
+# 构建时从仓库根复制进 SDK 的许可证（随包发布，源文件只有根目录一份）
+packages/pet-sdk/LICENSE
+
+# 依赖与缓存 —————————————————————————————————————————
+node_modules/
 .pnpm-store/
+.npm/
+.eslintcache
+__pycache__/
+*.py[cod]
+# 前端验收工程（TanStack Start / Vite）生成的目录
+.output/
+.vinxi/
+.vite/
+.tanstack/
+
+# 本地开发状态与密钥 ———————————————————————————————————
+# scripts/dev/dev.mjs 生成的开发密钥、环境与 SQLite 库，绝不提交
+/.dev/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+
+# 测试与诊断输出 ——————————————————————————————————————
+coverage/
+*.profraw
+*.profdata
+lcov.info
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# 编辑器与系统 ————————————————————————————————————————
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.zed/
+.fleet/
