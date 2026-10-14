@@ -1,3 +1,4 @@
+use crate::account::Watch;
 use crossterm::event::{poll, read, Event, KeyCode, KeyEventKind, KeyModifiers};
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
@@ -80,12 +81,26 @@ const FORMS: [&[Branch]; 8] = [
 /// 半格像素画的最低高度：放得下幼体；更矮或不支持 UTF-8、256 色时退回字符画。
 const BLOCKS_MIN_ROWS: u16 = 10;
 
-fn input(species: u8, w: u16, h: u16, t: u64, pose: Pose, cs: Charset, form: usize) -> FrameInput {
-    // 本地预览：固定演示个体;账号模式下由投影提供 species / genes / lineage。
-    let lineage = FORMS[form % FORMS.len()].to_vec();
-    FrameInput {
+/// 要画的个体：本地预览是固定的演示个体，账号模式来自服务的投影。
+struct Look {
+    species: u8,
+    genes: [u8; 8],
+    lineage: Vec<Branch>,
+}
+
+fn preview(species: u8, form: usize) -> Look {
+    Look {
         species,
         genes: [37, 0, 0, 0, 0, 0, 0, 0],
+        lineage: FORMS[form % FORMS.len()].to_vec(),
+    }
+}
+
+fn input(look: Look, w: u16, h: u16, t: u64, pose: Pose, cs: Charset) -> FrameInput {
+    let lineage = look.lineage;
+    FrameInput {
+        species: look.species,
+        genes: look.genes,
         pose,
         charset: cs,
         w,
@@ -115,15 +130,29 @@ fn form_label(form: usize) -> String {
 
 /// 非 TTY:输出一行可读 JSON 状态后退出,不含任何控制码。
 fn non_tty() -> i32 {
-    let f = render(&input(1, 24, 4, 0, Pose::Idle, Charset::Ascii, 0));
+    let f = render(&input(preview(1, 0), 24, 4, 0, Pose::Idle, Charset::Ascii));
     println!("{}", serde_json::json!({ "pose": "idle", "frame": f.rows }));
     0
 }
 
-pub fn run() -> i32 {
+/// `account` 为 true 时显示账号宠物（需要先 `pet-cli login`），按键执行真实的动作。
+pub fn run(account: bool) -> i32 {
     if !std::io::stdout().is_terminal() || !std::io::stdin().is_terminal() {
-        return non_tty();
+        // 账号模式在非 TTY 下等同 status：一行 JSON
+        return if account {
+            crate::account::run("status", &[])
+        } else {
+            non_tty()
+        };
     }
+    // 没有登录时在进入终端模式之前就失败，错误照常输出
+    let mut watch = match account.then(Watch::start).transpose() {
+        Ok(w) => w,
+        Err(f) => {
+            println!("{}", f.to_json());
+            return 1;
+        }
+    };
     let stop = Arc::new(AtomicBool::new(false));
     for sig in [SIGINT, SIGTERM] {
         if signal_hook::flag::register(sig, stop.clone()).is_err() {
@@ -161,7 +190,22 @@ pub fn run() -> i32 {
         } else {
             glyphs
         };
-        let f = render(&input(species, w, rows, t, pose, cs, form));
+        let (look, pose_now) = match &mut watch {
+            Some(wt) => {
+                wt.tick(t);
+                let look = match &wt.view {
+                    Some(v) => Look {
+                        species: v.species,
+                        genes: v.genes,
+                        lineage: v.lineage.clone(),
+                    },
+                    None => preview(1, 0),
+                };
+                (look, wt.pose(t))
+            }
+            None => (preview(species, form), pose),
+        };
+        let f = render(&input(look, w, rows, t, pose_now, cs));
         let _ = queue!(out, cursor::MoveTo(0, 0));
         for (y, row) in f.rows.iter().enumerate() {
             let _ = queue!(out, cursor::MoveTo(0, y as u16));
@@ -188,10 +232,13 @@ pub fn run() -> i32 {
                 }
             }
         }
-        let status = format!(
-            "q quit  i idle o look e eat p play s sleep ! scare k sick v evolve x end  n species  g form [{}]",
-            form_label(form)
-        );
+        let status = match &watch {
+            Some(wt) => wt.status(),
+            None => format!(
+                "q quit  i idle o look e eat p play s sleep ! scare k sick v evolve x end  n species  g form [{}]",
+                form_label(form)
+            ),
+        };
         let status: String = status.chars().take(w as usize).collect();
         let _ = queue!(
             out,
@@ -207,6 +254,19 @@ pub fn run() -> i32 {
                     match k.code {
                         KeyCode::Char('c') if k.modifiers.contains(KeyModifiers::CONTROL) => break,
                         KeyCode::Char('q') | KeyCode::Esc => break,
+                        // 账号模式：按键是真实的动作，结果由服务裁决
+                        KeyCode::Char(c) if watch.is_some() => {
+                            let action = match c {
+                                'f' => Some("feed"),
+                                'p' => Some("play"),
+                                'r' => Some("rest"),
+                                'h' => Some("heal"),
+                                _ => None,
+                            };
+                            if let (Some(a), Some(wt)) = (action, watch.as_mut()) {
+                                wt.act(a);
+                            }
+                        }
                         KeyCode::Char('s') => pose = Pose::Sleep,
                         KeyCode::Char('i') => pose = Pose::Idle,
                         KeyCode::Char('k') => pose = Pose::Sick,
