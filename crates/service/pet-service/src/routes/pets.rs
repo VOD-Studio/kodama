@@ -59,6 +59,8 @@ pub(crate) async fn get_pet<S: Store + Send + 'static>(
             Some(a) => serde_json::from_str(&a.state).map_err(ApiError::internal)?,
             None => Value::Null,
         };
+        // 今天还能从活动里得到多少（账号共享，不随宠物重置）
+        view["allowance"] = super::activity::allowance(st, store, &who)?;
         Ok(view)
     })
     .await?;

@@ -157,7 +157,7 @@ pub fn verify_assertion(
     })
 }
 
-fn pet_core_unhex(s: &str) -> Option<[u8; 32]> {
+pub(crate) fn pet_core_unhex(s: &str) -> Option<[u8; 32]> {
     if s.len() != 64 {
         return None;
     }

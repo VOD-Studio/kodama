@@ -1,4 +1,5 @@
 //! 服务实例的配置与共享状态。
+use crate::activity::ActivitySource;
 use crate::identity::{ReplayGuard, TrustedIssuer};
 use ed25519_dalek::SigningKey;
 use pet_store::Store;
@@ -21,6 +22,8 @@ pub struct Config {
     pub published_keys: Vec<Value>,
     /// 设备授权的确认页面（接入方实现）。未配置时设备授权关闭。
     pub device_verification_uri: Option<String>,
+    /// 受信任的活动连接器（#12）。为空时不接受任何活动事实。
+    pub activity_sources: Vec<ActivitySource>,
 }
 
 pub struct AppState<S: Store> {

@@ -251,7 +251,9 @@ async fn device_codes_and_user_codes_cannot_be_guessed_or_misused() {
 #[tokio::test]
 async fn the_device_flow_is_off_without_a_verification_page() {
     let e = env();
-    let app = state_with(&e.db, e.clock.clone(), &e.violet, WORLD, None);
+    let app = state_with(&e.db, e.clock.clone(), &e.violet, WORLD, |c| {
+        c.device_verification_uri = None
+    });
     let (s, v) = call(&app, "POST", "/v1/device/authorize", None, None).await;
     assert_eq!(
         (s, code(&v)),
