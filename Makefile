@@ -49,7 +49,7 @@ fmt-check: ## 格式检查,不改文件
 clippy: ## clippy,警告即失败
 	cargo clippy --workspace --all-targets -- -D warnings
 
-check-arch: ## crate 依赖方向、规则核心依赖范围,并在无 std 目标上编译核心
+check-arch: ## 目录结构白名单、crate 分层与依赖方向、核心依赖范围,并在无 std 目标上编译核心
 	node scripts/check/check-arch.mjs
 	cargo build -q -p pet-core -p pet-term --target $(NO_STD_TARGET)
 

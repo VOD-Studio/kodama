@@ -61,7 +61,7 @@ jobs:
           node-version: 22
       - run: make fmt-check
       - run: make clippy
-      - name: Architecture (dependency directions, no_std core)
+      - name: Architecture (layout, layers, dependency directions, no_std core)
         run: make check-arch
       - run: make check-versions
       - run: make lint-scripts
