@@ -24,57 +24,8 @@ pub const CURIOUS: usize = 0;
 pub const AFFECTION: usize = 1;
 pub const CALM: usize = 2;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "snake_case")]
-pub enum Stage {
-    #[default]
-    Baby,
-    Young,
-    Adult,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "snake_case")]
-pub enum Branch {
-    // 幼体 → 少年
-    Curious,
-    Gentle,
-    Steady,
-    // 少年 → 成年
-    Sage,
-    Guardian,
-    Wanderer,
-    /// 后天罕见形态:不改变出生稀有度,只记录在 acquired_rarity。
-    Radiant,
-}
-
-impl Branch {
-    fn source_stage(self) -> Stage {
-        match self {
-            Branch::Curious | Branch::Gentle | Branch::Steady => Stage::Baby,
-            _ => Stage::Young,
-        }
-    }
-
-    fn target_stage(self) -> Stage {
-        match self.source_stage() {
-            Stage::Baby => Stage::Young,
-            _ => Stage::Adult,
-        }
-    }
-}
-
-const ALL_BRANCHES: [Branch; 7] = [
-    Branch::Curious,
-    Branch::Gentle,
-    Branch::Steady,
-    Branch::Sage,
-    Branch::Guardian,
-    Branch::Wanderer,
-    Branch::Radiant,
-];
+/// 阶段与分支是规则与画面共用的词汇，定义在 pet-term（画面按它们选择外形）。
+pub use pet_term::form::{Branch, Stage};
 
 /// 主题倾向:接入方映射后的主题标签及累计次数。
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -291,7 +242,7 @@ fn check(g: &Growth, food: u32, branch: Branch) -> BranchOption {
 
 /// 当前阶段可走的全部分支及缺项说明。成年后为空。
 pub fn evolution_options(g: &Growth, food: u32) -> EvolutionOptions {
-    let options = ALL_BRANCHES
+    let options = Branch::ALL
         .iter()
         .copied()
         .filter(|b| b.source_stage() == g.stage)

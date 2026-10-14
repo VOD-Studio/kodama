@@ -1,0 +1,104 @@
+//! 调色板：物种基色 + 个体基因 + 姿态 + 外形。全部整数运算，三端输出逐字节一致。
+use super::{parts, SpeciesArt};
+use crate::form::{Branch, Form};
+use crate::Pose;
+use alloc::collections::BTreeMap;
+use alloc::format;
+use alloc::string::String;
+
+pub(crate) fn hsl(h: i32, s: i32, l: i32) -> String {
+    let h = h.rem_euclid(360);
+    let (s, l) = (s.clamp(0, 100), l.clamp(0, 100));
+    let c = (100 - (2 * l - 100).abs()) * s / 100;
+    let x = c * (60 - ((h % 120) - 60).abs()) / 60;
+    let m = l - c / 2;
+    let (r, g, b) = match h / 60 {
+        0 => (c, x, 0),
+        1 => (x, c, 0),
+        2 => (0, c, x),
+        3 => (0, x, c),
+        4 => (x, 0, c),
+        _ => (c, 0, x),
+    };
+    let ch = |v: i32| ((v + m).clamp(0, 100) * 255 / 100) as u8;
+    format!("#{:02x}{:02x}{:02x}", ch(r), ch(g), ch(b))
+}
+
+/// 基因只改变颜色，不改变像素布局：基因 0 偏移主色相，基因 1 调整明暗，基因 2 偏移点缀色相。
+pub(crate) fn palette(
+    art: &SpeciesArt,
+    genes: &[u8; 8],
+    form: Form,
+    pose: Pose,
+) -> BTreeMap<String, String> {
+    let mut hue = art.hue as i32 + (genes[0] % 41) as i32 - 20;
+    let mut sat = art.sat as i32;
+    let mut lift = (genes[1] % 7) as i32 - 3;
+    let (mut ah, mut asat) = (
+        art.accent.0 as i32 + (genes[2] % 31) as i32 - 15,
+        art.accent.1 as i32,
+    );
+    let (mut mh, mut ms, ml) = parts::material(form);
+    if form.adult == Some(Branch::Radiant) {
+        // 辉耀：点缀全部镀金
+        (ah, asat) = (46, 95);
+    }
+    match pose {
+        // 生病：偏青灰；即使看不到颜色，也能靠汗滴、眼神与晃动辨认
+        Pose::Sick => {
+            hue = 110;
+            sat = sat * 4 / 10;
+            asat = asat * 4 / 10;
+        }
+        // 终结：去色
+        Pose::End => {
+            sat = 0;
+            asat = 0;
+            ms = 0;
+            lift -= 4;
+            mh = 0;
+        }
+        _ => {}
+    }
+    let mut p = BTreeMap::new();
+    let mut put = |k: char, v: String| {
+        p.insert(String::from(k), v);
+    };
+    put('o', hsl(hue - 12, 45, 12));
+    put('s', hsl(hue - 8, sat, 44 + lift));
+    put('b', hsl(hue, sat, 60 + lift));
+    put('h', hsl(hue + 8, (sat - 10).max(0), 76 + lift));
+    put('l', hsl(hue + 14, sat * 40 / 100, 90));
+    put('L', hsl(hue + 6, sat * 45 / 100, 76));
+    put('d', hsl(hue - 10, (sat + 5).min(100), 38 + lift));
+    put('a', hsl(ah, asat, 56));
+    put('A', hsl(ah - 8, asat, 40));
+    put('c', hsl(ah + 10, asat, 76));
+    put('e', hsl(hue - 20, 50, 10));
+    put('w', String::from("#ffffff"));
+    put('m', hsl(352, 60, 34));
+    put('k', hsl(350, 80, 76));
+    put('n', hsl(350, 55, 62));
+    put('W', hsl(hue - 12, 30, 22));
+    put('p', hsl(mh, ms, ml));
+    put('q', hsl(mh - 6, ms, ml - 16));
+    put('r', hsl(mh + 8, (ms - 10).max(0), (ml + 18).min(96)));
+    put('t', hsl(24, 45, 42));
+    put('T', hsl(20, 45, 30));
+    put('i', hsl(28, 40, 56));
+    put('g', hsl(44, 100, 60));
+    put('G', hsl(52, 100, 86));
+    // 效果：闪光、睡眠的 Z、惊吓的感叹号、汗滴、食物、球、纪念台、悬浮者的影子
+    put('*', hsl(52, 100, 80));
+    put('Z', hsl(220, 50, 62));
+    put('!', hsl(4, 85, 52));
+    put('j', hsl(200, 85, 72));
+    put('f', hsl(356, 78, 54));
+    put('v', hsl(110, 55, 42));
+    put('u', hsl(210, 75, 56));
+    put('U', String::from("#f4f4f4"));
+    put('x', hsl(30, 6, 64));
+    put('X', hsl(30, 6, 46));
+    put('y', hsl(30, 8, 80));
+    p
+}

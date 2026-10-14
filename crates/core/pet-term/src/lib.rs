@@ -7,8 +7,10 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use serde::{Deserialize, Serialize};
 
+pub mod form;
 mod pixel;
-pub use pixel::{render_pixels, PixelInput, Pixels, PIXEL_H, PIXEL_W};
+pub use form::{Branch, Form, Stage};
+pub use pixel::{render_pixels, PixelInput, Pixels};
 
 const SPRITE_W: u16 = 7;
 const SPRITE_H: u16 = 3;

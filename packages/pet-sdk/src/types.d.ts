@@ -400,7 +400,8 @@ export interface FrameInput {
   w: number;
 }
 /**
- * 像素帧输入。`stage` 为 0 幼体、1 少年、2 成年;更大的值按成年处理。
+ * `sprite` 命令的输入。画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；
+ * 待机时会在画布里来回走动，需要更宽的画布才走得开，例如 96×40。画布更小时以身体中线居中裁切。
  *
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "PixelInput".
@@ -412,8 +413,15 @@ export interface PixelInput {
    */
   genes: [number, number, number, number, number, number, number, number];
   h: number;
+  /**
+   * 进化分支，按发生顺序（即宠物的 `growth.lineage`）。决定少年与成年的具体外形。
+   */
+  lineage?: Branch[];
   pose: Pose;
   species: number;
+  /**
+   * 成长阶段：0 幼体、1 少年、2 成年。给出 `lineage` 时以进化记录为准。
+   */
   stage: number;
   t: string;
   w: number;
