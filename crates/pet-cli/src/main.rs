@@ -8,6 +8,7 @@ fn main() {
         Some("live") => std::process::exit(live::run()),
         Some("capabilities") => println!("{}", execute("{\"op\":\"capabilities\"}")),
         Some("help" | "--help" | "-h") => help(),
+        Some("version" | "--version" | "-V") => version(),
         None | Some("exec") => exec(),
         Some(other) => {
             eprintln!("unknown command: {other}\nrun `pet-cli help`");
@@ -18,12 +19,13 @@ fn main() {
 
 /// 帮助文本中的能力列表与机器可读发现同源(pet_core::CAPABILITIES)。
 fn help() {
-    println!("usage: pet-cli [exec|live|capabilities|help]\n");
+    println!("usage: pet-cli [exec|live|capabilities|version|help]\n");
     println!(
         "  exec          read one JSON command per line on stdin, write one JSON result per line"
     );
     println!("  live          interactive terminal pet (non-TTY: one JSON status line)");
-    println!("  capabilities  print the machine-readable capability catalog\n");
+    println!("  capabilities  print the machine-readable capability catalog");
+    println!("  version       print the release version and the rules version\n");
     println!("ops accepted by exec (rules v{}):", pet_core::RULES_VERSION);
     for c in pet_core::CAPABILITIES {
         let errors: Vec<String> = c.errors.iter().map(|e| format!("{e:?}")).collect();
@@ -45,6 +47,15 @@ fn help() {
             errors
         );
     }
+}
+
+/// 发布归档不带包管理器的元数据，版本只能从二进制本身读到。
+fn version() {
+    println!(
+        "pet-cli {} (rules v{})",
+        env!("CARGO_PKG_VERSION"),
+        pet_core::RULES_VERSION
+    );
 }
 
 /// 每行一个 JSON 命令,每行输出一个 JSON 结果。

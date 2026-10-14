@@ -8,7 +8,7 @@ SHELL_SCRIPTS := $(shell git ls-files '*.sh')
 
 .PHONY: help fmt fmt-check clippy check-arch lint-scripts lint-workflows check-versions deny lint \
 	test test-pg three-end schema schema-check tty e2e e2e-pg consumers ci \
-	term preview dev-init dev token wasm image clean \
+	term preview dev-init dev token wasm cli-archive image image-smoke clean \
 	docker-build docker-shell docker-dev docker-token docker-down docker-clean
 
 ##@ 日常开发
@@ -90,8 +90,8 @@ e2e: ## 服务端到端(真实二进制、HTTP、重启),SQLite
 e2e-pg: ## 同上,另含 Postgres;未设置 PET_TEST_PG_URL 时需要 Docker
 	sh scripts/service-pg.sh
 
-consumers: ## 外部消费方验收:npm CLI、Node 嵌入、Rust 宿主、TanStack Start(需要 Chrome)
-	sh consumers/npm-cli.sh && sh consumers/node-embed.sh && sh consumers/rust-host.sh && sh consumers/tanstack-start/run.sh
+consumers: ## 外部消费方验收:CLI 发布归档、Node 嵌入、Rust 宿主、TanStack Start(需要 Chrome)
+	sh consumers/cli-archive.sh && sh consumers/node-embed.sh && sh consumers/rust-host.sh && sh consumers/tanstack-start/run.sh
 
 ci: lint test test-pg three-end e2e-pg schema-check tty ## CI 的 Lint 与 Core 作业(服务镜像除外)
 
@@ -100,8 +100,14 @@ ci: lint test test-pg three-end e2e-pg schema-check tty ## CI 的 Lint 与 Core 
 wasm: ## 构建 SDK(wasm-bindgen web target)到 packages/pet-sdk/dist
 	packages/pet-sdk/build.sh
 
+cli-archive: ## 打包本机平台的 pet-cli 发布归档到 target/dist(TARGET 可指定其他目标)
+	sh scripts/package-cli.sh target/dist $(TARGET)
+
 image: ## 构建服务镜像 pet-service:dev(在宿主上运行,需要 Docker)
 	docker build -f Dockerfile.service -t pet-service:dev .
+
+image-smoke: image ## 构建服务镜像并验证它以非 root 用户启动、应答健康检查与能力目录
+	sh scripts/smoke-service-image.sh pet-service:dev
 
 clean: ## 删除构建产物与 .dev/
 	cargo clean
