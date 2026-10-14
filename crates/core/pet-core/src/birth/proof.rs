@@ -1,7 +1,7 @@
 //! 出生承诺—揭示:承诺、接受收据、证书的签发与验证。
 //! 本模块只含验证所需的数据结构与纯函数;签名密钥与签发在 pet-issuer,不进入核心。
 use crate::birth::{derive_birth, BirthInput};
-use crate::codec::{u64_string, unhex};
+use crate::protocol::codec::{u64_string, unhex};
 use crate::RULES_VERSION;
 use alloc::string::String;
 use alloc::vec::Vec;

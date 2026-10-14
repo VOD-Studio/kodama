@@ -1,5 +1,5 @@
-use crate::codec::{u64_string, ErrorCode};
-use crate::growth::{self, Branch, Growth, AFFECTION, CALM, CURIOUS, MAX_TOPIC_LEN};
+use crate::protocol::codec::{u64_string, ErrorCode};
+use crate::rules::growth::{self, Branch, Growth, AFFECTION, CALM, CURIOUS, MAX_TOPIC_LEN};
 use crate::RULES_VERSION;
 use alloc::string::String;
 use serde::{Deserialize, Serialize};

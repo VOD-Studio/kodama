@@ -1,5 +1,5 @@
 //! 成长:经验与等级、长期性格、主题倾向、进化分支。全部为整数运算,无随机。
-use crate::life::ActError;
+use crate::rules::life::ActError;
 use alloc::string::String;
 use alloc::vec::Vec;
 use serde::{Deserialize, Serialize};
@@ -98,7 +98,7 @@ pub struct Growth {
     /// 出生底色,由基因决定,创建后不变。当前性格最多偏离底色 +200。
     pub base_traits: [u16; 3],
     /// 性格漂移预算所属的天(逻辑时间 / 1440)。
-    #[serde(with = "crate::codec::u64_string")]
+    #[serde(with = "crate::protocol::codec::u64_string")]
     #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub drift_day: u64,
     /// 当天各维度已使用的漂移点数。
