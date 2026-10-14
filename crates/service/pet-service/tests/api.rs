@@ -213,6 +213,36 @@ async fn adoption_issues_a_certificate_anyone_can_verify() {
 }
 
 #[tokio::test]
+async fn every_client_can_draw_the_pet_from_its_projection() {
+    let e = env();
+    let (_, accepted) = adopt(&e, &login(&e, "alice").await, 3).await;
+    let cert: Certificate = serde_json::from_value(accepted["certificate"].clone()).unwrap();
+    // 另一个客户端（例如 CLI）没有见过领取过程，只读投影
+    let (s, v) = call(
+        &e.app,
+        "GET",
+        "/v1/pets/me",
+        Some(&login(&e, "alice").await),
+        None,
+    )
+    .await;
+    assert_eq!(s, StatusCode::OK, "{v}");
+    let look = &v["value"]["appearance"];
+    assert_eq!(look["species"], cert.species);
+    assert_eq!(look["rarity"], cert.rarity);
+    // 基因与按证书重算的出生一致
+    let birth = pet_core::derive_birth(&pet_core::BirthInput {
+        world: cert.context.world.clone(),
+        request_id: cert.context.request_id.clone(),
+        server_seed: cert.server_seed.clone(),
+        client_seed: cert.client_seed.clone(),
+        born_at: 0,
+    })
+    .unwrap();
+    assert_eq!(look["genes"], json!(birth.genes));
+}
+
+#[tokio::test]
 async fn the_server_seed_is_never_exposed_before_the_certificate() {
     let e = env();
     let t = login(&e, "alice").await;

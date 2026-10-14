@@ -44,7 +44,7 @@ PET_TRUSTED_ISSUERS='[{"iss":"violet","keys":[{"kid":"v1","public_key":"<64 位�
 | `POST /v1/births` | 令牌 | 开始领取：返回承诺与承诺收据 |
 | `GET /v1/births/{id}` | 令牌 | 查看领取状态（接受前只含承诺，绝不含 `server_seed`） |
 | `POST /v1/births/{id}/accept` | 令牌 | 固定客户端随机材料并揭示，返回证书与宠物 |
-| `GET /v1/pets/me` | 令牌 | 当前主宠的投影 |
+| `GET /v1/pets/me` | 令牌 | 当前主宠的投影；`appearance` 为出生确定的外形（物种、基因、稀有度），任何客户端都能据此画出同一只宠物 |
 | `POST /v1/pets/me/actions` | 令牌 | 执行动作，体为 `{action, request_id}` |
 | `GET /v1/pets/me/evolution` | 令牌 | 进化分支与缺项说明 |
 | `POST /v1/device/authorize` | 无 | 设备开始登录：返回设备码与用户码，体可选 `{client}` |
