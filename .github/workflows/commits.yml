@@ -1,12 +1,15 @@
 name: Commits
 
-# release-please 从 main 上的提交推导版本号与 CHANGELOG。仓库只允许 Rebase and merge：
-# PR 里的每个提交原样进入 main，历史完整保留，每个 feat、fix 各成一条 CHANGELOG。
-# squash（会把历史压成一个提交）与 merge commit（会带上 PR 标题，同一改动被记两次）都已关闭。
+# release-please 从 main 上的提交推导版本号与 CHANGELOG。仓库允许三种合并方式，约定：
+# - 功能 PR 用 Create a merge commit：PR 里的每个提交原样进入 main，历史完整保留，每个 feat、fix 各成一条 CHANGELOG。
+#   合并提交的标题是「Merge pull request #N from …」，不符合 Conventional Commits，release-please 不会把它再记一次。
+# - 发版 PR（chore(main): release x.y.z）用 Squash and merge，标题即 PR 标题。
+# - Rebase and merge 仍然可用，效果与合并提交相同但没有合并节点。
+# 所以这里同时校验每个提交（合并提交与 rebase 时原样进入 main）与 PR 标题（squash 时成为提交标题）。
 # 发版 PR 由 GITHUB_TOKEN 创建，不会触发 pull_request；release.yml 以 workflow_dispatch 对其分支补跑一次。
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, edited]
   workflow_dispatch:
 
 permissions:
@@ -15,27 +18,55 @@ permissions:
 
 jobs:
   commits:
-    # 必需检查：每个提交都会原样进入 main
+    # 必需检查
     name: Commit messages
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      - name: Every commit follows Conventional Commits
+      - name: Commits and the pull request title follow Conventional Commits; bodies are lists
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number || github.ref_name }}
           # <type>(<scope>)?!?: <描述>
           PATTERN: '^(feat|fix|perf|refactor|docs|style|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: [^ ]'
+          # 正文每一行：列表项、列表项的缩进续行，或 trailer（Closes #1、Refs #1、BREAKING CHANGE: …）
+          BODY: '^(\s*([-*] |[0-9]+\. )|\s{2,}\S|(Closes|Fixes|Resolves|Refs) #|BREAKING CHANGE: |[A-Za-z][A-Za-z-]*: )'
         run: |
-          headlines=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json commits --jq '.commits[].messageHeadline')
+          pr=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json title,commits)
+          fail=0
+          title=$(printf '%s' "$pr" | jq -r .title)
+          if ! printf '%s\n' "$title" | grep -Eq "$PATTERN"; then
+            echo "PR 标题不符合 Conventional Commits（squash 合并时它会成为提交标题）：$title" >&2
+            fail=1
+          fi
+          headlines=$(printf '%s' "$pr" | jq -r '.commits[].messageHeadline')
           printf '%s\n' "$headlines"
           bad=$(printf '%s\n' "$headlines" | grep -Ev "$PATTERN" || true)
-          [ -z "$bad" ] && exit 0
-          {
-            echo "这些提交不符合 Conventional Commits，而它们会原样进入 main："
-            printf '  %s\n' "$bad"
-            echo "格式：<type>(<scope>)?: <描述>，破坏性变更在冒号前加 !；type 为"
-            echo "feat fix perf refactor docs style test build ci chore revert。"
-            echo "用 git rebase -i 整理或改写提交信息后强推本分支。合并提交（Merge …）也不允许，请 rebase 到 main。"
-          } >&2
-          exit 1
+          if [ -n "$bad" ]; then
+            {
+              echo "这些提交标题不符合 Conventional Commits，而它们会原样进入 main："
+              printf '  %s\n' "$bad"
+              echo "格式：<type>(<scope>)?: <描述>，破坏性变更在冒号前加 !；type 为"
+              echo "feat fix perf refactor docs style test build ci chore revert。"
+              echo "PR 内不允许从 main 合并进来的提交（Merge …），请 rebase 到 main。"
+            } >&2
+            fail=1
+          fi
+          # 正文写成列表，不写散文；机器人（Dependabot、Actions）的提交不在此列
+          prose=$(printf '%s' "$pr" | jq -r '
+            .commits[]
+            | select(all(.authors[]; (.login // "") | test("\\[bot\\]$") | not))
+            | .messageHeadline as $h
+            | (.messageBody | split("\n")[] | select(test("\\S"))) as $line
+            | "\($h)\t\($line)"' | while IFS="$(printf '\t')" read -r head line; do
+              printf '%s\n' "$line" | grep -Eq "$BODY" || printf '  %s\n    %s\n' "$head" "$line"
+            done)
+          if [ -n "$prose" ]; then
+            {
+              echo "提交正文要写成列表（「- 」开头，续行缩进两格），不要写成段落；trailer（Closes #1、Refs #1）可以单独成行："
+              printf '%s\n' "$prose"
+              echo "用 git rebase -i 改写后强推本分支。"
+            } >&2
+            fail=1
+          fi
+          exit "$fail"

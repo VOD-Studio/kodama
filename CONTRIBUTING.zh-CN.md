@@ -63,9 +63,28 @@ make lint test       # 或：make docker-ci
 
 破坏性变更在冒号前加 `!`，例如 `feat(sdk)!: …`；1.0 之前，破坏性变更升次版本。常用 scope 有 `core`、`term`、`store`、`service`、`cli`、`sdk`、`release`、`deps`。描述可以用中文或英文。
 
-**合并方式。** 只允许 **Rebase and merge**：PR 的每个提交原样进入 `main`，历史完整保留，每个 `feat`、`fix` 各成一条 CHANGELOG。squash（会把历史压成一个提交）与 merge commit（会带上 PR 标题，release-please 会把同一改动记两次）都已关闭。
+**合并方式。** 三种方式都开着，按 PR 的类型选：
 
-请把 PR 整理成一系列原子提交，每个提交信息都符合 Conventional Commits。必需检查 **Commit messages** 校验每个提交；需要修改时用 `git rebase -i` 改写后强推分支。PR 内不允许出现从 `main` 合并进来的 merge commit，请改为 rebase 到 `main`。
+| PR | 方式 | 理由 |
+|---|---|---|
+| 功能、修复、文档等 | **Create a merge commit** | PR 的每个提交原样进入 `main`，历史完整保留，每个 `feat`、`fix` 各成一条 CHANGELOG；合并提交的标题是「Merge pull request #N from …」，release-please 不会把同一改动再记一次。`git log --first-parent` 可以按 PR 一条一行地看历史 |
+| 发版 PR（`chore(main): release x.y.z`） | **Squash and merge** | 只有一个版本提交，压成一个以 PR 标题命名的提交 |
+| 只有一个提交的小 PR（例如 Dependabot） | 三种都可以 | 结果相同 |
+
+不要用 squash 合并功能 PR：多个提交会被压成一个，历史与逐条的 CHANGELOG 都会丢失。
+
+**提交信息。** 请把 PR 整理成一系列原子提交，每个提交信息都符合 Conventional Commits。正文写成列表，不写成段落：
+
+```
+feat(service): 好友与拜访
+
+- 邀请码建立好友，双方各自确认，任一方随时撤回
+- 拜访只返回公开投影，不含库存与账号信息
+
+Closes #19
+```
+
+列表项以 `- ` 开头，续行缩进两格；`Closes #1`、`Refs #1`、`BREAKING CHANGE: …` 可以单独成行。必需检查 **Commit messages** 校验每个提交的标题与正文，以及 PR 标题（squash 时它会成为提交标题）；需要修改时用 `git rebase -i` 改写后强推分支。PR 内不允许出现从 `main` 合并进来的 merge commit，请改为 rebase 到 `main`。
 
 Dependabot 每月开分组的依赖更新 PR。cargo 依赖编译进所有产物，提交前缀为 `fix(deps)`，合并后随补丁版本发布；npm 开发工具、Actions 与镜像的更新前缀为 `chore(deps)` 或 `ci`，不触发发版。`wasm-bindgen` 不在 Dependabot 范围内：需要手动在 `crates/runtimes/pet-wasm/Cargo.toml`、各工作流与 `docker/dev.Dockerfile` 中同时升级，版本不一致时 `make check-versions` 会报错。
 

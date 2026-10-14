@@ -63,9 +63,28 @@ Run the narrower checks that match your change as well: `make three-end` for rul
 
 Add `!` before the colon for a breaking change, for example `feat(sdk)!: …`. Before 1.0, a breaking change bumps the minor version. Common scopes are `core`, `term`, `store`, `service`, `cli`, `sdk`, `release` and `deps`. Descriptions may be in Chinese or English.
 
-**Merging.** Only **Rebase and merge** is allowed. Every commit of a pull request lands on `main` as it is, so history stays complete and each `feat` or `fix` becomes its own CHANGELOG entry. Squash merging (which collapses history into one commit) and merge commits (which carry the pull request title, so release-please would count the change twice) are disabled.
+**Merging.** All three methods are enabled; pick by the kind of pull request:
 
-Shape each pull request as a series of clean, atomic commits, each with a Conventional Commits message. The required **Commit messages** check validates every commit; to fix one, rewrite it with `git rebase -i` and force-push the branch. Merge commits from `main` are not allowed inside a pull request: rebase onto `main` instead.
+| Pull request | Method | Why |
+|---|---|---|
+| Features, fixes, docs and the like | **Create a merge commit** | Every commit lands on `main` as it is, so history stays complete and each `feat` or `fix` becomes its own CHANGELOG entry. The merge commit is titled "Merge pull request #N from …", so release-please does not count the change twice. `git log --first-parent` shows one line per pull request |
+| The release pull request (`chore(main): release x.y.z`) | **Squash and merge** | It holds one version commit; squashing names it after the pull request title |
+| Small single-commit pull requests (for example Dependabot) | Any | The result is the same |
+
+Do not squash a feature pull request: its commits would collapse into one, losing the history and the per-commit CHANGELOG entries.
+
+**Commit messages.** Shape each pull request as a series of atomic commits with Conventional Commits messages. Write the body as a list, not as paragraphs:
+
+```
+feat(service): friends and visits
+
+- Friendships start from an invite code; each side confirms and either can withdraw
+- Visits return only the public projection, never inventory or account details
+
+Closes #19
+```
+
+List items start with `- `, and continuation lines are indented by two spaces; trailers such as `Closes #1`, `Refs #1` and `BREAKING CHANGE: …` can stand on their own lines. The required **Commit messages** check validates every commit's title and body, and the pull request title, which becomes the commit title on a squash. To fix a message, rewrite it with `git rebase -i` and force-push the branch. Merge commits from `main` are not allowed inside a pull request: rebase onto `main` instead.
 
 Dependabot opens grouped update pull requests monthly. Cargo updates use the `fix(deps)` prefix, because Rust dependencies ship inside every artifact, so merging them triggers a patch release; npm dev tooling, Actions and image updates use `chore(deps)` or `ci` and do not. `wasm-bindgen` is excluded from Dependabot: update it by hand in `crates/runtimes/pet-wasm/Cargo.toml`, the workflows and `docker/dev.Dockerfile` together. `make check-versions` catches any mismatch.
 
