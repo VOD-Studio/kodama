@@ -18,9 +18,9 @@
 **只用 Docker。** 任何 make 目标加上 `docker-` 前缀，就在开发容器里运行，容器里的工具链与 CI 完全相同：
 
 ```sh
-make docker-build      # 构建镜像 kodama-dev（约 1.9 GB），首次与 Dockerfile.dev 变更后各一次
+make docker-build      # 构建镜像 kodama-dev（约 1.9 GB），首次与 docker/dev.Dockerfile 变更后各一次
 make docker-test       # 在容器里运行 make test
-make docker-ci         # CI 的 Lint 与 Core 作业中的全部检查，Postgres 来自 compose.yaml
+make docker-ci         # CI 的 Lint 与 Core 作业中的全部检查，Postgres 来自 docker/compose.yaml
 make docker-dev        # 本地服务，宿主可访问 127.0.0.1:8787
 make -s docker-token   # 向该服务换取 SUB（默认 alice）的访问令牌
 make docker-shell      # 进入容器的 shell
@@ -45,7 +45,7 @@ make lint test       # 或：make docker-ci
 
 - **格式**使用 rustfmt 默认风格（`rustfmt.toml` 只设了稳定版选项）。一次性的全量格式化提交记录在 `.git-blame-ignore-revs` 里；执行 `git config blame.ignoreRevsFile .git-blame-ignore-revs` 后，`git blame` 会跳过它，GitHub 的 blame 视图已自动跳过。
 - **生成的文件**（`packages/pet-sdk/schema/`、`src/types.d.ts`、`docs/capabilities.md`）随仓库提交。用 `make schema` 重新生成，不要手改。
-- **架构规则**由 `make check-arch` 检查。新增 crate 或 crate 之间的依赖时，在同一个 PR 里更新 `scripts/check-arch.mjs` 的表与 `docs/architecture.md`。
+- **架构规则**由 `make check-arch` 检查。新增 crate 或 crate 之间的依赖时，在同一个 PR 里更新 `scripts/check/check-arch.mjs` 的表与 `docs/architecture.md`。
 
 ## 提交与 PR
 
@@ -72,7 +72,7 @@ make lint test       # 或：make docker-ci
 
 两项检查配合使用：**PR title** 是必需检查，校验 PR 标题；**Commit messages** 是提示性检查，校验每个提交，它失败时请用 squash 合并。
 
-Dependabot 每月开分组的依赖更新 PR，标题前缀为 `chore(deps)`。如果某次更新修复了随产物发布的依赖漏洞，合并前把标题改成 `fix(deps): …`，以便触发发版。`wasm-bindgen` 不在 Dependabot 范围内：需要手动在 `crates/runtimes/pet-wasm/Cargo.toml`、各工作流与 `Dockerfile.dev` 中同时升级，版本不一致时 `make check-versions` 会报错。
+Dependabot 每月开分组的依赖更新 PR，标题前缀为 `chore(deps)`。如果某次更新修复了随产物发布的依赖漏洞，合并前把标题改成 `fix(deps): …`，以便触发发版。`wasm-bindgen` 不在 Dependabot 范围内：需要手动在 `crates/runtimes/pet-wasm/Cargo.toml`、各工作流与 `docker/dev.Dockerfile` 中同时升级，版本不一致时 `make check-versions` 会报错。
 
 ## 发版
 
@@ -82,7 +82,7 @@ Dependabot 每月开分组的依赖更新 PR，标题前缀为 `chore(deps)`。�
 - `pet-cli` 各平台归档、`SHA256SUMS` 与构建来源证明，作为该 GitHub Release 的附件；
 - 多架构的 `pet-service` 镜像到 `ghcr.io/vod-studio/pet-service`。
 
-流程、需要的仓库设置与支持的平台见 [docs/distribution.md](docs/distribution.md)。
+流程、需要的仓库设置与支持的平台见 [docs/operations/distribution.md](docs/operations/distribution.md)。
 
 ## 报告安全问题
 

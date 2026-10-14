@@ -68,7 +68,7 @@ Only uncatchable termination (SIGKILL) can leave the terminal in the alternate s
 To show the pet inside your own terminal tool, do not spawn `pet-cli live`. Embed the renderer so that your tool keeps its input and its screen:
 
 - Node hosts: [`@violetjs/pet/terminal`](https://github.com/VOD-Studio/kodama/blob/main/packages/pet-sdk/README.md)
-- Rust hosts: depend on the `pet-core` and `pet-term` crates (see `consumers/rust-host` in the repository)
+- Rust hosts: depend on the `pet-core` and `pet-term` crates (see `tests/consumers/rust-host` in the repository)
 
 ## License
 

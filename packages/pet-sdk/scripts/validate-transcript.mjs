@@ -8,7 +8,7 @@ ajv.addSchema(schema, "pet");
 const check = (name) => ajv.getSchema(`pet#/$defs/${name}`);
 
 const transcript = fs.readFileSync(new URL("../../../target/out-native.txt", import.meta.url), "utf8").trim().split("\n");
-const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../scenario/steps.json", import.meta.url))).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", "capabilities"];
+const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url))).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", "capabilities"];
 if (ops.length !== transcript.length) throw new Error(`op count ${ops.length} != transcript ${transcript.length}`);
 
 let n = 0;
@@ -21,7 +21,7 @@ transcript.forEach((line, i) => {
 
 // 输入侧:场景里发出的命令也必须符合 Command。
 const cmd = check("Command");
-const fx = JSON.parse(fs.readFileSync(new URL("../../../scenario/cert.json", import.meta.url)));
+const fx = JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/cert.json", import.meta.url)));
 const inputs = [
   { op: "birth", world: "w1", request_id: "r1", server_seed: "aa".repeat(32), client_seed: "bb".repeat(32), born_at: "0" },
   { op: "verify_birth", ...fx },

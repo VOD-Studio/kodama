@@ -46,7 +46,7 @@ jobs:
       - uses: taiki-e/install-action@1168f6810a3cb30a3514bf5756a3b7f0422c6df8 # v2
         with:
           tool: cargo-deny@${{ env.CARGO_DENY_VERSION }}
-      # install-action 收录的 actionlint 版本滞后，直接下载官方发布并校验 checksum（与 Dockerfile.dev 同源）
+      # install-action 收录的 actionlint 版本滞后，直接下载官方发布并校验 checksum（与 docker/dev.Dockerfile 同源）
       - name: Install actionlint
         run: |
           base="https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}"
@@ -150,13 +150,13 @@ jobs:
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
           CHROME_FLAGS: --no-sandbox
-        run: ./consumers/tanstack-start/run.sh
+        run: sh tests/consumers/tanstack-start/run.sh
       - name: CLI release archive outside the repository
-        run: ./consumers/cli-archive.sh
+        run: sh tests/consumers/cli-archive/run.sh
       - name: Node terminal embedding
-        run: ./consumers/node-embed.sh
+        run: sh tests/consumers/node-embed/run.sh
       - name: Rust host embedding
-        run: ./consumers/rust-host.sh
+        run: sh tests/consumers/rust-host/run.sh
 
   platforms:
     name: Platform (${{ matrix.os }})
@@ -178,4 +178,4 @@ jobs:
       - name: Release binary and real TTY behavior
         run: make tty
       - name: Rust host embedding
-        run: ./consumers/rust-host.sh
+        run: sh tests/consumers/rust-host/run.sh
