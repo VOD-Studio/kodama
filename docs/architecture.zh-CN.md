@@ -52,7 +52,7 @@ flowchart BT
 | `pet-wasm` | 通过 wasm-bindgen 暴露 `execute` | 其他一切；它只有七行 |
 | `pet-cli` | `exec`（JSON 行）、`live`（终端里的动态宠物）、`capabilities`、`version` | 账号状态；`live` 只是本地预览 |
 | `pet-schema` | 输出线上协议的 JSON Schema | 运行时行为；它是构建期工具 |
-| `@violetjs/pet` | 显式异步初始化、强类型的 `run`、给 Node 宿主的终端嵌入 | 规则；它只调用 WebAssembly |
+| `@violetjs/pet` | 显式异步初始化、强类型的 `run`、画布与终端呈现、本地模式（与 `pet-store` 同一契约的 IndexedDB 存储） | 规则；它只调用 WebAssembly |
 
 ### 依赖规则
 
@@ -120,7 +120,7 @@ kodama/
 ├── docs/
 │   ├── architecture(.zh-CN).md
 │   ├── prd/ adr/ research/   产品需求、决策记录、调研
-│   ├── design/               规则与协议：参数、成长、版本、出生协议、扩展玩法、素材
+│   ├── design/               规则与协议：参数、成长、版本、出生协议、本地模式、扩展玩法、素材
 │   ├── operations/           服务运行、分发与发版
 │   └── history/              过去的变更记录，如仓库拆分
 └── .github/                  工作流、dependabot、release-please 配置与清单
@@ -194,7 +194,7 @@ CAPABILITIES（pet-core::caps）────────────────
 | 原生、Node、web 输出一致 | `make three-end` 逐字节比较转录（CI 的 Core 作业） |
 | 既有出生永不改变 | 16 组黄金出生向量（`tests/fixtures/golden-births.json`）；改变派生必须提升 `rules_version` |
 | 不猜测旧个体的规则 | `act` 遇到不支持的 `rules_version` 返回 `unsupported_rules` |
-| 各存储后端行为一致 | 同一套契约测试分别对 SQLite 与 Postgres 运行，包括并发 |
+| 各存储后端行为一致 | 同一套契约测试分别对 SQLite 与 Postgres 运行，包括并发；其中的共享向量（`tests/fixtures/store-contract.json`）也对 SDK 的内存与 IndexedDB 存储运行 |
 
 包版本与 `rules_version` 相互独立，见[版本策略](design/versioning.md)。
 
@@ -208,7 +208,7 @@ CAPABILITIES（pet-core::caps）────────────────
 | 真实二进制上的服务端到端 | `make e2e-pg` | Core |
 | 服务镜像以非 root 运行并应答 | `make image-smoke` | Core；Release（两种架构） |
 | schema、类型与文档未过期 | `make schema-check` | Core |
-| SDK 网页渲染：生命周期、减少动效、无障碍 | `make sdk-test` | Core |
+| SDK 网页渲染与本地模式：生命周期、无障碍、存储契约、回滚、多标签页 | `make sdk-test` | Core |
 | 真实 TTY 行为 | `make tty` | Core；Platform（linux-arm64、macOS） |
 | 安装后的包在仓库外可用 | `make consumers` | External consumption；Package |
 | 每个发布归档在对应平台可用 | `tests/consumers/cli-archive/run.sh` | Package |
@@ -242,7 +242,7 @@ CAPABILITIES（pet-core::caps）────────────────
 | #5 规则版本迁移 | `rules/migrate.rs`：显式的 `migrate(pet, from, to)` 与不变量测试 | — | 加载时迁移并持久化；表结构变更以编号迁移放在 `pet-store` | — |
 | #10 账号服务 | — | — | `http.rs` 里的连接池、令牌存储、速率限制；固化存储契约签名 | — |
 | #12 活动与奖励 | `grant`（已有） | — | `routes/activity.rs`：持久收件、去重、世界内上限 | 接入方的连接器发送签名事件 |
-| #13 浏览器本地模式 | — | — | — | `packages/pet-sdk`：IndexedDB 适配器，通过与 Rust 存储相同的契约向量（共享于 `tests/fixtures/`） |
+| #13 浏览器本地模式 | 不变 | — | 契约向量（`tests/fixtures/store-contract.json`）也对 SQLite 与 Postgres 运行 | **已完成**（[设计](design/local-mode.md)）：`@violetjs/pet/local` 与 `/store`，IndexedDB 存储、每日口粮与活动奖励、多标签页并发 |
 | #15 CLI 账号 | — | — | 设备授权式的登录接口 | `pet-cli` 的 `account` 模块经 HTTP 访问，不链接服务端 crate |
 | #16 Skill | 能力目录（已有） | — | — | `packages/pet-sdk/skill/`，可生成部分由能力目录产出 |
 | #17 装扮与家园 | `rules/outfit.rs`：槽位与身体结构兼容 | 物品素材与锚点；`assets/catalog/items.json` | `routes/outfit.rs` | SDK 的渲染图层 |

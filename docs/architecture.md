@@ -52,7 +52,7 @@ An arrow means "depends on". Every edge points toward the pure core at the top, 
 | `pet-wasm` | Exposing `execute` through wasm-bindgen | Anything else; it is seven lines long |
 | `pet-cli` | `exec` (JSON lines), `live` (an animated pet in the terminal), `capabilities`, `version` | Account state; `live` is a local preview |
 | `pet-schema` | Printing the JSON Schema of the wire protocol | Runtime behavior; it is a build-time tool |
-| `@violetjs/pet` | Explicit async initialization, typed `run`, and terminal embedding for Node hosts | Rules; it only calls the WebAssembly |
+| `@violetjs/pet` | Explicit async initialization, typed `run`, canvas and terminal rendering, and local mode (an IndexedDB store with the same contract as `pet-store`) | Rules; it only calls the WebAssembly |
 
 ### Dependency rules
 
@@ -120,7 +120,7 @@ kodama/
 ├── docs/
 │   ├── architecture(.zh-CN).md
 │   ├── prd/ adr/ research/   product requirements, decisions, background
-│   ├── design/               rules and protocols: parameters, growth, versioning, birth protocol, extensions, art
+│   ├── design/               rules and protocols: parameters, growth, versioning, birth protocol, local mode, extensions, art
 │   ├── operations/           running the service, distribution and releases
 │   └── history/              records of past changes, such as the repository split
 └── .github/                  workflows, dependabot, release-please config and manifest
@@ -194,7 +194,7 @@ Encoding rules: 64-bit integers are decimal strings (JavaScript numbers lose pre
 | Native, Node and web output agree | `make three-end` compares transcripts byte for byte (CI Core job) |
 | Existing births never change | 16 golden birth vectors (`tests/fixtures/golden-births.json`); changing a derivation requires a new `rules_version` |
 | Old pets are never guessed | `act` refuses an unsupported `rules_version` with `unsupported_rules` |
-| Storage backends behave the same | One contract test suite runs against SQLite and Postgres, including concurrency |
+| Storage backends behave the same | One contract test suite runs against SQLite and Postgres, including concurrency; its shared vectors (`tests/fixtures/store-contract.json`) also run against the SDK's memory and IndexedDB stores |
 
 Package versions and `rules_version` are separate: see [versioning](design/versioning.md).
 
@@ -208,7 +208,7 @@ Package versions and `rules_version` are separate: see [versioning](design/versi
 | Service end to end on a real binary | `make e2e-pg` | Core |
 | Service image runs as non-root and answers | `make image-smoke` | Core; Release (both architectures) |
 | Schema, types and docs are current | `make schema-check` | Core |
-| SDK web rendering: lifecycle, reduced motion, accessibility | `make sdk-test` | Core |
+| SDK web rendering and local mode: lifecycle, accessibility, store contract, rollback, multiple tabs | `make sdk-test` | Core |
 | Real TTY behavior | `make tty` | Core; Platform (linux-arm64, macOS) |
 | Installed packages work outside the repository | `make consumers` | External consumption; Package |
 | Release archives work on each target | `tests/consumers/cli-archive/run.sh` | Package |
@@ -242,7 +242,7 @@ Each open issue already has a place in this layout. A feature adds modules where
 | #5 Rule-version migration | `rules/migrate.rs`: explicit `migrate(pet, from, to)` with invariant tests | — | Migrates on load and persists; schema changes as numbered migrations in `pet-store` | — |
 | #10 Account service | — | — | Connection pool, token store, rate limits in `http.rs`; storage contract signatures frozen | — |
 | #12 Activity and rewards | `grant` (exists) | — | `routes/activity.rs`: durable inbox, deduplication, per-world caps | Integrator connectors send signed events |
-| #13 Browser local mode | — | — | — | `packages/pet-sdk`: IndexedDB adapter passing the same storage contract vectors as the Rust stores (shared fixtures in `tests/fixtures/`) |
+| #13 Browser local mode | Unchanged | — | The contract vectors (`tests/fixtures/store-contract.json`) also run against SQLite and Postgres | **Done** ([design](design/local-mode.md)): `@violetjs/pet/local` and `/store`, an IndexedDB store, a daily ration and activity rewards, multiple tabs |
 | #15 CLI accounts | — | — | Device-style authorization endpoint | `pet-cli`: `account` module talking HTTP; no service crate linked |
 | #16 Skill | Capability catalog (exists) | — | — | `packages/pet-sdk/skill/`, generated parts from the catalog |
 | #17 Outfits and home | `rules/outfit.rs`: slots and body compatibility | Item art and anchors; `assets/catalog/items.json` | `routes/outfit.rs` | Rendering layers in the SDK |

@@ -7,7 +7,8 @@
 - **结果确定。** 规则只用整数，自身不读时钟、不取随机源：时间与随机材料都由调用方传入。浏览器、Node 与原生构建的输出在 CI 里逐字节比较。
 - **显式初始化。** 导入本包不会加载或实例化 WebAssembly，SSR 期间导入是安全的。在客户端调用 `initPet()`，之后的调用全部是同步的。
 - **强类型命令。** TypeScript 类型、JSON Schema 与能力目录都由 Rust 类型生成，不会与实现脱节。
-- **终端嵌入。** `@violetjs/pet/terminal` 在你自己的 Node 终端工具里划定的矩形内绘制宠物，不夺取它的输入与屏幕。
+- **画布与终端呈现。** `@violetjs/pet/web` 在 `<canvas>` 上播放宠物；`@violetjs/pet/terminal` 在你自己的 Node 终端工具里划定的矩形内绘制宠物，不夺取它的输入与屏幕。
+- **本地模式。** `@violetjs/pet/local` 把宠物存在浏览器的 IndexedDB 里，不需要账号或后端。
 
 > 出生协议尚未经过独立安全评审。评审通过前，不要对外宣称出生结果可正式验证。
 
@@ -80,7 +81,7 @@ await initPet(await readFile(new URL(import.meta.resolve("@violetjs/pet/wasm")))
 
 每个命令的结果类型与可能的错误见[能力目录](https://github.com/VOD-Studio/kodama/blob/main/packages/pet-sdk/docs/capabilities.md)（随包分发为 `docs/capabilities.md`）。JSON Schema 导出为 `@violetjs/pet/schema.json`。
 
-会改变状态的命令（`birth`、`act`、`grant`）返回新状态，SDK 本身不保存任何东西。账号模式下由[宠物服务](https://github.com/VOD-Studio/kodama/blob/main/docs/operations/service.md)持有权威状态，客户端只负责呈现。
+会改变状态的命令（`birth`、`act`、`grant`）返回新状态，命令本身不保存任何东西。本地模式下由 `@violetjs/pet/local` 把状态存在浏览器里；账号模式下由[宠物服务](https://github.com/VOD-Studio/kodama/blob/main/docs/operations/service.md)持有权威状态，客户端只负责呈现。
 
 ## 网页渲染
 
@@ -108,6 +109,33 @@ pet.dispose();
 - 导入没有副作用，SSR 期间安全；在客户端调用 `mountPet`。
 
 逻辑画布不小于 56×36 时任何外形都不会被裁切（缺省 96×40），多出的宽度用来走动。
+
+## 本地模式
+
+`@violetjs/pet/local` 让宠物住在浏览器里，不需要账号、后端或网络。每个动作都由与服务端相同的规则核心结算，并以一次原子提交写入 IndexedDB：
+
+```js
+import { initPet } from "@violetjs/pet";
+import { createLocalPet, openIndexedDbStore } from "@violetjs/pet/local";
+
+await initPet();
+const local = createLocalPet({ store: await openIndexedDbStore() });
+if (!(await local.get())) await local.adopt();
+await local.claimDaily();             // 每日口粮：3 份食物，每个本地自然日一次
+const fed = await local.act("feed");  // { ok: true, value } 或 { ok: false, code, message }
+await local.reward("read:post-42", { exp: 10, topic: "rust" }); // 你站点里的一次活动
+const view = await local.get();       // 结算到现在的投影，只用于展示
+```
+
+- 逻辑时间取本机时钟的分钟数，离开期间按规则结算：离开再久，回来最多生病，不会直接死亡。本机时钟被调回过去时，宠物的时间停在最近一次结算，不会倒流。
+- 多个标签页可以同时操作：版本冲突时重新读取并结算，同一份食物不会被花两次。用同一个请求标识重试（`act(action, requestId)`）返回第一次的结果，不会重复扣费。
+- 没有服务时资源由固定的本地规则提供：`claimDaily()` 每个本地自然日给 3 份食物（手里没有药品时另给 1 份）；`reward(source, { exp, topic })` 为你上报的活动给经验与主题，同一 `source` 只奖励一次，每天至多 20 次、合计 100 经验。活动奖励不给食物。`get()` 的 `allowance` 给出今天还剩多少。
+- 错误码沿用规则核心；存储相关的错误与服务端同名（`not_found`、`already_has_pet`、`request_conflict`、`busy`）；本地额度用完时为 `already_claimed` 与 `daily_limit`。
+- 本地宠物出生在 `"local"` 世界，没有出生证书。它不是服务签发的个体，也不会被上传或并入账号。
+- `createMemoryStore()` 只存在内存里，用于测试与预览。两种存储都运行与服务端 SQLite、Postgres 相同的契约向量（`@violetjs/pet/store`）。
+- 导入没有副作用，SSR 期间安全；在客户端打开存储。
+
+规则与取值理由见[本地模式设计](https://github.com/VOD-Studio/kodama/blob/main/docs/design/local-mode.md)。账号模式下 SDK 不提供离线队列：断网时用 `mountPet` 继续播放最近一次的投影，恢复后重新读取权威状态。
 
 ## 服务端渲染
 
