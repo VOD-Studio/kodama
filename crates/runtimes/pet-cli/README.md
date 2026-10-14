@@ -43,7 +43,7 @@ Windows is not supported yet, because its terminal handling (alternate screen, s
 ## Usage
 
 ```sh
-pet-cli live                     # animated pet; q to quit, n for the next species
+pet-cli live                     # animated pet; q quit, n next species, g next evolution form
 pet-cli capabilities             # what exec accepts, with error codes
 echo '{"op":"frame","species":1,"genes":[1,2,3,4,5,6,7,8],"pose":"idle","charset":"ascii","w":10,"h":3,"t":"0"}' | pet-cli exec
 pet-cli --version                # release version and rules version
@@ -55,9 +55,10 @@ pet-cli --version                # release version and rules version
 
 | Condition | Behavior |
 |---|---|
+| UTF-8 locale, 256 colours and at least 11 rows | Half-block pixel art: the same evolved forms and animations as the web, two pixels per character cell |
 | Output is not a terminal | `live` prints one JSON status line and exits, with no escape codes |
 | `NO_COLOR` is set, or `TERM` is `dumb` or empty | No colors |
-| `COLORTERM=truecolor` or a `256color` `TERM` | 256 colors; otherwise the 16-color palette |
+| `COLORTERM=truecolor` or a `256color` `TERM` | 256 colors; otherwise the 16-color palette and character art |
 | Locale is not UTF-8 | ASCII only |
 | Terminal is resized | The frame follows the new size; very small terminals do not crash |
 

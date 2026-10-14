@@ -47,7 +47,7 @@ export type ErrorCode =
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "Charset".
  */
-export type Charset = "ascii" | "unicode";
+export type Charset = ("ascii" | "unicode") | "blocks";
 /**
  * 线上命令:`op` 为判别字段。
  *
@@ -394,8 +394,13 @@ export interface FrameInput {
    */
   genes: [number, number, number, number, number, number, number, number];
   h: number;
+  lineage?: Branch[];
   pose: Pose;
   species: number;
+  /**
+   * 成长阶段与进化记录，含义与 `sprite` 相同；只有 `blocks` 画风按外形绘制。
+   */
+  stage?: number;
   t: string;
   w: number;
 }
@@ -486,6 +491,10 @@ export interface EvolutionOptionsResult {
  * via the `definition` "Frame".
  */
 export interface Frame {
+  /**
+   * 与 rows 逐字符对应的背景 256 色索引；0 表示不设背景。只有 `blocks` 画风使用。
+   */
+  bg: number[][];
   /**
    * 与 rows 逐字符对应的 256 色索引;0 表示不着色。
    */

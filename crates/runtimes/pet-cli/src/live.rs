@@ -1,8 +1,8 @@
 use crossterm::event::{poll, read, Event, KeyCode, KeyEventKind, KeyModifiers};
-use crossterm::style::{Color, Print, ResetColor, SetForegroundColor};
+use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
 use crossterm::{cursor, queue};
-use pet_term::{render, Charset, FrameInput, Pose};
+use pet_term::{render, Branch, Charset, FrameInput, Pose};
 use signal_hook::consts::{SIGINT, SIGTERM};
 use std::io::{IsTerminal, Write};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -65,8 +65,24 @@ impl Drop for TermGuard {
     }
 }
 
-fn input(species: u8, w: u16, h: u16, t: u64, pose: Pose, cs: Charset) -> FrameInput {
-    // 切片:固定演示个体;账号模式下由投影提供 species / genes。
+/// 本地预览依次展示的外形：幼体、三种少年、以及各成年分支（按 g 切换）。
+const FORMS: [&[Branch]; 8] = [
+    &[],
+    &[Branch::Curious],
+    &[Branch::Gentle],
+    &[Branch::Steady],
+    &[Branch::Curious, Branch::Sage],
+    &[Branch::Gentle, Branch::Guardian],
+    &[Branch::Steady, Branch::Wanderer],
+    &[Branch::Curious, Branch::Radiant],
+];
+
+/// 半格像素画的最低高度：放得下幼体；更矮或不支持 UTF-8、256 色时退回字符画。
+const BLOCKS_MIN_ROWS: u16 = 10;
+
+fn input(species: u8, w: u16, h: u16, t: u64, pose: Pose, cs: Charset, form: usize) -> FrameInput {
+    // 本地预览：固定演示个体;账号模式下由投影提供 species / genes / lineage。
+    let lineage = FORMS[form % FORMS.len()].to_vec();
     FrameInput {
         species,
         genes: [37, 0, 0, 0, 0, 0, 0, 0],
@@ -75,12 +91,31 @@ fn input(species: u8, w: u16, h: u16, t: u64, pose: Pose, cs: Charset) -> FrameI
         w,
         h,
         t,
+        stage: lineage.len() as u8,
+        lineage,
     }
+}
+
+fn form_label(form: usize) -> String {
+    let lineage = FORMS[form % FORMS.len()];
+    if lineage.is_empty() {
+        return "baby".into();
+    }
+    let names: Vec<String> = lineage
+        .iter()
+        .map(|b| {
+            serde_json::to_value(b)
+                .ok()
+                .and_then(|v| v.as_str().map(String::from))
+                .unwrap_or_default()
+        })
+        .collect();
+    names.join(" > ")
 }
 
 /// 非 TTY:输出一行可读 JSON 状态后退出,不含任何控制码。
 fn non_tty() -> i32 {
-    let f = render(&input(1, 24, 4, 0, Pose::Idle, Charset::Ascii));
+    let f = render(&input(1, 24, 4, 0, Pose::Idle, Charset::Ascii, 0));
     println!("{}", serde_json::json!({ "pose": "idle", "frame": f.rows }));
     0
 }
@@ -109,15 +144,24 @@ pub fn run() -> i32 {
             return 1;
         }
     };
-    let (mode, cs) = (color_mode(), charset());
+    let (mode, glyphs) = (color_mode(), charset());
+    // 半格像素画需要 UTF-8 与 256 色；否则用字符画
+    let blocks = mode == ColorMode::Ansi256 && glyphs == Charset::Unicode;
     let mut pose = Pose::Idle;
     let mut species = 1u8;
+    let mut form = 0usize;
     let mut t = 0u64;
     let mut out = std::io::stdout();
 
     while !stop.load(Ordering::Relaxed) {
         let (w, h) = terminal::size().unwrap_or((40, 10));
-        let f = render(&input(species, w, h.saturating_sub(1), t, pose, cs));
+        let rows = h.saturating_sub(1);
+        let cs = if blocks && rows >= BLOCKS_MIN_ROWS {
+            Charset::Blocks
+        } else {
+            glyphs
+        };
+        let f = render(&input(species, w, rows, t, pose, cs, form));
         let _ = queue!(out, cursor::MoveTo(0, 0));
         for (y, row) in f.rows.iter().enumerate() {
             let _ = queue!(out, cursor::MoveTo(0, y as u16));
@@ -128,7 +172,11 @@ pub fn run() -> i32 {
                         let _ = queue!(out, ResetColor, Print(ch));
                     }
                     (ColorMode::Ansi256, c) => {
-                        let _ = queue!(out, SetForegroundColor(Color::AnsiValue(c)), Print(ch));
+                        let _ = queue!(out, ResetColor, SetForegroundColor(Color::AnsiValue(c)));
+                        if f.bg[y][x] != 0 {
+                            let _ = queue!(out, SetBackgroundColor(Color::AnsiValue(f.bg[y][x])));
+                        }
+                        let _ = queue!(out, Print(ch));
                     }
                     (ColorMode::Ansi16, c) => {
                         let _ = queue!(
@@ -140,7 +188,17 @@ pub fn run() -> i32 {
                 }
             }
         }
-        let _ = queue!(out, cursor::MoveTo(0, h.saturating_sub(1)), ResetColor, Print("q quit  i idle o look e eat p play s sleep ! scare k sick v evolve x end  n next species"));
+        let status = format!(
+            "q quit  i idle o look e eat p play s sleep ! scare k sick v evolve x end  n species  g form [{}]",
+            form_label(form)
+        );
+        let status: String = status.chars().take(w as usize).collect();
+        let _ = queue!(
+            out,
+            cursor::MoveTo(0, h.saturating_sub(1)),
+            ResetColor,
+            Print(status)
+        );
         let _ = out.flush();
 
         if poll(Duration::from_millis(100)).unwrap_or(false) {
@@ -162,6 +220,8 @@ pub fn run() -> i32 {
                             // 切换物种,便于逐个检查形象。
                             species = (species + 1) % pet_term::SPECIES_COUNT;
                         }
+                        // 切换进化外形：幼体 → 少年三分支 → 成年各分支
+                        KeyCode::Char('g') => form = (form + 1) % FORMS.len(),
                         _ => {}
                     }
                 }
