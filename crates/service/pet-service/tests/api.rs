@@ -174,6 +174,7 @@ async fn a_key_used_outside_its_window_is_rejected() {
         cfg,
         signing,
         new_store: Arc::new(move || SqliteStore::open(&path).unwrap()),
+        pool: Default::default(),
         clock: Arc::new(move || clock.load(Ordering::SeqCst)),
         replay: Default::default(),
     }));

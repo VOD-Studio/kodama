@@ -81,6 +81,7 @@ pub fn state_with(
         cfg,
         signing,
         new_store: Arc::new(move || SqliteStore::open(&path).unwrap()),
+        pool: Default::default(),
         clock: Arc::new(move || c.load(Ordering::SeqCst)),
         replay: Default::default(),
     });
