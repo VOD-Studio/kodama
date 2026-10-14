@@ -15,7 +15,7 @@ pet-core = { path = "crates/core/pet-core" }
 pet-term = { path = "crates/core/pet-term" }
 pet-store = { path = "crates/service/pet-store" }
 pet-issuer = { path = "crates/service/pet-issuer" }
-sha2 = { version = "0.10", default-features = false }
+sha2 = { version = "0.11", default-features = false }
 hmac = { version = "0.12", default-features = false }
 serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
 serde_json = { version = "1", default-features = false, features = ["alloc"] }
