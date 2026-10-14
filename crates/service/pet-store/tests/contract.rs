@@ -166,6 +166,61 @@ fn same_request_raced_by_many_connections_commits_once<S: Store + Send + 'static
     assert_eq!((p.food, version), (4, 2));
 }
 
+/// 共享向量：与 SDK 的内存、IndexedDB 实现运行同一份 tests/fixtures/store-contract.json。
+fn shared_vectors<S: Store>(f: &Factory<S>) {
+    let v: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../../tests/fixtures/store-contract.json"
+    ))
+    .unwrap();
+    for (i, case) in v["cases"].as_array().unwrap().iter().enumerate() {
+        let mut s = f();
+        // 每个用例用独立的世界前缀，同一份存储里互不干扰
+        let sc = |o: &serde_json::Value| {
+            scope(
+                &format!("v{i}-{}", o["world"].as_str().unwrap()),
+                o["owner"].as_str().unwrap(),
+            )
+        };
+        let name = case["name"].as_str().unwrap();
+        for (n, step) in case["steps"].as_array().unwrap().iter().enumerate() {
+            let expect = &step["expect"];
+            if let Some(o) = step.get("load") {
+                let got = s
+                    .load(&sc(o))
+                    .unwrap()
+                    .map(|v| serde_json::json!({"version": v.version, "state": v.state}));
+                assert_eq!(
+                    got.unwrap_or(serde_json::Value::Null),
+                    *expect,
+                    "{name} step {n}"
+                );
+            } else {
+                let c = &step["commit"];
+                let cs = Changeset {
+                    state: c["state"].as_str().unwrap().into(),
+                    result: c["result"].as_str().unwrap().into(),
+                    params_hash: c["params_hash"].as_str().unwrap().into(),
+                };
+                let got = match s
+                    .commit(
+                        &sc(c),
+                        c["expected"].as_u64().unwrap(),
+                        c["request_id"].as_str().unwrap(),
+                        &cs,
+                    )
+                    .unwrap()
+                {
+                    Commit::Committed { version } => serde_json::json!({ "committed": version }),
+                    Commit::Replayed { result } => serde_json::json!({ "replayed": result }),
+                    Commit::Conflict { actual } => serde_json::json!({ "conflict": actual }),
+                    Commit::RequestIdReused => serde_json::json!({ "request_id_reused": true }),
+                };
+                assert_eq!(got, *expect, "{name} step {n}");
+            }
+        }
+    }
+}
+
 macro_rules! contract {
     ($modname:ident, $factory:expr $(, #[$attr:meta])*) => {
         mod $modname {
@@ -186,6 +241,7 @@ macro_rules! contract {
             case!(scopes_are_isolated);
             case!(concurrent_feeds_never_double_spend);
             case!(same_request_raced_by_many_connections_commits_once);
+            case!(shared_vectors);
         }
     };
 }

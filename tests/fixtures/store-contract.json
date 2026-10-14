@@ -1,0 +1,60 @@
+{
+  "note": "存储契约的共享向量：Rust 的 SQLite、Postgres 实现与 SDK 的内存、IndexedDB 实现都逐条运行同一份。每步是 load 或 commit 及其期望结果；作用域由 world 与 owner 组成。原子回滚需要注入故障，留在各实现自己的测试里。",
+  "cases": [
+    {
+      "name": "first commit creates version 1",
+      "steps": [
+        { "load": { "world": "w", "owner": "a" }, "expect": null },
+        { "commit": { "world": "w", "owner": "a", "expected": 0, "request_id": "r1", "state": "s1", "result": "x1", "params_hash": "h1" }, "expect": { "committed": 1 } },
+        { "load": { "world": "w", "owner": "a" }, "expect": { "version": 1, "state": "s1" } },
+        { "commit": { "world": "w", "owner": "a", "expected": 1, "request_id": "r2", "state": "s2", "result": "x2", "params_hash": "h2" }, "expect": { "committed": 2 } },
+        { "load": { "world": "w", "owner": "a" }, "expect": { "version": 2, "state": "s2" } }
+      ]
+    },
+    {
+      "name": "a stale version is a distinct conflict and changes nothing",
+      "steps": [
+        { "commit": { "world": "w", "owner": "a", "expected": 0, "request_id": "r1", "state": "s1", "result": "x1", "params_hash": "h1" }, "expect": { "committed": 1 } },
+        { "commit": { "world": "w", "owner": "a", "expected": 0, "request_id": "r2", "state": "lost", "result": "x2", "params_hash": "h2" }, "expect": { "conflict": 1 } },
+        { "load": { "world": "w", "owner": "a" }, "expect": { "version": 1, "state": "s1" } },
+        { "commit": { "world": "w", "owner": "a", "expected": 1, "request_id": "r2", "state": "s2", "result": "x2", "params_hash": "h2" }, "expect": { "committed": 2 } }
+      ]
+    },
+    {
+      "name": "replaying a request returns the original result and changes nothing",
+      "steps": [
+        { "commit": { "world": "w", "owner": "a", "expected": 0, "request_id": "r1", "state": "s1", "result": "first", "params_hash": "h1" }, "expect": { "committed": 1 } },
+        { "commit": { "world": "w", "owner": "a", "expected": 1, "request_id": "r1", "state": "other", "result": "second", "params_hash": "h1" }, "expect": { "replayed": "first" } },
+        { "commit": { "world": "w", "owner": "a", "expected": 0, "request_id": "r1", "state": "other", "result": "second", "params_hash": "h1" }, "expect": { "replayed": "first" } },
+        { "load": { "world": "w", "owner": "a" }, "expect": { "version": 1, "state": "s1" } }
+      ]
+    },
+    {
+      "name": "reusing a request id with other parameters is rejected",
+      "steps": [
+        { "commit": { "world": "w", "owner": "a", "expected": 0, "request_id": "r1", "state": "s1", "result": "x1", "params_hash": "feed" }, "expect": { "committed": 1 } },
+        { "commit": { "world": "w", "owner": "a", "expected": 1, "request_id": "r1", "state": "s2", "result": "x2", "params_hash": "play" }, "expect": { "request_id_reused": true } },
+        { "load": { "world": "w", "owner": "a" }, "expect": { "version": 1, "state": "s1" } }
+      ]
+    },
+    {
+      "name": "scopes are isolated",
+      "steps": [
+        { "commit": { "world": "w", "owner": "a", "expected": 0, "request_id": "r1", "state": "mine", "result": "x", "params_hash": "h" }, "expect": { "committed": 1 } },
+        { "load": { "world": "w", "owner": "b" }, "expect": null },
+        { "load": { "world": "other", "owner": "a" }, "expect": null },
+        { "commit": { "world": "other", "owner": "a", "expected": 0, "request_id": "r9", "state": "theirs", "result": "y", "params_hash": "h" }, "expect": { "committed": 1 } },
+        { "load": { "world": "w", "owner": "a" }, "expect": { "version": 1, "state": "mine" } },
+        { "load": { "world": "other", "owner": "a" }, "expect": { "version": 1, "state": "theirs" } }
+      ]
+    },
+    {
+      "name": "request ids belong to their scope",
+      "steps": [
+        { "commit": { "world": "w", "owner": "a", "expected": 0, "request_id": "same", "state": "a1", "result": "ra", "params_hash": "h" }, "expect": { "committed": 1 } },
+        { "commit": { "world": "w", "owner": "b", "expected": 0, "request_id": "same", "state": "b1", "result": "rb", "params_hash": "h" }, "expect": { "committed": 1 } },
+        { "commit": { "world": "w", "owner": "b", "expected": 1, "request_id": "same", "state": "b2", "result": "rb2", "params_hash": "h" }, "expect": { "replayed": "rb" } }
+      ]
+    }
+  ]
+}
