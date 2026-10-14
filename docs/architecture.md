@@ -56,16 +56,77 @@ An arrow means "depends on". Every edge points toward the pure core at the top, 
 
 ### Dependency rules
 
-`scripts/check/check-arch.mjs` (run by `make check-arch` and the CI Lint job) holds the allowed edges, and fails when:
+The directory is the layer: every crate lives in `crates/<layer>/<crate>`, and the workspace includes `crates/*/*`. Paths between crates are declared once, in `[workspace.dependencies]` of the root `Cargo.toml`; members write `pet-core = { workspace = true }`.
 
-- a crate depends on a workspace crate outside its allowed list (the table above);
-- a new crate is added to the workspace without being registered;
-- `pet-core` or `pet-term` gains a normal dependency outside the allowlist: digests (`sha2`, `hmac`), signature verification (`ed25519-dalek`), serialization (`serde`, `serde_json`), schema derivation (`schemars`, optional), and `pet-term` for the core;
+| Layer | Crates | May depend on |
+|---|---|---|
+| `core` | `pet-core`, `pet-term` | `core` only. `no_std`, no clock, no randomness, no I/O |
+| `service` | `pet-store`, `pet-issuer`, `pet-service` | `core`, `service` |
+| `runtimes` | `pet-cli`, `pet-wasm` | `core` |
+| `tools` | `pet-schema` | `core` |
+
+`scripts/check/check-arch.mjs` (run by `make check-arch` and the CI Lint job) fails when:
+
+- a crate sits outside `crates/<its layer>/<its name>`, or a new crate is not registered;
+- a crate depends on another layer than the table allows, or on a workspace crate outside its own allowlist;
+- `pet-core` or `pet-term` gains a normal dependency outside the core allowlist: digests (`sha2`, `hmac`), signature verification (`ed25519-dalek`), serialization (`serde`, `serde_json`) and schema derivation (`schemars`, optional);
 - `pet-core` or `pet-term` loses `#![no_std]` or `#![forbid(unsafe_code)]`.
 
-The same target then compiles both crates for `thumbv7em-none-eabihf`, a target with no standard library. A dependency that quietly pulls in `std` fails there, even though it would build fine for native targets and `wasm32-unknown-unknown`.
+The same target then compiles the core layer for `thumbv7em-none-eabihf`, a target with no standard library. A dependency that quietly pulls in `std` fails there, even though it would build fine for native targets and `wasm32-unknown-unknown`.
 
-To add a crate or an edge, change the table in `scripts/check/check-arch.mjs` and this document in the same pull request.
+To add a crate or an edge, change `scripts/check/check-arch.mjs` and this document in the same pull request.
+
+### Inside the crates
+
+`pet-core` and `pet-service` are split by responsibility, so each new feature has a fixed place instead of growing one file:
+
+```
+crates/core/pet-core/src/
+├── protocol/   execute, Command, codec, capability catalog. The boundary of a future protocol crate
+├── birth/      birth derivation; proof.rs verifies certificates
+├── rules/      life.rs (needs, illness, death), growth.rs (level, personality, evolution)
+└── rng.rs      HKDF channels; every feature draws from its own labelled channel
+
+crates/service/pet-service/src/
+├── lib.rs      the route table: the one list of every endpoint
+├── state.rs    Config, AppState
+├── error.rs    the {ok, value} / {ok:false, code, message} envelope
+├── http.rs     authentication, body parsing, scopes, running store work off the async runtime
+├── identity.rs identity assertions and access tokens
+└── routes/     one file per resource: meta, auth, births, pets
+```
+
+Public paths do not depend on the internal layout: `pet_core` re-exports everything other crates use.
+
+## Directory structure
+
+```
+kodama/
+├── crates/<layer>/<crate>/   Rust, grouped by layer (see above)
+├── packages/<package>/       npm packages: pet-sdk is @violetjs/pet
+├── assets/                   art and its records: catalog/species.json today
+├── tests/                    cross-component acceptance, by kind
+│   ├── fixtures/             golden births, scenario steps, certificates and their generator
+│   ├── parity/               native, Node and web output must be byte-identical
+│   ├── tty/                  real-terminal behavior of pet-cli live
+│   ├── e2e/                  the service binary over real HTTP, SQLite and Postgres
+│   ├── consumers/<name>/     installed artifacts outside the repository; each has run.sh
+│   └── bench/
+├── scripts/
+│   ├── dev/                  local development: dev.mjs, with-postgres.sh
+│   ├── check/                repository checks: check-arch.mjs, version.mjs
+│   └── release/              packaging and publishing
+├── docker/                   dev.Dockerfile, service.Dockerfile (each with its own .dockerignore), compose.yaml
+├── docs/
+│   ├── architecture(.zh-CN).md
+│   ├── prd/ adr/ research/   product requirements, decisions, background
+│   ├── design/               rules and protocols: parameters, growth, versioning, birth protocol, extensions, art
+│   ├── operations/           running the service, distribution and releases
+│   └── history/              records of past changes, such as the repository split
+└── .github/                  workflows, dependabot, release-please config and manifest
+```
+
+The root holds only what tools require there (`Cargo.toml`, `Cargo.lock`, `rustfmt.toml`, `deny.toml`, dotfiles), the entry points (`Makefile`, README, CONTRIBUTING, CHANGELOG, `CONTEXT.md`, LICENSE), and the folders above. `check-arch` enforces this with an allowlist, and also rejects loose files directly inside `crates/`, `crates/<layer>/`, `tests/`, `scripts/` and `packages/`. Unit tests stay next to their code (`crates/**/tests/`); `tests/` is only for checks that span several components or installed artifacts.
 
 ## How a command flows
 
@@ -166,17 +227,40 @@ All artifacts share one version and are released from one tag by `release.yml`. 
 
 ## Known coupling and planned changes
 
-**`pet-core` depends on `pet-term`.** The protocol entry `execute` and the `Command` enum live in `pet-core`, and two commands (`frame`, `sprite`) dispatch to the renderer. The rules themselves do not use `pet-term`. A cleaner split would move `execute`, `Command` and the capability catalog into a protocol crate that depends on both. It is deferred on purpose. Today it would change no behavior: the crates are not published, unused code is already stripped from the `.wasm`, and output is unchanged. It would also break the crate API twice, because the crates will be renamed to `violet-pet-*` before publishing. Both changes will happen together when crates are first published. Until then, `check-arch` keeps the edge from spreading: no other crate may depend on `pet-term` except the CLI and the schema generator.
+**`pet-core` depends on `pet-term`.** The protocol entry `execute` and the `Command` enum live in `pet-core` (now its own `protocol` module), and two commands (`frame`, `sprite`) dispatch to the renderer. The rules themselves do not use `pet-term`. Moving `protocol/` into its own crate is deferred on purpose: today it would change no behavior, since the crates are not published, unused code is already stripped from the `.wasm`, and output is unchanged. It would also break the crate API twice, because the crates will be renamed to `violet-pet-*` before publishing. Both changes will happen together when crates are first published. Until then, the module boundary and `check-arch` keep the edge from spreading.
 
 Other open items are tracked in the PRD and in [service](operations/service.md) ("Known limitations"): token revocation, shared replay protection for multi-instance deployments, encryption of `server_seed` at rest, connection pooling, and rate limiting.
+
+## Where planned features go
+
+Each open issue already has a place in this layout. A feature adds modules where the table says, and registers its commands in the capability catalog only once it is implemented.
+
+| Issue | Rules (`pet-core`) | Art (`pet-term`, `assets/`) | Service (`pet-service`, `pet-store`) | Clients |
+|---|---|---|---|---|
+| Evolution forms and refined art (#6, #11, #14) | `rules/growth.rs`: evolution lines and conditions | One distinct form per stage and branch; evolution lines in `assets/catalog/` | `GET /v1/pets/me/evolution` stays the entry | SDK renders the same forms |
+| #5 Rule-version migration | `rules/migrate.rs`: explicit `migrate(pet, from, to)` with invariant tests | — | Migrates on load and persists; schema changes as numbered migrations in `pet-store` | — |
+| #10 Account service | — | — | Connection pool, token store, rate limits in `http.rs`; storage contract signatures frozen | — |
+| #12 Activity and rewards | `grant` (exists) | — | `routes/activity.rs`: durable inbox, deduplication, per-world caps | Integrator connectors send signed events |
+| #13 Browser local mode | — | — | — | `packages/pet-sdk`: IndexedDB adapter passing the same storage contract vectors as the Rust stores (shared fixtures in `tests/fixtures/`) |
+| #15 CLI accounts | — | — | Device-style authorization endpoint | `pet-cli`: `account` module talking HTTP; no service crate linked |
+| #16 Skill | Capability catalog (exists) | — | — | `packages/pet-sdk/skill/`, generated parts from the catalog |
+| #17 Outfits and home | `rules/outfit.rs`: slots and body compatibility | Item art and anchors; `assets/catalog/items.json` | `routes/outfit.rs` | Rendering layers in the SDK |
+| #18 Expeditions | `rules/expedition.rs`: its own RNG channel | Souvenir art | `routes/expeditions.rs`, daily caps | — |
+| #19 Friends | Public projection only | — | `routes/friends.rs`: mutual consent and revocation, own tables | — |
+| #20 Breeding and lineage | `birth/inherit.rs`: inheritance and mutation on its own channel; lineage in the certificate context | Inherited traits in the forms | `routes/breeding.rs`: two-step consent, incubator, retirement | — |
+| #21 AI conversation | Capability whitelist from the catalog | — | `routes/chat.rs`; model providers behind a trait in a new `service`-layer crate, so their HTTP clients stay optional | — |
+| #7 Identity and activity protocol | — | — | JSON Schema of the HTTP API generated by `pet-schema`, like the command protocol | Connectors in the integrating site's repository |
+
+New top-level folders, such as `apps/` for a web demo (#14), are added to the `check-arch` allowlist in the pull request that introduces them.
 
 ## Where to change what
 
 | Change | Touch |
 |---|---|
-| A rule (growth, illness, rewards) | `crates/core/pet-core/src/{life,growth}.rs` and their tests; keep `make three-end` green; a change to existing results needs a new `rules_version` |
-| A new command | `Command` and `execute` in `pet-core`, register it in `CAPABILITIES`, then `make schema` |
+| A rule (growth, illness, rewards) | `crates/core/pet-core/src/rules/` and the tests in `crates/core/pet-core/tests/`; keep `make three-end` green; a change to existing results needs a new `rules_version` |
+| A new command | `Command` and `execute` in `crates/core/pet-core/src/protocol/mod.rs`, register it in `protocol/caps.rs`, then `make schema` |
 | Art for a species or pose | `crates/core/pet-term`, `assets/catalog/species.json`; preview with `make preview` |
 | A storage backend | Implement `Store` in `pet-store` and run the shared contract tests against it |
-| An HTTP endpoint | `crates/service/pet-service/src/lib.rs` (router) and `tests/api.rs`; document it in [service](operations/service.md) |
+| An HTTP endpoint | A handler in `crates/service/pet-service/src/routes/`, a line in the route table in `lib.rs`, tests in `tests/api.rs`; document it in [service](operations/service.md) |
+| A cross-component check | A folder under `tests/` with a `run.sh`, a `make` target, and a CI step |
 | A supported CLI platform | The `cli` matrix in `.github/workflows/package.yml`, the CLI README tables, and [distribution](operations/distribution.md) |
