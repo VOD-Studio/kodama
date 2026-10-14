@@ -82,6 +82,33 @@ The [capability catalog](https://github.com/VOD-Studio/kodama/blob/main/packages
 
 Commands that change state (`birth`, `act`, `grant`) return the new state; the SDK stores nothing. In account mode, the [pet service](https://github.com/VOD-Studio/kodama/blob/main/docs/operations/service.md) holds the authoritative state, and the client only renders it.
 
+## Web rendering
+
+`@violetjs/pet/web` animates the pet on a `<canvas>`, with the same forms and actions as the `sprite` command:
+
+```js
+import { initPet } from "@violetjs/pet";
+import { mountPet } from "@violetjs/pet/web";
+
+await initPet();
+const pet = mountPet(document.querySelector("canvas"), {
+  pet: { species: born.value.species, genes: born.value.genes, lineage: born.value.pet.growth.lineage },
+  label: "Ember Kit",
+  onActivate: () => console.log("petted"), // optional
+});
+// after an evolution: pet.setPet({ ...nextProjection })
+pet.dispose();
+```
+
+- Pixels stay crisp: integer scaling (`scale`, default 4), multiplied by `devicePixelRatio` on high-DPI screens.
+- Honours `prefers-reduced-motion`: one still frame, no walking or animation.
+- Pauses while the page is hidden; `pause()` and `resume()` are also available.
+- By default the canvas lets clicks through to the page (`role="img"`). With `onActivate` it becomes a focusable button that reacts to click, Enter and Space.
+- Never reads or writes storage: pass the projection in, and replace it with `setPet()`. `dispose()` stops the clock, removes listeners and restores the canvas.
+- The import has no side effects and is safe during SSR; call `mountPet` on the client.
+
+A canvas of at least 56×36 logical pixels (the default is 96×40) never clips a form; the extra width is room to walk.
+
 ## Server-side rendering
 
 The import has no side effects, and `run` throws until `initPet()` resolves. During SSR, render a placeholder and call `initPet()` in an effect on the client. CI verifies this with a production TanStack Start build: the server HTML contains no WebAssembly, and the pet appears after hydration.
