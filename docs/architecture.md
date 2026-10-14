@@ -93,10 +93,11 @@ crates/service/pet-service/src/
 ├── error.rs    the {ok, value} / {ok:false, code, message} envelope
 ├── http.rs     authentication, body parsing, scopes, running store work off the async runtime
 ├── identity.rs identity assertions and access tokens
+├── activity.rs activity facts: signatures, reward table, daily ledger
 ├── session.rs  login sessions: rotating refresh tokens, reuse revokes the session
 ├── device.rs   device authorization (CLI login): user codes, grants
 ├── record.rs   read-modify-commit of small JSON records on the storage contract
-└── routes/     one file per resource: meta, auth, births, pets, sessions, device
+└── routes/     one file per resource: meta, auth, births, pets, sessions, device, activity
 ```
 
 Public paths do not depend on the internal layout: `pet_core` re-exports everything other crates use.
@@ -244,7 +245,7 @@ Each open issue already has a place in this layout. A feature adds modules where
 | Evolution forms and refined art (#6, #11, #14) | `rules/growth.rs`: conditions (unchanged); `Stage` and `Branch` live in `pet_term::form` | **Pixel art done** ([design](design/evolution.md)): a body per stage, branch features, 16 forms per species, names in `assets/catalog/`; terminals draw the same art with half blocks (`charset: "blocks"`) | `GET /v1/pets/me/evolution` stays the entry | SDK passes `lineage` to `sprite` |
 | #5 Rule-version migration | `rules/migrate.rs`: explicit `migrate(pet, from, to)` with invariant tests | — | Migrates on load and persists; schema changes as numbered migrations in `pet-store` | — |
 | #10 Account service | — | — | **Login sessions done**: `session.rs` (rotating refresh tokens, reuse revokes), `record.rs` (small records on the storage contract); to do: connection pool, rate limits, freezing the storage contract signatures | — |
-| #12 Activity and rewards | `grant` (exists) | — | `routes/activity.rs`: durable inbox, deduplication, per-world caps | Integrator connectors send signed events |
+| #12 Activity and rewards | `grant` (exists) | — | **Done**: `activity.rs` (signatures, reward table, daily ledger) and `routes/activity.rs` (receive, reserve, grant; deduplicated by eligibility); `run_grant` in `pet-store` | Integrator connectors send signed events |
 | #13 Browser local mode | Unchanged | — | The contract vectors (`tests/fixtures/store-contract.json`) also run against SQLite and Postgres | **Done** ([design](design/local-mode.md)): `@violetjs/pet/local` and `/store`, an IndexedDB store, a daily ration and activity rewards, multiple tabs |
 | #15 CLI accounts | — | — | **Done**: device authorization in `device.rs` and `routes/device.rs` ([details](operations/service.md)); projections carry the appearance | **Done**: `pet-cli`'s `account/` (login, credentials, automatic refresh, `live --account`), talking HTTP; no service crate linked |
 | #16 Skill | Capability catalog (exists) | — | — | `packages/pet-sdk/skill/`, generated parts from the catalog |
