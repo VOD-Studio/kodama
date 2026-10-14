@@ -1,6 +1,26 @@
 {
   "name": "@violetjs/pet",
   "version": "0.1.1",
+  "description": "Electronic pet SDK for the web and Node: deterministic WebAssembly rules core, typed commands and terminal embedding.",
+  "keywords": [
+    "pet",
+    "virtual-pet",
+    "electronic-pet",
+    "webassembly",
+    "wasm",
+    "deterministic",
+    "terminal"
+  ],
+  "homepage": "https://github.com/VOD-Studio/kodama/tree/main/packages/pet-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/VOD-Studio/kodama/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VOD-Studio/kodama.git",
+    "directory": "packages/pet-sdk"
+  },
+  "license": "MIT",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -23,15 +43,15 @@
     },
     "./wasm": "./dist/pet_wasm_bg.wasm"
   },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "ajv": "^8",
     "json-schema-to-typescript": "^16",
     "typescript": "^5"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/VOD-Studio/kodama.git",
-    "directory": "packages/pet-sdk"
-  },
-  "license": "MIT"
+  }
 }
