@@ -4,13 +4,22 @@ import os, pty, sys, time, fcntl, termios, struct, signal, select, re
 # PET_CLI_BIN 指向发布归档里的二进制(tests/consumers/cli-archive/run.sh);缺省为本仓库的 release 构建
 BIN = os.environ.get("PET_CLI_BIN") or os.path.join(os.path.dirname(__file__), "../../target/release/pet-cli")
 
+def fresh_termios():
+    # 子进程启动时拿到的是新建 pty 的默认属性。不能在 fork 之后读取：子进程可能已经切到原始模式，
+    # 基线就成了原始模式，「退出后恢复」的比较会随机失败
+    m, s = os.openpty()
+    try:
+        return termios.tcgetattr(s)
+    finally:
+        os.close(m); os.close(s)
+
 def run(env_extra, rows, cols, action, resize=None):
     env = {"PATH": os.environ["PATH"], "HOME": os.environ.get("HOME", "/"), **env_extra}
+    before = fresh_termios()
     pid, fd = pty.fork()
     if pid == 0:
         os.execve(BIN, [BIN, "live"], env)
     fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
-    before = termios.tcgetattr(fd)
     buf = b""
     def pump(sec):
         nonlocal buf
@@ -77,7 +86,7 @@ ok("\u2580".encode() in buf and b"48;5;" in buf, "UTF-8 + 256 colours draws half
 
 # 2. q
 buf, _, st, b, a = run(full, 12, 40, lambda p, fd: os.write(fd, b"q"))
-ok(os.WIFEXITED(st) and os.WEXITSTATUS(st) == 0 and a[3] == b[3], "q exits 0 and restores termios")
+ok(st is not None and os.WIFEXITED(st) and os.WEXITSTATUS(st) == 0 and a[3] == b[3], "q exits 0 and restores termios")
 
 # 3. SIGTERM
 buf, _, st, b, a = run(full, 12, 40, lambda p, fd: os.kill(p, signal.SIGTERM))
