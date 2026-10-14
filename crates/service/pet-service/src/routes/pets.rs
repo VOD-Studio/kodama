@@ -1,13 +1,14 @@
 //! 主宠：读取投影、执行动作、查询进化分支。
 use crate::error::{ok, ApiError};
-use crate::http::{authed, parse_json, pet_scope, valid_request_id, with_store};
-use crate::state::AppState;
+use crate::http::{authed, parse_json, pet_scope, scope, valid_request_id, with_store};
+use crate::identity::Subject;
+use crate::state::{AppState, Config};
 use axum::body::Bytes;
 use axum::extract::State;
 use axum::http::{HeaderMap, StatusCode};
 use axum::Json;
 use pet_core::{Pet, Phase};
-use pet_store::{ExecError, Store};
+use pet_store::{ExecError, Scope, Store};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::sync::Arc;
@@ -36,6 +37,12 @@ pub(crate) fn is_dead(pet: &Pet, ticks: u64) -> bool {
         .is_err_and(|e| e.code() == pet_core::ErrorCode::Dead)
 }
 
+/// 个体的外形（物种、基因、稀有度）：出生时确定、永不改变，渲染需要它。宠物状态里没有这些字段，
+/// 所以在领取时按个体标识另存一条，任何客户端（网页、CLI）都能读到并画出同一只宠物。
+pub(crate) fn appearance_scope(cfg: &Config, who: &Subject, pet_id: &str) -> Scope {
+    scope(cfg, who, &format!("appearance:{pet_id}"))
+}
+
 pub(crate) async fn get_pet<S: Store + Send + 'static>(
     State(st): State<Arc<AppState<S>>>,
     headers: HeaderMap,
@@ -46,7 +53,13 @@ pub(crate) async fn get_pet<S: Store + Send + 'static>(
             .load(&pet_scope(&st.cfg, &who))?
             .ok_or_else(|| ApiError::not_found("no pet"))?;
         let pet: Pet = serde_json::from_str(&v.state).map_err(ApiError::internal)?;
-        Ok(project(&pet, st.ticks(), v.version))
+        let mut view = project(&pet, st.ticks(), v.version);
+        // 本版本之前领取的个体没有外形记录，返回 null
+        view["appearance"] = match store.load(&appearance_scope(&st.cfg, &who, &pet.id))? {
+            Some(a) => serde_json::from_str(&a.state).map_err(ApiError::internal)?,
+            None => Value::Null,
+        };
+        Ok(view)
     })
     .await?;
     Ok(ok(v))

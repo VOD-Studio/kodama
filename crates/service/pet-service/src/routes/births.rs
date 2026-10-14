@@ -1,5 +1,5 @@
 //! 出生：承诺 → 接受 → 揭示。服务端先承诺 server_seed，客户端再提供随机材料，证书公开可验证。
-use super::pets::{is_dead, project};
+use super::pets::{appearance_scope, is_dead, project};
 use crate::error::{ok, ApiError};
 use crate::http::{authed, parse_json, pet_scope, scope, unhex, valid_hex, with_store};
 use crate::identity::Subject;
@@ -166,6 +166,15 @@ pub(crate) fn accept<S: Store>(
         born_at: ticks,
     })
     .map_err(|e| ApiError::bad_request("bad_input", e))?;
+
+    // 外形先于宠物写入：有宠物就一定有外形。内容由出生决定，重试写入的是同一份
+    let look = json!({"species": birth.species, "genes": birth.genes, "rarity": birth.rarity});
+    let cs = Changeset {
+        state: look.to_string(),
+        result: "{}".into(),
+        params_hash: "appearance".into(),
+    };
+    store.commit(&appearance_scope(&st.cfg, who, &birth.id), 0, "create", &cs)?;
 
     let pet_scope = pet_scope(&st.cfg, who);
     let existing = store.load(&pet_scope)?;
