@@ -84,7 +84,7 @@ flowchart BT
 crates/core/pet-core/src/
 ├── protocol/   execute、Command、编码、能力目录。日后拆成独立协议 crate 的边界
 ├── birth/      出生派生；proof.rs 核验证书
-├── rules/      life.rs（需求、病程、死亡）、growth.rs（等级、性格、进化）
+├── rules/      life.rs（需求、病程、死亡）、growth.rs（等级、性格、进化）、wardrobe.rs（装扮）
 └── rng.rs      HKDF 随机通道；每个功能各用一条带标签的独立通道
 
 crates/service/pet-service/src/
@@ -124,7 +124,7 @@ kodama/
 ├── docs/
 │   ├── architecture(.zh-CN).md
 │   ├── prd/ adr/ research/   产品需求、决策记录、调研
-│   ├── design/               规则与协议：参数、成长、版本、出生协议、本地模式、扩展玩法、素材
+│   ├── design/               规则与协议：参数、成长、版本、出生协议、本地模式、扩展玩法、素材、装扮
 │   ├── operations/           服务运行、分发与发版
 │   └── history/              过去的变更记录，如仓库拆分
 └── .github/                  工作流、dependabot、release-please 配置与清单
@@ -249,7 +249,7 @@ CAPABILITIES（pet-core::caps）────────────────
 | #13 浏览器本地模式 | 不变 | — | 契约向量（`tests/fixtures/store-contract.json`）也对 SQLite 与 Postgres 运行 | **已完成**（[设计](design/local-mode.md)）：`@violetjs/pet/local` 与 `/store`，IndexedDB 存储、每日口粮与活动奖励、多标签页并发 |
 | #15 CLI 账号 | — | — | **已完成**：设备授权 `device.rs` 与 `routes/device.rs`（[说明](operations/service.md#登录会话与设备授权)）；投影带上外形 | **已完成**：`pet-cli` 的 `account/`（登录、凭据、自动刷新、`live --account`），经 HTTP 访问，不链接服务端 crate |
 | #16 Skill | 能力目录（已有） | — | — | `packages/pet-sdk/skill/`，可生成部分由能力目录产出 |
-| #17 装扮与家园 | `rules/outfit.rs`：槽位与身体结构兼容 | 物品素材与锚点；`assets/catalog/items.json` | `routes/outfit.rs` | SDK 的渲染图层 |
+| #17 装扮与家园 | **已完成**：`rules/wardrobe.rs`（升级解锁、穿脱、身体结构检查），`Pet.species` | **已完成**：`pet-term` 的 `outfit.rs` 与 `pixel/items.rs`，`assets/catalog/items.json`（[设计](design/outfits.md)） | 动作经 `POST /v1/pets/me/actions`，无需新接口 | `sprite`、`frame`、`mountPet` 与终端嵌入接受 `outfit` |
 | #18 主题探险 | `rules/expedition.rs`：独立随机通道 | 见闻收藏品素材 | `routes/expeditions.rs`、每日上限 | — |
 | #19 好友 | 只有公开投影 | — | `routes/friends.rs`：双方确认与撤回，自有数据表 | — |
 | #20 繁育与家谱 | `birth/inherit.rs`：遗传与变异用独立通道；家谱进入证书上下文 | 遗传特征体现在形态上 | `routes/breeding.rs`：两步授权、孵化仓、退役 | — |
