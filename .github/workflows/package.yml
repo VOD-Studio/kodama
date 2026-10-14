@@ -1,0 +1,125 @@
+name: Package
+
+# 构建并打包 npm 包:SDK、各平台 CLI 二进制包、CLI 主包,产物以 artifact 形式交出。
+# 这里的作业接触不到任何发布凭据;发布由 release.yml 里声明了 npm 环境的作业完成。
+# PR 上只做 dry-run(打包并校验文件清单);发版时由 release.yml 调用并传入版本。
+on:
+  pull_request:
+    paths:
+      - "packages/**"
+      - "crates/pet-wasm/**"
+      - "crates/pet-cli/**"
+      - "scripts/**"
+      - ".github/workflows/package.yml"
+  workflow_call:
+    inputs:
+      version:
+        description: 发布的版本号,不带 v 前缀
+        type: string
+        required: true
+      ref:
+        description: 要构建的 git 引用(发版时为标签)
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  WASM_BINDGEN_VERSION: 0.2.129
+  VERSION: ${{ inputs.version || '0.0.0-dryrun' }}
+
+jobs:
+  sdk:
+    name: "@violetjs/pet"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Version files agree with the tag
+        if: inputs.version
+        run: node scripts/version.mjs check "v$VERSION"
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - uses: taiki-e/install-action@1168f6810a3cb30a3514bf5756a3b7f0422c6df8 # v2
+        with:
+          tool: wasm-bindgen-cli@${{ env.WASM_BINDGEN_VERSION }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+      - run: packages/pet-sdk/build.sh
+      - name: Pack and dry-run
+        run: |
+          mkdir -p "$RUNNER_TEMP/tgz"
+          npm pack ./packages/pet-sdk --pack-destination "$RUNNER_TEMP/tgz"
+          scripts/npm-publish.sh "$RUNNER_TEMP"/tgz/*.tgz dry-run
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: npm-sdk
+          path: ${{ runner.temp }}/tgz/*.tgz
+          if-no-files-found: error
+
+  cli:
+    name: CLI (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # 与 docs/distribution.md 中已验证的平台一致
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-14]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+      - run: packages/pet-cli-npm/build.sh "$RUNNER_TEMP/out"
+      - name: Pack and dry-run
+        run: |
+          mkdir -p "$RUNNER_TEMP/tgz"
+          npm pack "$RUNNER_TEMP/out/platform" --pack-destination "$RUNNER_TEMP/tgz"
+          scripts/npm-publish.sh "$RUNNER_TEMP"/tgz/*.tgz dry-run
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: npm-cli-${{ matrix.os }}
+          path: ${{ runner.temp }}/tgz/*.tgz
+          if-no-files-found: error
+
+  cli-main:
+    name: "@violetjs/pet-cli"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+      - run: packages/pet-cli-npm/build.sh "$RUNNER_TEMP/out"
+      - name: Pack and dry-run
+        run: |
+          mkdir -p "$RUNNER_TEMP/tgz"
+          npm pack "$RUNNER_TEMP/out/main" --pack-destination "$RUNNER_TEMP/tgz"
+          scripts/npm-publish.sh "$RUNNER_TEMP"/tgz/*.tgz dry-run
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: npm-cli-main
+          path: ${{ runner.temp }}/tgz/*.tgz
+          if-no-files-found: error
