@@ -1,6 +1,6 @@
 # 拆分为独立仓库的计划
 
-#517 的一部分。**已于 2026-10-14 执行**：从 Violet 的 `release/2.0` 拆出 `pet/` 的完整历史，推送为 `VOD-Studio/kodama` 的 `main`。本文保留了建议、结构与调试方案；“执行步骤”一节记录的是实际做过的操作，路径前缀 `pet/` 指拆分前在 Violet 里的位置。
+#2 的一部分。**已于 2026-10-14 执行**：从 Violet 的 `release/2.0` 拆出 `pet/` 的完整历史，推送为 `VOD-Studio/kodama` 的 `main`。本文保留了建议、结构与调试方案；“执行步骤”一节记录的是实际做过的操作，路径前缀 `pet/` 指拆分前在 Violet 里的位置。
 
 ## 建议：现在拆
 
@@ -11,7 +11,7 @@
 | 边界已经成型 | `pet/` 不读 Violet 的任何文件；Violet 只通过身份断言、活动事件与 SDK 三条通道接触它（ADR-0021） |
 | 历史可无损迁出 | 见下文执行步骤 |
 
-时机：**先合并 PR #541（用 merge commit），再拆。** 这样 `release/2.0` 上之后的宠物历史是原子提交，不必再重放；只有更早被 squash 的 #516 需要从 `refs/pull/516/head` 取原始提交。
+时机：**先合并 PR VOD-Studio/violet#541（用 merge commit），再拆。** 这样 `release/2.0` 上之后的宠物历史是原子提交，不必再重放；只有更早被 squash 的 VOD-Studio/violet#516 需要从 `refs/pull/516/head` 取原始提交。
 
 ## 仓库名：`VOD-Studio/kodama`
 
@@ -42,7 +42,7 @@ kodama/
 └── .github/workflows/ ci.yml（由 pet.yml 迁入）、release
 ```
 
-Violet 里保留：PRD-0036、ADR-0021、活动连接器（#528）、站点挂载（#531）和 `/pet` 演示页。
+Violet 里保留：PRD-0036、ADR-0021、活动连接器（VOD-Studio/violet#528）、站点挂载（VOD-Studio/violet#531）和 `/pet` 演示页。
 
 ## 仓库自己的调试
 
@@ -71,7 +71,7 @@ Violet 里保留：PRD-0036、ADR-0021、活动连接器（#528）、站点挂�
 |---|---|---|
 | 1. 本机源码联调（现在就能用） | 两个仓库并排检出。在 Violet 的 `web/` 里 `PET_REPO=../kodama pnpm pet:sync --watch`，另开 `make dev`。改 Rust 后自动重建并同步，Vite 热更新 `/pet` | 同时改宠物与页面 |
 | 2. 已发布包 | 首次 npm 发布后，Violet 的 `web/package.json` 依赖固定版本的 `@violetjs/pet`，`/pet` 页改为直接从包导入，删除 `pet:sync` 与忽略的 `sdk/` 目录 | 日常开发与生产 |
-| 3. 服务联调 | `PET_DEV_TRUST_KEY` 设为 Violet 开发环境的断言公钥后启动 `kodama` 服务；Violet 连接器（#528，**尚未实现**）配置服务地址与签名密钥 | 活动结算与奖励 |
+| 3. 服务联调 | `PET_DEV_TRUST_KEY` 设为 Violet 开发环境的断言公钥后启动 `kodama` 服务；Violet 连接器（VOD-Studio/violet#528，**尚未实现**）配置服务地址与签名密钥 | 活动结算与奖励 |
 
 阶段 1 的细节：
 
@@ -85,18 +85,18 @@ Violet 里保留：PRD-0036、ADR-0021、活动连接器（#528）、站点挂�
 
 ### 为什么要从 PR 的原始提交取早期历史
 
-PR #516 是 squash 合并，`release/2.0` 上 `pet/` 的早期历史只有一个压缩提交。PR 的原始头部仍保存在 GitHub 的 `refs/pull/<n>/head`，从那里拆能保留历史。PR #541 用 merge commit 合并后，之后的历史是原子提交，不需要再重放。
+PR VOD-Studio/violet#516 是 squash 合并，`release/2.0` 上 `pet/` 的早期历史只有一个压缩提交。PR 的原始头部仍保存在 GitHub 的 `refs/pull/<n>/head`，从那里拆能保留历史。PR VOD-Studio/violet#541 用 merge commit 合并后，之后的历史是原子提交，不需要再重放。
 
-实际结果：把 #535 与 #541 的 26 个非合并提交重放到 `refs/pull/516/head` 上，再对 `pet/` 做 subtree split，得到 **44 个提交**，文件树与 `release/2.0` 的 `pet/` 逐文件一致（树比较输出为空），不含 `web/`、`api/`、`.github/`。拆出的历史原样推送为 `main`，之后在分支上做独立化改造（`LICENSE`、路径引用、CI、README）。
+实际结果：把 VOD-Studio/violet#535 与 VOD-Studio/violet#541 的 26 个非合并提交重放到 `refs/pull/516/head` 上，再对 `pet/` 做 subtree split，得到 **44 个提交**，文件树与 `release/2.0` 的 `pet/` 逐文件一致（树比较输出为空），不含 `web/`、`api/`、`.github/`。拆出的历史原样推送为 `main`，之后在分支上做独立化改造（`LICENSE`、路径引用、CI、README）。
 
 ```sh
-# 1. 取得 #516 的原始头部（squash 前的提交）
+# 1. 取得 VOD-Studio/violet#516 的原始头部（squash 前的提交）
 git fetch origin refs/pull/516/head:refs/tmp/pr516
 
 # 2. 在临时 worktree 里把之后的 pet 相关提交重放到它上面
 git worktree add -b tmp/full-history ../kodama-split refs/tmp/pr516
 cd ../kodama-split
-git cherry-pick -X theirs $(git rev-list --reverse <#516 的合并提交>..origin/release/2.0 -- pet)
+git cherry-pick -X theirs $(git rev-list --reverse <VOD-Studio/violet#516 的合并提交>..origin/release/2.0 -- pet)
 
 # 3. 校验文件树一致（输出必须为空）
 git diff --stat tmp/full-history origin/release/2.0 -- pet
@@ -122,17 +122,17 @@ git push git@github.com:VOD-Studio/kodama.git kodama-split:main
 
 ## 留在 Violet
 
-PRD-0036、ADR-0021、CONTEXT 中的术语、Violet 活动连接器（#528）、主页挂载（#531）、`/pet` 演示页与 `pet:sync`。迁出后删除 `pet/` 与 `pet.yml`，PRD 中的路径引用改为新仓库链接。
+PRD-0036、ADR-0021、CONTEXT 中的术语、Violet 活动连接器（VOD-Studio/violet#528）、主页挂载（VOD-Studio/violet#531）、`/pet` 演示页与 `pet:sync`。迁出后删除 `pet/` 与 `pet.yml`，PRD 中的路径引用改为新仓库链接。
 
 ## 迁移清单
 
-- [x] 合并 PR #541（merge commit），其中已含像素画风与开发入口
+- [x] 合并 PR VOD-Studio/violet#541（merge commit），其中已含像素画风与开发入口
 - [x] 由有权限的人创建 `VOD-Studio/kodama`
 - [x] 按上面步骤拆分并校验树一致（44 个提交）
 - [ ] 新仓库配置 CI：安装 `wasm-bindgen-cli@0.2.129`、Postgres 服务、Chrome；`RUNNER_STATUS_TOKEN` 与 `SELF_HOSTED_RUNNER` 是否沿用另议
 - [ ] 新仓库配置 release-please（独立版本，不再牵动 Violet 的发版）
 - [ ] 新仓库首次 CI 全绿后，再从 Violet 删除 `pet/` 与 `pet.yml`
-- [ ] 转移下游 issue（#525 至 #540）：`gh issue transfer <n> <新仓库>`；评审类 issue（#518 至 #524）按内容决定留在 Violet 还是迁出
+- [ ] 转移下游 issue（#10 至 #21）：`gh issue transfer <n> <新仓库>`；评审类 issue（#3 至 #9）按内容决定留在 Violet 还是迁出
 - [ ] 更新 PRD、ADR 与 CONTEXT 中的路径和链接
 - [ ] crate 改名为 `violet-pet-*`，npm 与 crates.io 的发布流程与令牌（目前没有任何包发布）
 - [ ] 许可文件：`LICENSE` 随仓库根，素材许可另附
@@ -141,7 +141,7 @@ PRD-0036、ADR-0021、CONTEXT 中的术语、Violet 活动连接器（#528）、
 
 - **独立的像素预览页**：目前像素画只能在 Violet 的 `/pet` 看。拆分后建议在新仓库加一个 `apps/demo`（Vite），复用同一批展示组件，并考虑把它们抽成 `@violetjs/pet-react`，让 Violet 的 `/pet` 退化为薄封装。这是一次独立的设计与提交，不应混进拆分本身。
 - **README**：新仓库根的 README 在拆分时写，内容以本文“仓库自己的调试”为骨架。
-- **阶段 3 的连接器**（#528）与 Violet 开发公钥的来源还没有实现，上文只是约定。
+- **阶段 3 的连接器**（VOD-Studio/violet#528）与 Violet 开发公钥的来源还没有实现，上文只是约定。
 
 ## 不在本文范围
 
