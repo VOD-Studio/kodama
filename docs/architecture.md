@@ -237,7 +237,7 @@ Each open issue already has a place in this layout. A feature adds modules where
 
 | Issue | Rules (`pet-core`) | Art (`pet-term`, `assets/`) | Service (`pet-service`, `pet-store`) | Clients |
 |---|---|---|---|---|
-| Evolution forms and refined art (#6, #11, #14) | `rules/growth.rs`: evolution lines and conditions | One distinct form per stage and branch; evolution lines in `assets/catalog/` | `GET /v1/pets/me/evolution` stays the entry | SDK renders the same forms |
+| Evolution forms and refined art (#6, #11, #14) | `rules/growth.rs`: conditions (unchanged); `Stage` and `Branch` live in `pet_term::form` | **Pixel art done** ([design](design/evolution.md)): a body per stage, branch features, 16 forms per species, names in `assets/catalog/`; terminal forms next | `GET /v1/pets/me/evolution` stays the entry | SDK passes `lineage` to `sprite` |
 | #5 Rule-version migration | `rules/migrate.rs`: explicit `migrate(pet, from, to)` with invariant tests | — | Migrates on load and persists; schema changes as numbered migrations in `pet-store` | — |
 | #10 Account service | — | — | Connection pool, token store, rate limits in `http.rs`; storage contract signatures frozen | — |
 | #12 Activity and rewards | `grant` (exists) | — | `routes/activity.rs`: durable inbox, deduplication, per-world caps | Integrator connectors send signed events |
