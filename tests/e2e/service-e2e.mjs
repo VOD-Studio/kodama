@@ -23,6 +23,18 @@ function assertion(sub, now = Math.floor(Date.now() / 1000)) {
   return `v1.${b64(payload)}.${b64(crypto.sign(null, msg, privateKey))}`;
 }
 
+// 扮演接入方的活动连接器：持有事件签名密钥。
+const connector = crypto.generateKeyPairSync("ed25519");
+const connectorPub = Buffer.from(connector.publicKey.export({ format: "jwk" }).x, "base64url").toString("hex");
+function signedEvent(fields) {
+  const payload = Buffer.from(JSON.stringify({
+    source: "site", kid: "c1", subject: "alice", action: "read", content_ref: { kind: "post", id: "p1" },
+    occurred_at: new Date().toISOString(), topics: ["rust"], ...fields,
+  }));
+  const msg = Buffer.concat([Buffer.from("pet/activity/v1\n"), payload]);
+  return `e1.${b64(payload)}.${b64(crypto.sign(null, msg, connector.privateKey))}`;
+}
+
 const port = 20000 + Math.floor(Math.random() * 20000);
 const base = `http://127.0.0.1:${port}`;
 const env = {
@@ -31,6 +43,7 @@ const env = {
   PET_SIGNING_SEED: crypto.randomBytes(32).toString("hex"), PET_TOKEN_SECRET: crypto.randomBytes(32).toString("hex"), PET_ELIGIBILITY_SECRET: crypto.randomBytes(32).toString("hex"),
   PET_TRUSTED_ISSUERS: JSON.stringify([{ iss: "violet", keys: [{ kid: "v1", public_key: violetPub, not_before: "0" }] }]),
   PET_DEVICE_VERIFICATION_URI: "https://site.example/pet/device",
+  PET_ACTIVITY_SOURCES: JSON.stringify([{ source: "site", iss: "violet", keys: [{ kid: "c1", public_key: connectorPub, not_before: "0" }] }]),
 };
 
 let child;
@@ -102,8 +115,19 @@ try {
   assert.equal(after.body.value.pet.id, cert.id);
   assert.equal(after.body.value.appearance.species, cert.species, "the projection carries the appearance");
 
+  // 活动：可信连接器送来的阅读给宠物食物；重送无害
+  const ev = { event: signedEvent({ event_id: "e2e-read-1", eligibility_id: "read:p1:alice" }) };
+  const r1 = await api("POST", "/v1/activity", null, ev);
+  assert.equal(r1.status, 200, JSON.stringify(r1.body));
+  assert.equal(r1.body.value.granted.food, 1);
+  const r2 = await api("POST", "/v1/activity", null, ev);
+  assert.equal(r2.body.value.replayed, true);
+  const rewarded = (await api("GET", "/v1/pets/me", alice2)).body.value;
+  assert.equal(rewarded.pet.food, 5, "one food from the read, once");
+  assert.equal(rewarded.allowance.food, 2);
+
   if (cli) await cliAccount(alice2, cert);
-  console.log(`PASS: service e2e on ${db.startsWith("postgres") || db.includes("host=") ? "postgres" : "sqlite"} — adopt across a restart, wasm-verified certificate, idempotent action, isolation${cli ? ", CLI device login" : ""}`);
+  console.log(`PASS: service e2e on ${db.startsWith("postgres") || db.includes("host=") ? "postgres" : "sqlite"} — adopt across a restart, wasm-verified certificate, idempotent action, isolation, activity rewards${cli ? ", CLI device login" : ""}`);
 } finally {
   await stop();
 }
