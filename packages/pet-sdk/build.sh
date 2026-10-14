@@ -10,4 +10,5 @@ cp src/index.d.ts dist/index.d.ts
 cp src/types.d.ts dist/types.d.ts
 cp src/terminal.js src/terminal.d.ts dist/
 cp src/web.js src/web.d.ts dist/
+cp src/store.js src/store.d.ts src/local.js src/local.d.ts dist/
 cp ../../LICENSE LICENSE

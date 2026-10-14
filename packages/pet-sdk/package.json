@@ -1,7 +1,7 @@
 {
   "name": "@violetjs/pet",
   "version": "0.2.0",
-  "description": "Electronic pet SDK for the web and Node: deterministic WebAssembly rules core, typed commands and terminal embedding.",
+  "description": "Electronic pet SDK for the web and Node: deterministic WebAssembly rules core, typed commands, terminal and canvas rendering, and an offline local mode.",
   "keywords": [
     "pet",
     "virtual-pet",
@@ -9,7 +9,9 @@
     "webassembly",
     "wasm",
     "deterministic",
-    "terminal"
+    "terminal",
+    "indexeddb",
+    "offline"
   ],
   "homepage": "https://github.com/VOD-Studio/kodama/tree/main/packages/pet-sdk#readme",
   "bugs": {
@@ -45,6 +47,14 @@
       "types": "./dist/web.d.ts",
       "default": "./dist/web.js"
     },
+    "./store": {
+      "types": "./dist/store.d.ts",
+      "default": "./dist/store.js"
+    },
+    "./local": {
+      "types": "./dist/local.d.ts",
+      "default": "./dist/local.js"
+    },
     "./wasm": "./dist/pet_wasm_bg.wasm"
   },
   "scripts": {
@@ -58,6 +68,7 @@
   },
   "devDependencies": {
     "ajv": "^8",
+    "fake-indexeddb": "^6",
     "json-schema-to-typescript": "^16",
     "typescript": "^7"
   }
