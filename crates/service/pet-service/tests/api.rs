@@ -168,6 +168,7 @@ async fn a_key_used_outside_its_window_is_rejected() {
         eligibility_secret: hex32(2),
         published_keys: vec![],
         device_verification_uri: None,
+        activity_sources: vec![],
     };
     let app = router(Arc::new(AppState {
         cfg,

@@ -54,6 +54,15 @@ fn config() -> (Config, SigningKey) {
         eligibility_secret: hex32("PET_ELIGIBILITY_SECRET").to_vec(),
         published_keys: published,
         device_verification_uri: device_uri(),
+        activity_sources: std::env::var("PET_ACTIVITY_SOURCES")
+            .ok()
+            .map(|s| {
+                serde_json::from_str(&s).unwrap_or_else(|e| {
+                    eprintln!("PET_ACTIVITY_SOURCES is not valid: {e}");
+                    std::process::exit(2);
+                })
+            })
+            .unwrap_or_default(),
     };
     (cfg, signing)
 }

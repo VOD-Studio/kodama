@@ -47,21 +47,22 @@ pub fn issuer_keys(violet: &SigningKey, not_after: Option<u64>) -> Vec<TrustedIs
 pub const DEVICE_URI: &str = "https://site.example/pet/device";
 
 pub fn state(db: &Path, clock: Arc<AtomicU64>, violet: &SigningKey, world: &str) -> Router {
-    state_with(db, clock, violet, world, Some(DEVICE_URI.into()))
+    state_with(db, clock, violet, world, |_| {})
 }
 
+/// 与 `state` 相同，另外可以改动配置（例如关闭设备授权、不登记连接器）。
 pub fn state_with(
     db: &Path,
     clock: Arc<AtomicU64>,
     violet: &SigningKey,
     world: &str,
-    device_verification_uri: Option<String>,
+    tweak: impl FnOnce(&mut Config),
 ) -> Router {
     let signing = SigningKey::from_bytes(&[5u8; 32]);
     let published = vec![
         json!({"kid": "p1", "public_key": pet_core::hex(&signing.verifying_key().to_bytes()), "not_before": "0"}),
     ];
-    let cfg = Config {
+    let mut cfg = Config {
         world: world.into(),
         audience: AUD.into(),
         issuer_name: "pet-service".into(),
@@ -70,8 +71,10 @@ pub fn state_with(
         token_secret: hex32(1),
         eligibility_secret: hex32(2),
         published_keys: published,
-        device_verification_uri,
+        device_verification_uri: Some(DEVICE_URI.into()),
+        activity_sources: activity_sources(),
     };
+    tweak(&mut cfg);
     let path = db.to_path_buf();
     let c = clock.clone();
     let st = Arc::new(AppState {
@@ -190,4 +193,49 @@ pub async fn futures_join(
         out.push(t.await.unwrap());
     }
     out
+}
+
+/// 扮演接入方的活动连接器：签名密钥与它在服务里的登记。
+pub fn connector_key() -> SigningKey {
+    SigningKey::from_bytes(&[11u8; 32])
+}
+
+pub fn activity_sources() -> Vec<pet_service::activity::ActivitySource> {
+    serde_json::from_value(json!([{
+        "source": "site", "iss": "violet",
+        "keys": [{"kid": "c1", "public_key": pet_core::hex(&connector_key().verifying_key().to_bytes()), "not_before": "0"}]
+    }]))
+    .unwrap()
+}
+
+/// 签名一条活动事实：`fields` 覆盖缺省字段（一次阅读）。
+pub fn signed_event(fields: Value) -> String {
+    let mut e = json!({
+        "source": "site", "kid": "c1", "event_id": "ev-1", "eligibility_id": "read:post-1:alice",
+        "subject": "alice", "action": "read", "content_ref": {"kind": "post", "id": "post-1"},
+        "occurred_at": "2027-01-15T08:00:00Z", "topics": ["rust"]
+    });
+    for (k, v) in fields.as_object().unwrap() {
+        e[k] = v.clone();
+    }
+    let payload = serde_json::to_vec(&e).unwrap();
+    let mut msg = b"pet/activity/v1\n".to_vec();
+    msg.extend_from_slice(&payload);
+    format!(
+        "e1.{}.{}",
+        URL_SAFE_NO_PAD.encode(&payload),
+        URL_SAFE_NO_PAD.encode(connector_key().sign(&msg).to_bytes())
+    )
+}
+
+/// 送达一条活动事实。
+pub async fn deliver(e: &Env, fields: Value) -> (StatusCode, Value) {
+    call(
+        &e.app,
+        "POST",
+        "/v1/activity",
+        None,
+        Some(json!({ "event": signed_event(fields) })),
+    )
+    .await
 }

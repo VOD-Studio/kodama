@@ -1,7 +1,8 @@
 //! 独立宠物服务：持有账号宠物的唯一权威状态。不依赖 Violet 的 API、SSR 或数据库。
 //! 模块：state（配置与共享状态）、error（响应格式）、http（认证与请求处理）、
-//! identity（身份断言与访问令牌）、session（登录会话与刷新令牌）、device（设备授权）、
+//! activity（活动事实与奖励结算）、identity（身份断言与访问令牌）、session（登录会话与刷新令牌）、device（设备授权）、
 //! record（小记录的读改写）、routes（按资源分文件的处理函数）。
+pub mod activity;
 mod device;
 mod error;
 mod http;
@@ -18,7 +19,7 @@ pub use state::{AppState, Config};
 use axum::routing::{delete, get, post};
 use axum::Router;
 use pet_store::Store;
-use routes::{auth, births, meta, pets, sessions};
+use routes::{activity as activity_routes, auth, births, meta, pets, sessions};
 use std::sync::Arc;
 
 /// 全部 HTTP 接口。新增接口在这里登记，并写进 docs/operations/service.md 的接口表。
@@ -43,5 +44,6 @@ pub fn router<S: Store + Send + 'static>(state: Arc<AppState<S>>) -> Router {
         .route("/v1/pets/me", get(pets::get_pet::<S>))
         .route("/v1/pets/me/actions", post(pets::act::<S>))
         .route("/v1/pets/me/evolution", get(pets::evolution::<S>))
+        .route("/v1/activity", post(activity_routes::receive::<S>))
         .with_state(state)
 }
