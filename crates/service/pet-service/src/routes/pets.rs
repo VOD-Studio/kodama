@@ -90,38 +90,50 @@ pub(crate) async fn act<S: Store + Send + 'static>(
         .map_err(|e| ApiError::bad_request("bad_input", &e.to_string()))?;
     let action_text = body.action.to_string();
     let v = with_store(&st, move |st, store| {
-        match pet_store::run_act(
-            store,
-            &pet_scope(&st.cfg, &who),
-            action,
-            &action_text,
-            st.ticks(),
-            &body.request_id,
-        ) {
-            Ok(result) => serde_json::from_str::<Value>(&result).map_err(ApiError::internal),
-            Err(ExecError::NoPet) => Err(ApiError::not_found("no pet")),
-            Err(ExecError::RequestIdReused) => Err(ApiError::conflict(
-                "request_conflict",
-                "request_id was already used with different parameters",
-            )),
-            Err(ExecError::Act(e)) => {
-                let status = if e.code() == pet_core::ErrorCode::Dead {
-                    StatusCode::CONFLICT
-                } else {
-                    StatusCode::UNPROCESSABLE_ENTITY
-                };
-                let code = serde_json::to_value(e.code()).unwrap_or_default();
-                Err(ApiError::new(
-                    status,
-                    code.as_str().unwrap_or("rejected"),
-                    e.message(),
-                ))
-            }
-            Err(other) => Err(ApiError::internal(other)),
-        }
+        act_as(st, store, &who, action, &action_text, &body.request_id)
     })
     .await?;
     Ok(ok(v))
+}
+
+/// 以 `who` 的宠物执行一个动作：规则核心结算后原子提交；错误码与 HTTP 状态的对应在这里统一。
+pub(crate) fn act_as<S: Store>(
+    st: &AppState<S>,
+    store: &mut S,
+    who: &Subject,
+    action: pet_core::Action,
+    action_text: &str,
+    request_id: &str,
+) -> Result<Value, ApiError> {
+    match pet_store::run_act(
+        store,
+        &pet_scope(&st.cfg, who),
+        action,
+        action_text,
+        st.ticks(),
+        request_id,
+    ) {
+        Ok(result) => serde_json::from_str::<Value>(&result).map_err(ApiError::internal),
+        Err(ExecError::NoPet) => Err(ApiError::not_found("no pet")),
+        Err(ExecError::RequestIdReused) => Err(ApiError::conflict(
+            "request_conflict",
+            "request_id was already used with different parameters",
+        )),
+        Err(ExecError::Act(e)) => {
+            let status = if e.code() == pet_core::ErrorCode::Dead {
+                StatusCode::CONFLICT
+            } else {
+                StatusCode::UNPROCESSABLE_ENTITY
+            };
+            let code = serde_json::to_value(e.code()).unwrap_or_default();
+            Err(ApiError::new(
+                status,
+                code.as_str().unwrap_or("rejected"),
+                e.message(),
+            ))
+        }
+        Err(other) => Err(ApiError::internal(other)),
+    }
 }
 
 pub(crate) async fn evolution<S: Store + Send + 'static>(

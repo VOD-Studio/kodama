@@ -1,10 +1,11 @@
 //! 独立宠物服务：持有账号宠物的唯一权威状态。不依赖 Violet 的 API、SSR 或数据库。
 //! 模块：state（配置与共享状态）、error（响应格式）、http（认证与请求处理）、
-//! activity（活动事实与奖励结算）、identity（身份断言与访问令牌）、session（登录会话与刷新令牌）、device（设备授权）、
+//! activity（活动事实与奖励结算）、friends（好友、拜访与联合探险）、identity（身份断言与访问令牌）、session（登录会话与刷新令牌）、device（设备授权）、
 //! record（小记录的读改写）、routes（按资源分文件的处理函数）。
 pub mod activity;
 mod device;
 mod error;
+mod friends;
 mod http;
 pub mod identity;
 mod record;
@@ -19,7 +20,10 @@ pub use state::{AppState, Config};
 use axum::routing::{delete, get, post};
 use axum::Router;
 use pet_store::Store;
-use routes::{activity as activity_routes, auth, births, memorials, meta, pets, sessions};
+use routes::{
+    activity as activity_routes, auth, births, friends as friend_routes, memorials, meta, pets,
+    sessions,
+};
 use std::sync::Arc;
 
 /// 全部 HTTP 接口。新增接口在这里登记，并写进 docs/operations/service.md 的接口表。
@@ -47,5 +51,26 @@ pub fn router<S: Store + Send + 'static>(state: Arc<AppState<S>>) -> Router {
         .route("/v1/memorials", get(memorials::list::<S>))
         .route("/v1/memorials/{id}", get(memorials::get::<S>))
         .route("/v1/activity", post(activity_routes::receive::<S>))
+        .route("/v1/friends", get(friend_routes::list::<S>))
+        .route(
+            "/v1/friends/invites",
+            post(friend_routes::create_invite::<S>),
+        )
+        .route("/v1/friends/accept", post(friend_routes::accept::<S>))
+        .route("/v1/friends/visitors", get(friend_routes::visitors::<S>))
+        .route("/v1/friends/{id}", delete(friend_routes::remove::<S>))
+        .route("/v1/friends/{id}/visits", post(friend_routes::visit::<S>))
+        .route(
+            "/v1/friends/{id}/expeditions",
+            post(friend_routes::start_joint::<S>),
+        )
+        .route(
+            "/v1/friends/{id}/expeditions/{plan}/join",
+            post(friend_routes::join_joint::<S>),
+        )
+        .route(
+            "/v1/friends/{id}/expeditions/{plan}/cancel",
+            post(friend_routes::cancel_joint::<S>),
+        )
         .with_state(state)
 }
