@@ -153,32 +153,84 @@ fn selected_adult_whale_keeps_original_pixels_at_one_times_scale() {
 }
 
 #[test]
-fn gpt_adult_renders_two_key_poses_and_earlier_stages_stay_reserved() {
-    let look = |action| CompanionAppearance {
+fn gpt_earlier_stages_stay_reserved_and_every_action_has_its_own_clip() {
+    let look = |action, expression| CompanionAppearance {
         character: Companion::Gpt,
         action: Some(action),
-        expression: None,
+        expression,
     };
     for stage in 0..2 {
-        assert!(!is_ready(&look(CompanionAction::Idle), stage, &[]));
+        assert!(!is_ready(&look(CompanionAction::Idle, None), stage, &[]));
         let p = render(
-            &input(stage, 0, "idle", 80, 92),
-            &look(CompanionAction::Idle),
+            &input(stage, 0, "idle", 69, 66),
+            &look(CompanionAction::Idle, None),
         );
         assert!(p.palette.is_empty(), "stage {stage} must not show artwork");
     }
-    assert!(is_ready(&look(CompanionAction::Idle), 2, &[]));
-    let open = render(&input(2, 0, "idle", 80, 92), &look(CompanionAction::Idle));
-    let closed = render(&input(2, 0, "sleep", 80, 92), &look(CompanionAction::Sleep));
-    assert_eq!((open.w, open.h), (80, 92));
-    assert_ne!(open.rows, closed.rows);
-    for p in [&open, &closed] {
-        assert!(p.rows.iter().all(|r| r.len() == 80));
-        for key in p.rows.iter().flat_map(|r| r.chars()).filter(|c| *c != '.') {
-            assert!(p.palette.contains_key(&key.to_string()));
+    assert!(is_ready(&look(CompanionAction::Idle, None), 2, &[]));
+    let mut per_action = BTreeSet::new();
+    for action in CompanionAction::ALL {
+        let mut frames = BTreeSet::new();
+        for t in 0..80 {
+            let p = render(&input(2, t, "observe", 69, 66), &look(action, None));
+            assert_eq!((p.w, p.h), (69, 66), "{} t{t}", action.name());
+            assert!(p.rows.iter().all(|r| r.len() == 69));
+            assert!(p.rows.iter().any(|r| r.bytes().any(|b| b != b'.')));
+            for key in p.rows.iter().flat_map(|r| r.chars()).filter(|c| *c != '.') {
+                assert!(p.palette.contains_key(&key.to_string()));
+            }
+            frames.insert(p.rows);
+        }
+        if action != CompanionAction::End {
+            assert!(frames.len() > 1, "{} must animate", action.name());
+        }
+        per_action.insert(frames);
+    }
+    assert!(per_action.len() >= 25, "actions must not share one clip");
+}
+
+#[test]
+fn gpt_expressions_hold_a_distinct_face_over_the_rest_clips() {
+    let draw = |expression, t| {
+        let look = CompanionAppearance {
+            character: Companion::Gpt,
+            action: Some(CompanionAction::Idle),
+            expression,
+        };
+        render(&input(2, t, "observe", 69, 66), &look).rows
+    };
+    let mut seen = BTreeSet::new();
+    for expression in [
+        Expression::Curious,
+        Expression::Focused,
+        Expression::Shy,
+        Expression::Happy,
+        Expression::Startled,
+        Expression::Smug,
+    ] {
+        assert_ne!(draw(Some(expression), 0), draw(None, 0), "{expression:?}");
+        seen.insert(draw(Some(expression), 0));
+    }
+    assert_eq!(seen.len(), 6, "six expressions are six distinct faces");
+}
+
+#[test]
+fn gpt_life_poses_override_a_stale_action_and_expression() {
+    for pose in ["sick", "end", "sleep", "evolve"] {
+        let plain = CompanionAppearance {
+            character: Companion::Gpt,
+            action: None,
+            expression: None,
+        };
+        let stale = CompanionAppearance {
+            character: Companion::Gpt,
+            action: Some(CompanionAction::Complete),
+            expression: Some(Expression::Happy),
+        };
+        for t in [0, 7, 31] {
+            let a = render(&input(2, t, pose, 69, 66), &plain);
+            let b = render(&input(2, t, pose, 69, 66), &stale);
+            assert_eq!(a.rows, b.rows, "{pose} t{t}");
         }
     }
-    // A smaller host region crops around the centre instead of stretching.
-    let small = render(&input(2, 0, "idle", 69, 66), &look(CompanionAction::Idle));
-    assert_eq!((small.w, small.h), (69, 66));
 }

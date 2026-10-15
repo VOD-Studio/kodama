@@ -36,7 +36,8 @@ pub fn render(i: &crate::PixelInput, appearance: &CompanionAppearance) -> crate:
         }
         Companion::Deepseek => deepseek::render(action, expression, i.t)
             .map_or_else(|| empty(i.w, i.h), |pixels| center_source(pixels, i.w, i.h)),
-        Companion::Gpt => center_source(gpt::render(action, expression, i.t), i.w, i.h),
+        Companion::Gpt => gpt::render(action, expression, i.t)
+            .map_or_else(|| empty(i.w, i.h), |pixels| center_source(pixels, i.w, i.h)),
         _ => empty(i.w, i.h),
     }
 }

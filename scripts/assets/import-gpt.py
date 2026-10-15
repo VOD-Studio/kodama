@@ -1,109 +1,97 @@
 #!/usr/bin/env python3
-"""Rebuild the GPT companion pixel frames from the project's own concept study.
-Requires Pillow and numpy; never runs at runtime.
+"""Rebuild the GPT companion frames. Pure Python, no third-party packages; never runs at runtime.
 
-python3 scripts/assets/import-gpt.py
+python3 scripts/assets/import-gpt.py            # rewrite data.rs and frames.bin
+python3 scripts/assets/import-gpt.py --sheet out.png idle think   # contact sheet (needs Pillow)
 
-The source is assets/preview/companions/studies/gpt-v3-grid-study.png, an original
-image made for this project. Its pixel blocks are ~10 px but not on an exact grid,
-so each target pixel takes the dominant palette colour of the source cell, with
-dark outline colours weighted up so thin lines survive the reduction.
+The figure, symbols and clips are authored in scripts/assets/gpt/ (figure.py, props.py,
+clips.py) to the same spec as the original companion: a 69x66 canvas, a 49x48 half-body
+figure, one short clip per action with uneven frame times. The concept study in
+assets/preview/companions/studies/ is only the design reference.
+
+frames.bin layout: per frame, runs of (count u8, colour u8) over the canvas in row-major
+order; colour 0 is transparent and colour n is COLORS[n - 1]. Identical frames are stored
+once.
 """
 
 import sys
 from pathlib import Path
 
-import numpy as np
-from PIL import Image
-
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "assets/preview/companions/studies/gpt-v3-grid-study.png"
-OUT = ROOT / "crates/core/kodama-term/src/companions/gpt/data.rs"
-HEIGHT = 92
-COLORS = 48
-KEYS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+sys.path.insert(0, str(Path(__file__).resolve().parent / "gpt"))
+
+import clips  # noqa: E402
+from compose import CANVAS_H, CANVAS_W  # noqa: E402
+from lib import PAL  # noqa: E402
+
+OUT = ROOT / "crates/core/kodama-term/src/companions/gpt"
 
 
-def reduce(source: Image.Image):
-    alpha = np.array(source)[:, :, 3] >= 128
-    ys, xs = np.where(alpha)
-    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-    pixels = np.array(source)[y0:y1, x0:x1]
-    h, w = pixels.shape[:2]
-    width = round(w * HEIGHT / h)
-    quant = Image.fromarray(pixels[:, :, :3]).quantize(
-        COLORS, method=Image.MEDIANCUT, dither=Image.NONE
-    )
-    index = np.array(quant)
-    palette = np.array(quant.getpalette()[: COLORS * 3]).reshape(-1, 3)
-    luma = palette @ np.array([0.3, 0.59, 0.11])
-    weight = np.where(luma < 100, 1.5, 1.0)
-    mask = pixels[:, :, 3] >= 128
-    grid = -np.ones((HEIGHT, width), int)
-    for ty in range(HEIGHT):
-        for tx in range(width):
-            ya, yb = int(ty * h / HEIGHT), int((ty + 1) * h / HEIGHT)
-            xa, xb = int(tx * w / width), int((tx + 1) * w / width)
-            cell = mask[ya:yb, xa:xb]
-            if cell.mean() < 0.5:
-                continue
-            counts = np.bincount(index[ya:yb, xa:xb][cell], minlength=COLORS) * weight
-            grid[ty, tx] = counts.argmax()
-    return grid, palette
+def rle(canvas, index):
+    out = bytearray()
+    flat = [index.get(ch, 0) for row in canvas.g for ch in row]
+    run, prev = 0, None
+    for value in flat:
+        if value == prev and run < 255:
+            run += 1
+        else:
+            if prev is not None:
+                out += bytes((run, prev))
+            prev, run = value, 1
+    out += bytes((run, prev))
+    return bytes(out)
 
 
-def closed_eyes(grid, palette):
-    """Second frame: the violet eye is replaced by skin and a lash line."""
-    out = grid.copy()
-    skin = None
-    for y in range(36, 44):
-        for x in range(30, 40):
-            r, g, b = palette[grid[y, x]] if grid[y, x] >= 0 else (0, 0, 0)
-            if r > 240 and 215 < g < 240 and 205 < b < 235:
-                skin = grid[y, x]
-    if skin is None:
-        return out
-    lash = min(range(COLORS), key=lambda i: palette[i] @ np.array([0.3, 0.59, 0.11]))
-    for y in range(33, 41):
-        for x in range(38, 48):
-            if out[y, x] < 0:
-                continue
-            r, g, b = palette[out[y, x]]
-            if b > r + 12 and r + g + b < 640:
-                out[y, x] = skin
-    for x in range(40, 46):
-        out[39, x] = lash
-    return out
+def build():
+    rendered = {name: clips.render_clip(name) for name in clips.CLIPS}
+    used = sorted({ch for frames in rendered.values() for _, c in frames for row in c.g for ch in row if ch != "."})
+    index = {ch: i + 1 for i, ch in enumerate(used)}
+    blob, seen, table = bytearray(), {}, {}
+    for name, frames in rendered.items():
+        entries = []
+        for ms, canvas in frames:
+            data = rle(canvas, index)
+            if data not in seen:
+                seen[data] = (len(blob), len(data))
+                blob += data
+            offset, length = seen[data]
+            entries.append((ms, offset, length))
+        table[name] = entries
+    return used, bytes(blob), table, sum(len(f) for f in rendered.values())
+
+
+def write(used, blob, table):
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "frames.bin").write_bytes(blob)
+    lines = [
+        "// Generated by scripts/assets/import-gpt.py; do not edit by hand.",
+        f"pub(super) const WIDTH: usize = {CANVAS_W};",
+        f"pub(super) const HEIGHT: usize = {CANVAS_H};",
+        'pub(super) const DATA: &[u8] = include_bytes!("frames.bin");',
+        "/// Palette key and RGB. Frame colour n is COLORS[n - 1]; 0 is transparent.",
+        "pub(super) const COLORS: &[(char, [u8; 3])] = &[",
+    ]
+    for ch in used:
+        v = PAL[ch]
+        lines.append(f"    ('{ch}', [{int(v[1:3], 16)}, {int(v[3:5], 16)}, {int(v[5:7], 16)}]),")
+    lines += ["];", "/// Frame: duration in ms, byte offset and length in DATA.", "pub(super) type Frame = (u16, usize, usize);",
+              "pub(super) const ANIMATIONS: &[(&str, &[Frame])] = &["]
+    for name, entries in table.items():
+        lines.append(f'    ("{name}", &[')
+        lines += [f"        ({ms}, {off}, {ln})," for ms, off, ln in entries]
+        lines.append("    ]),")
+    lines.append("];")
+    (OUT / "data.rs").write_text("\n".join(lines) + "\n")
 
 
 def main():
-    grid, palette = reduce(Image.open(SOURCE).convert("RGBA"))
-    frames = {"adult_open": grid, "adult_closed": closed_eyes(grid, palette)}
-    used = sorted({int(v) for f in frames.values() for v in f.flatten() if v >= 0})
-    if len(used) > len(KEYS):
-        sys.exit("too many colours")
-    key_of = {color: KEYS[i] for i, color in enumerate(used)}
-    height, width = grid.shape
-    lines = [
-        "// Generated by scripts/assets/import-gpt.py from the project's own concept study.",
-        "// Do not edit by hand; re-run the script after changing the study image.",
-        f"pub(super) const WIDTH: usize = {width};",
-        f"pub(super) const HEIGHT: usize = {height};",
-        "/// Palette key and RGB. `.` is transparent and is never listed here.",
-        "pub(super) const COLORS: &[(char, [u8; 3])] = &[",
-    ]
-    for color in used:
-        r, g, b = (int(v) for v in palette[color])
-        lines.append(f"    ('{key_of[color]}', [{r}, {g}, {b}]),")
-    lines.append("];")
-    for name, frame in frames.items():
-        lines.append(f"pub(super) const {name.upper()}: [&str; {height}] = [")
-        for row in frame:
-            lines.append('    "' + "".join("." if v < 0 else key_of[int(v)] for v in row) + '",')
-        lines.append("];")
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text("\n".join(lines) + "\n")
-    print(f"{OUT.relative_to(ROOT)}: {width}x{height}, {len(used)} colours")
+    if len(sys.argv) > 2 and sys.argv[1] == "--sheet":
+        import sheet
+        sheet.draw(sys.argv[3:], sys.argv[2])
+        return
+    used, blob, table, frames = build()
+    write(used, blob, table)
+    print(f"{OUT.relative_to(ROOT)}: {len(table)} clips, {frames} frames ({len(blob)} bytes stored), {len(used)} colours")
 
 
 if __name__ == "__main__":
