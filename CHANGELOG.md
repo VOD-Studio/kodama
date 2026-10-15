@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0](https://github.com/VOD-Studio/kodama/compare/v0.3.0...v0.4.0) (2026-10-15)
+
+
+### Features
+
+* **art:** 个体花纹与稀有度光效 ([310a8d8](https://github.com/VOD-Studio/kodama/commit/310a8d84f00164b00d8796600de0426e6aa3f7d4))
+* **art:** 个体花纹与稀有度光效，同物种同外形的每一只也一眼能认出来 ([8f0f00f](https://github.com/VOD-Studio/kodama/commit/8f0f00f6480dc6c01fc7491c2a51f34f86cd95ad))
+* **term:** make preview 在终端里打印半格像素画，与网页和 live 是同一套画面 ([6bac1fe](https://github.com/VOD-Studio/kodama/commit/6bac1fe6097b5e04b02aa07665d14cacb0c06054))
+
 ## [0.3.0](https://github.com/VOD-Studio/kodama/compare/v0.2.0...v0.3.0) (2026-10-14)
 
 
