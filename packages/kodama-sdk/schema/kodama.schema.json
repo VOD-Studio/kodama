@@ -526,6 +526,83 @@
         }
       ]
     },
+    "Companion": {
+      "description": "AI 伙伴身份预留。当前仅 `deepseek` 有可用美术；其他身份经 `sprite`/`frame` 请求时返回 `bad_input`。",
+      "enum": [
+        "deepseek",
+        "gpt",
+        "claude",
+        "grok",
+        "glm",
+        "kimi",
+        "gemini"
+      ],
+      "type": "string"
+    },
+    "CompanionAction": {
+      "enum": [
+        "idle",
+        "blink",
+        "move",
+        "observe",
+        "eat",
+        "play",
+        "sleep",
+        "startled",
+        "sick",
+        "evolve",
+        "end",
+        "think",
+        "work",
+        "parallel",
+        "build",
+        "error",
+        "complete",
+        "await_confirmation",
+        "organize",
+        "carry",
+        "wake",
+        "poke_left",
+        "poke_right",
+        "tickle",
+        "lift",
+        "praise"
+      ],
+      "type": "string"
+    },
+    "CompanionAppearance": {
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CompanionAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "character": {
+          "$ref": "#/$defs/Companion"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Expression"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "character"
+      ],
+      "type": "object"
+    },
     "Context": {
       "description": "本次领取固定的上下文:世界、发行者、请求、资格与规则摘要。",
       "properties": {
@@ -718,6 +795,17 @@
       ],
       "type": "object"
     },
+    "Expression": {
+      "enum": [
+        "curious",
+        "focused",
+        "shy",
+        "happy",
+        "startled",
+        "smug"
+      ],
+      "type": "string"
+    },
     "Frame": {
       "properties": {
         "bg": {
@@ -779,6 +867,18 @@
       "properties": {
         "charset": {
           "$ref": "#/$defs/Charset"
+        },
+        "companion": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CompanionAppearance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "可选的 AI 伙伴外观；仅影响呈现，不参与出生与养成规则。"
         },
         "genes": {
           "items": {
@@ -1294,8 +1394,20 @@
       "type": "string"
     },
     "PixelInput": {
-      "description": "`sprite` 命令的输入。画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；\n待机时会在画布里来回走动，需要更宽的画布才走得开，例如 96×40。画布更小时以身体中线居中裁切。",
+      "description": "`sprite` 命令的输入。原有物种的画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；\n待机时会在画布里来回走动，例如 96×40。AI 伙伴建议 96×96。更小的画布按身体中线裁切。",
       "properties": {
+        "companion": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CompanionAppearance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "可选的 AI 伙伴外观；仅影响呈现，不参与出生与养成规则。"
+        },
         "genes": {
           "items": {
             "format": "uint8",
@@ -1770,7 +1882,7 @@
         ],
         "mutates_state": false,
         "op": "frame",
-        "summary": "将姿态与呈现时钟合成为字符单元网格"
+        "summary": "将姿态与呈现时钟合成为字符单元网格;可选 DeepSeek 伙伴外观、动作与表情，其他伙伴美术未就绪时返回 bad_input"
       },
       {
         "errors": [
@@ -1778,7 +1890,7 @@
         ],
         "mutates_state": false,
         "op": "sprite",
-        "summary": "将姿态、成长阶段与呈现时钟合成为像素画调色板与网格"
+        "summary": "将姿态、成长阶段与呈现时钟合成为像素画调色板与网格;可选 DeepSeek 伙伴外观、动作与表情，其他伙伴美术未就绪时返回 bad_input"
       },
       {
         "errors": [

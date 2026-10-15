@@ -1,0 +1,302 @@
+{
+  "source_page": "https://dshtui.com/pets/deepy-whale/",
+  "source_page_sha256": "dc5b1b3de2fe5eca8cdf389336e5cb53ca294129b7d066871ea9406e179ec37f",
+  "retrieved": "2026-10-15",
+  "publisher": "dsh-TUI / dshtui.com",
+  "source_frame_width": 260,
+  "source_frame_height": 260,
+  "source_logical_canvas_claim": [
+    52,
+    52
+  ],
+  "display_sample_step": 5,
+  "storage_conversion": "Lossless original exported RGBA frames to indexed RLE; exact RGBA and source 50ms durations retained. No shape or expression overlays.",
+  "display_conversion": "Nearest-neighbor 5:1 samples to a 52x52 display. Exported transformations are not constant 5x5 blocks, so display scaling is not lossless. The original 260x260 source frame stays in frames.bin.",
+  "stage_0": "Original Deepy whale frames",
+  "stage_1": "Temporarily the same original Deepy whale frames; a distinct young stage has not been designed.",
+  "animations": [
+    {
+      "key": "idle",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/idle.png",
+      "sha256": "fb0d81d7f12f34eeaad9b6b42af4a0e27c05b6afa936e99dde9ed23f1eb1a2eb",
+      "frame_count": 48,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 6,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "4c477a67d5008c080b66c6cae7b6b06f3d80d929dcac49891e524f45550ba737"
+    },
+    {
+      "key": "idle-look",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/idle-look.png",
+      "sha256": "f3c7095bc5dcd77b61dba1058262378b09b040cf8e2a9f1fbc573100f08940bf",
+      "frame_count": 68,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 9,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "ec13ff40447605b51d04da047aef30e35c2fd2a5ff9e643772e81b3b69865596"
+    },
+    {
+      "key": "idle-spout",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/idle-spout.png",
+      "sha256": "0a7a0b19622203639adf5263468a721727296b8302840c7d23789e21ed7ec4de",
+      "frame_count": 64,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 8,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "b55cdbee0cbc2b1abbe030429fe55937db31780758eea9f8925d16fcb3bc23e2"
+    },
+    {
+      "key": "thinking",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/thinking.png",
+      "sha256": "03643754b3faf7294b7f91f69ea1a4a494ab380111246dd593d7f0ed11a9307b",
+      "frame_count": 48,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 6,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "192643a1f87f2ef14a5497dd81ceb4ec4e8c6107ee5257c92e62cee270afbaa8"
+    },
+    {
+      "key": "typing",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/typing.png",
+      "sha256": "aa0a51ac60d48c4d1e3749c014287197bdc81dd98ce60a47a4dbdc6ced6d74dc",
+      "frame_count": 48,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 6,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "ec78c5687e63124391f3287edc0ab3eb1de9abbb8c273926b3f2ace2e814a3c0"
+    },
+    {
+      "key": "music",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/music.png",
+      "sha256": "a9b2b231cbdaefa77e70ba0256efbfdfc8c79677a160d998a289995fb3b363c7",
+      "frame_count": 32,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 4,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "0c7e3d30827baf1d6f3bf4caa0ed8882d2769229f32313cd0a5245b90fc1e50e"
+    },
+    {
+      "key": "conducting",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/conducting.png",
+      "sha256": "034020d13823299f99823c53dfd6199e86eeb7c2aa624acf74c0f31e0adfce2e",
+      "frame_count": 48,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 6,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "4e94248dc7e07a879e401bcc19a4024b7c9618b8fcd59a6ab3cdf5f9590f5c89"
+    },
+    {
+      "key": "building",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/building.png",
+      "sha256": "6f9f3e8530104e0ad955ae61f453a981915b50412ed4c0ea2dda006621b0998f",
+      "frame_count": 48,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 6,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "f49052684360e25b2c969bd1d77f415f14455f789bd62974f31b10f39e1ead3c"
+    },
+    {
+      "key": "error",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/error.png",
+      "sha256": "4f65eba3b65479832f96f9f8ee858d76d05e00c055060dfc1c4ae5cbccf51b16",
+      "frame_count": 48,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 6,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "e2bab7daff6c16bd0e5607f705c5b5a3df5bda4a85782d8c0ba7cada5ca2f2a5"
+    },
+    {
+      "key": "happy",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/happy.png",
+      "sha256": "800b0f1d28ee27b7f341ee091b2eaf54ef02b14ee2006ec2a6a66d28bf8cc2dc",
+      "frame_count": 52,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 7,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "45d0a0880e6c79ddf0373012f0ad0de2a4909ee96d6adc1ea8ef9ee7320e8678"
+    },
+    {
+      "key": "notification",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/notification.png",
+      "sha256": "9fded0a64086c86226dd36d89fab46225c19d61e067af468cb00599df747667c",
+      "frame_count": 32,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 4,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "eec17d84356312e02ea5ee5d38b729c4b21b256ad460f18d5b8ce73e475a7661"
+    },
+    {
+      "key": "compacting",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/compacting.png",
+      "sha256": "f45c97795bc3d62ed5c84355cc6256d84fe5b16473806335170f6383c8dfb706",
+      "frame_count": 56,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 7,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "4b65c38f6723d4fc1ab8a793be55cb211c2ffd0e7b84835757c88694dd1d13fa"
+    },
+    {
+      "key": "carrying",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/carrying.png",
+      "sha256": "e951ea0a2ae878a2b9617dc294e7f7065ca2ac8f291aa4267b0531e7b7dfb42e",
+      "frame_count": 32,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 4,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "b5756aff7093ab1e73576ca4bd82874bd40e850d0e67dc5438edae5e3f3bd116"
+    },
+    {
+      "key": "sleeping",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/sleeping.png",
+      "sha256": "bdf6305080fa066bbde710ceed52642f3eb1422a5e8bc0f3ec5c219489dca73e",
+      "frame_count": 64,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 8,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "1136f0c9168221a166bddd44f246bced7511e313296b59c98417433ef3a9d883"
+    },
+    {
+      "key": "waking",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/waking.png",
+      "sha256": "f9fcf32a73b595efd9e7f9648fd56a81e961e410b14e05783bc6760aa94ad68b",
+      "frame_count": 30,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 4,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "410138d0d666fd6a4323109f6c4c6f8071cecc31a4e9227b910cde485c10e1cb"
+    },
+    {
+      "key": "poke-left",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/react-left.png",
+      "sha256": "d7bab447b2815b555ce5df723f7987218aed73b6d6904bac462acad9a1e59a50",
+      "frame_count": 40,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 5,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "3507b02c8a5c5822c6e0848253c865ff5adec9294197a7f80aacbf6de3dcff89"
+    },
+    {
+      "key": "poke-right",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/react-right.png",
+      "sha256": "ede2d249549a5f4e4e7d3cfcbe9ba99a1188105d830737f41162ab480127bcc0",
+      "frame_count": 40,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 5,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "1ce497c5e6264c7c94c85e4b2298ddc0223ae71bf0a948f8f6f4747331268b40"
+    },
+    {
+      "key": "tickle",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/react-double.png",
+      "sha256": "25f8c5060458529b09b610da132b5c2ef38941edcf7af4cb2be80ed82d3dfd74",
+      "frame_count": 48,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 6,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "73442dc80ff713f2ddce597b8e3832518cbdd56f1d95d76efeea3b38f8d0a51d"
+    },
+    {
+      "key": "drag",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/react-drag.png",
+      "sha256": "04eaa2626f1d0d2439e45592b2ee9d3995d746ed089b2f4b7b68e5be553f1a3c",
+      "frame_count": 24,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 3,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "1d1f6987c042a52584dc8e644ef9789efde4b4e304ed32d7c5b197cab07f4de2"
+    },
+    {
+      "key": "roam",
+      "url": "https://dshtui.com/pets/deepy-whale/assets/sheets/roam-hop.png",
+      "sha256": "cee6eafe6e5c1d9cfd8b2ff57004b739ef5de83d04905ec02837fcf855b5ccf5",
+      "frame_count": 24,
+      "duration_ms": 50,
+      "sheet": {
+        "cols": 8,
+        "rows": 3,
+        "w": 260,
+        "h": 260
+      },
+      "frames_rgba_sha256": "8d00017d7d8d557828d31e91f0a575e27f7e13751191fd62e18ed2efe42cf3e5"
+    }
+  ],
+  "storage_layout": "Each RLE run: count u8, then palette index u16 little-endian. The 579-entry RGBA palette includes transparent index zero. Original 260x260 frames are retained.",
+  "display_alpha": "Shared across web and terminal: on the original sample coordinates sx=5*x+2, sy=5*y+2, retain the original RGB iff source alpha >= Bayer4[sy%4][sx%4]*16+8; otherwise transparent. Bayer4=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]]. No RGB quantization or face overlays.",
+  "playback_clock": "Original atlas durations are 50ms. The existing host presentation clock is 100ms and samples the original timeline without stretching durations; this does not claim every 20fps source frame is presented by that host."
+}

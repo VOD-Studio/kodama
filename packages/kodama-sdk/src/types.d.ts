@@ -148,6 +148,49 @@ export type Command =
       request_id: string;
     };
 /**
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "CompanionAction".
+ */
+export type CompanionAction =
+  | "idle"
+  | "blink"
+  | "move"
+  | "observe"
+  | "eat"
+  | "play"
+  | "sleep"
+  | "startled"
+  | "sick"
+  | "evolve"
+  | "end"
+  | "think"
+  | "work"
+  | "parallel"
+  | "build"
+  | "error"
+  | "complete"
+  | "await_confirmation"
+  | "organize"
+  | "carry"
+  | "wake"
+  | "poke_left"
+  | "poke_right"
+  | "tickle"
+  | "lift"
+  | "praise";
+/**
+ * AI 伙伴身份预留。当前仅 `deepseek` 有可用美术；其他身份经 `sprite`/`frame` 请求时返回 `bad_input`。
+ *
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Companion".
+ */
+export type Companion = "deepseek" | "gpt" | "claude" | "grok" | "glm" | "kimi" | "gemini";
+/**
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "Expression".
+ */
+export type Expression = "curious" | "focused" | "shy" | "happy" | "startled" | "smug";
+/**
  * 姿态。眨眼由呈现时钟自动产生,不单独设姿态;移动随身体结构变化(见 `Body`)。
  *
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
@@ -532,6 +575,10 @@ export interface Reward {
 export interface FrameInput {
   charset: Charset;
   /**
+   * 可选的 AI 伙伴外观；仅影响呈现，不参与出生与养成规则。
+   */
+  companion?: CompanionAppearance | null;
+  /**
    * @minItems 8
    * @maxItems 8
    */
@@ -553,13 +600,26 @@ export interface FrameInput {
   w: number;
 }
 /**
- * `sprite` 命令的输入。画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；
- * 待机时会在画布里来回走动，需要更宽的画布才走得开，例如 96×40。画布更小时以身体中线居中裁切。
+ * This interface was referenced by `PetWireProtocol`'s JSON-Schema
+ * via the `definition` "CompanionAppearance".
+ */
+export interface CompanionAppearance {
+  action?: CompanionAction | null;
+  character: Companion;
+  expression?: Expression | null;
+}
+/**
+ * `sprite` 命令的输入。原有物种的画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；
+ * 待机时会在画布里来回走动，例如 96×40。AI 伙伴建议 96×96。更小的画布按身体中线裁切。
  *
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "PixelInput".
  */
 export interface PixelInput {
+  /**
+   * 可选的 AI 伙伴外观；仅影响呈现，不参与出生与养成规则。
+   */
+  companion?: CompanionAppearance | null;
   /**
    * @minItems 8
    * @maxItems 8

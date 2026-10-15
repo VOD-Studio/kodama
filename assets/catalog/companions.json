@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "note": "Only DeepSeek source artwork is available. The other six identities are reserved and sprite/frame requests return bad_input (artwork not ready). Rejected geometric drafts are excluded from compilation. Does not add species or alter v1 birth outcomes. Asset sources and usage conditions are separate from MIT; see packages/kodama-sdk/ASSET_NOTICES.md.",
+  "logical_canvas": {
+    "w": 96,
+    "h": 96
+  },
+  "actions": [
+    "idle",
+    "blink",
+    "move",
+    "observe",
+    "eat",
+    "play",
+    "sleep",
+    "startled",
+    "sick",
+    "evolve",
+    "end",
+    "think",
+    "work",
+    "parallel",
+    "build",
+    "error",
+    "complete",
+    "await_confirmation",
+    "organize",
+    "carry",
+    "wake",
+    "poke_left",
+    "poke_right",
+    "tickle",
+    "lift",
+    "praise"
+  ],
+  "expressions": [
+    "curious",
+    "focused",
+    "shy",
+    "happy",
+    "startled",
+    "smug"
+  ],
+  "companions": [
+    {
+      "key": "deepseek",
+      "name": "DeepSeek 鲸娘",
+      "rarity": "rare",
+      "birth_pool": false,
+      "animal_origin": "whale",
+      "stages": [
+        "baby",
+        "young",
+        "adult"
+      ],
+      "identity_cues": [
+        "蓝色长发",
+        "头鳍",
+        "鲸尾",
+        "深蓝白女仆装"
+      ],
+      "renderer": "source_frames",
+      "character_reference": "https://genderswapai.com/zh-CN/ai-gijinka/deepseek",
+      "source_post": "https://www.bilibili.com/opus/1233069202138464289",
+      "adaptation": "Original dshtui Deepy whale and whale-girl frames; no redesigned whale or generated face overlays. The young stage currently shares Deepy and is not separately designed.",
+      "quality_status": "existing_reference_frames",
+      "animal_reference": "https://dshtui.com/pets/deepy-whale/",
+      "available": true
+    },
+    {
+      "key": "gpt",
+      "name": "GPT 龙娘",
+      "rarity": "rare",
+      "birth_pool": false,
+      "animal_origin": "dragon",
+      "stages": [
+        "baby",
+        "young",
+        "adult"
+      ],
+      "identity_cues": [
+        "银白淡紫",
+        "龙角",
+        "龙翼",
+        "龙尾"
+      ],
+      "renderer": "unavailable",
+      "character_reference": "https://genderswapai.com/zh-CN/ai-gijinka/gpt",
+      "source_post": "https://www.bilibili.com/opus/1233069202138464289",
+      "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
+      "quality_status": "rework_pending",
+      "available": false
+    },
+    {
+      "key": "claude",
+      "name": "Claude 娘",
+      "rarity": "rare",
+      "birth_pool": false,
+      "animal_origin": null,
+      "stages": [
+        "baby",
+        "young",
+        "adult"
+      ],
+      "identity_cues": [
+        "橙色长发",
+        "花饰",
+        "层叠裙",
+        "书"
+      ],
+      "renderer": "unavailable",
+      "character_reference": "https://genderswapai.com/zh-CN/ai-gijinka/claude",
+      "source_post": "https://www.bilibili.com/opus/1233069202138464289",
+      "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
+      "quality_status": "rework_pending",
+      "available": false
+    },
+    {
+      "key": "grok",
+      "name": "Grok 娘",
+      "rarity": "rare",
+      "birth_pool": false,
+      "animal_origin": null,
+      "stages": [
+        "baby",
+        "young",
+        "adult"
+      ],
+      "identity_cues": [
+        "金发双马尾",
+        "小冠",
+        "蝙蝠翼发饰",
+        "黑红金礼服",
+        "双刃斧"
+      ],
+      "renderer": "unavailable",
+      "character_reference": "https://genderswapai.com/zh-CN/ai-gijinka/grok",
+      "source_post": "https://www.bilibili.com/opus/1233069202138464289",
+      "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
+      "quality_status": "rework_pending",
+      "available": false
+    },
+    {
+      "key": "glm",
+      "name": "GLM 娘",
+      "rarity": "rare",
+      "birth_pool": false,
+      "animal_origin": "fox",
+      "stages": [
+        "baby",
+        "young",
+        "adult"
+      ],
+      "identity_cues": [
+        "黑发狐耳",
+        "黑尾白尖",
+        "睡眼罩",
+        "黑白女仆装"
+      ],
+      "renderer": "unavailable",
+      "character_reference": "https://genderswapai.com/zh-CN/ai-gijinka/glm",
+      "source_post": "https://www.bilibili.com/opus/1233069202138464289",
+      "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
+      "quality_status": "rework_pending",
+      "available": false
+    },
+    {
+      "key": "kimi",
+      "name": "Kimi 娘",
+      "rarity": "rare",
+      "birth_pool": false,
+      "animal_origin": null,
+      "stages": [
+        "baby",
+        "young",
+        "adult"
+      ],
+      "identity_cues": [
+        "银紫长发",
+        "棱镜",
+        "月饰",
+        "不对称裙",
+        "长笛"
+      ],
+      "renderer": "unavailable",
+      "character_reference": "https://genderswapai.com/zh-CN/ai-gijinka/kimi",
+      "source_post": "https://www.bilibili.com/opus/1233069202138464289",
+      "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
+      "quality_status": "rework_pending",
+      "available": false
+    },
+    {
+      "key": "gemini",
+      "name": "Gemini 娘",
+      "rarity": "rare",
+      "birth_pool": false,
+      "animal_origin": "cat",
+      "stages": [
+        "baby",
+        "young",
+        "adult"
+      ],
+      "identity_cues": [
+        "蓝紫长发",
+        "猫耳猫尾",
+        "金红异色瞳",
+        "四色星饰"
+      ],
+      "renderer": "unavailable",
+      "character_reference": "https://genderswapai.com/zh-CN/ai-gijinka/gemini",
+      "source_post": "https://www.bilibili.com/opus/1233069202138464289",
+      "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
+      "quality_status": "rework_pending",
+      "available": false
+    }
+  ],
+  "quality_status": "not_approved"
+}

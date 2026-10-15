@@ -59,5 +59,17 @@ out.push(exec(JSON.stringify({ op: "frame", species: 7, genes: [37, 1, 2, 3, 4, 
 // 个体花纹（基因 3 的每种花纹）与稀有度光效
 for (const [sp, gene3, rarity, t] of [[0, 0, 0, "0"], [2, 1, 1, "4"], [3, 2, 2, "9"], [4, 3, 3, "13"], [6, 4, 4, "21"], [5, 31, 4, "30"]])
   out.push(exec(JSON.stringify({ op: "sprite", species: sp, genes: [37, 1, 2, gene3, 4, 5, 6, 7], pose: "idle", stage: 2, lineage: ["curious", "sage"], w: 56, h: 36, t, rarity })));
+// DeepSeek 源帧和预留角色的 artwork-not-ready 错误都必须跨三端逐字节一致。
+for (const character of ["deepseek", "gpt", "claude", "grok", "glm", "kimi", "gemini"])
+  for (const stage of [0, 1, 2])
+    out.push(exec(JSON.stringify({ op: "sprite", species: 0, genes: [37, 1, 2, 3, 4, 5, 6, 7], pose: "observe", stage, w: 96, h: 96, t: "37", rarity: 2, companion: { character, action: "work", expression: "focused" } })));
+for (const charset of ["ascii", "blocks"])
+  out.push(exec(JSON.stringify({ op: "frame", species: 0, genes: [37, 1, 2, 3, 4, 5, 6, 7], pose: "end", stage: 2, charset, w: 48, h: 40, t: "9000000000000000000", companion: { character: "gpt", action: "play", expression: "happy" } })));
+for (const character of ["gpt", "claude", "grok", "glm", "kimi", "gemini"]) {
+  const result = exec(JSON.stringify({ op: "frame", species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], pose: "idle", stage: 2, charset: "blocks", w: 69, h: 33, t: "0", companion: { character } }));
+  const error = JSON.parse(result);
+  if (error.ok !== false || error.code !== "bad_input" || error.message !== `${character} artwork not ready`) throw new Error(`${character} exposed unavailable artwork`);
+  out.push(result);
+}
 out.push(exec(JSON.stringify({ op: "capabilities" })));
 console.log(out.join("\n"));

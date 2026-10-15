@@ -27,6 +27,7 @@
   "sideEffects": false,
   "files": [
     "LICENSE",
+    "ASSET_NOTICES.md",
     "dist",
     "docs",
     "schema"

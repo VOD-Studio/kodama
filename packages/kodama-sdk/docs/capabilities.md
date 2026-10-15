@@ -9,8 +9,8 @@
 | `act` | 对宠物执行喂食、休息、玩耍、治疗、等待、进化、穿脱装扮或探险(出发、领取、召回),按逻辑时间结算病程;升级时解锁装扮 | 是 | `OutcomeResult` | `bad_input`、`dead`、`no_food`、`no_medicine`、`not_sick`、`too_tired`、`time_backwards`、`unsupported_rules`、`not_eligible`、`not_owned`、`incompatible_item`、`on_expedition`、`no_expedition`、`still_away`、`daily_limit`、`unwell` |
 | `grant` | 发放经服务裁决后的奖励(经验、食物、药品、主题倾向);核心只校验单次上限 | 是 | `OutcomeResult` | `bad_input`、`dead`、`invalid_reward`、`time_backwards`、`unsupported_rules` |
 | `evolution_options` | 列出当前阶段的进化分支,以及每个分支的缺项说明 | 否 | `EvolutionOptionsResult` | `bad_input` |
-| `frame` | 将姿态与呈现时钟合成为字符单元网格 | 否 | `FrameResult` | `bad_input` |
-| `sprite` | 将姿态、成长阶段与呈现时钟合成为像素画调色板与网格 | 否 | `PixelsResult` | `bad_input` |
+| `frame` | 将姿态与呈现时钟合成为字符单元网格;可选 DeepSeek 伙伴外观、动作与表情，其他伙伴美术未就绪时返回 bad_input | 否 | `FrameResult` | `bad_input` |
+| `sprite` | 将姿态、成长阶段与呈现时钟合成为像素画调色板与网格;可选 DeepSeek 伙伴外观、动作与表情，其他伙伴美术未就绪时返回 bad_input | 否 | `PixelsResult` | `bad_input` |
 | `verify_birth` | 核验出生证书的来源签名、承诺揭示与结果重算 | 否 | `VerdictResult` | `bad_input` |
 | `capabilities` | 列出当前实现的全部能力与错误分类 | 否 | `CapabilityCatalogResult` | — |
 

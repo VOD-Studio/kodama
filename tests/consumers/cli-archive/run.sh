@@ -11,7 +11,7 @@ mkdir "$WORK/x"
 tar -xzf "$ARCHIVE" -C "$WORK/x"
 BIN=$(find "$WORK/x" -type f -name kodama | head -1)
 test -n "$BIN" && test -x "$BIN" || { echo "FAIL: no executable kodama in $ARCHIVE"; exit 1; }
-for f in LICENSE README.md README.zh-CN.md; do
+for f in LICENSE ASSET_NOTICES.md README.md README.zh-CN.md; do
   test -f "$(dirname "$BIN")/$f" || { echo "FAIL: $f missing from $ARCHIVE"; exit 1; }
 done
 case "$ARCHIVE" in

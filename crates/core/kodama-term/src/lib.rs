@@ -8,6 +8,7 @@ use alloc::vec::Vec;
 use serde::{Deserialize, Serialize};
 
 mod blocks;
+pub mod companions;
 pub mod form;
 pub mod outfit;
 mod pixel;
@@ -95,6 +96,9 @@ pub struct FrameInput {
     /// 出生稀有度 0–4；只有 `blocks` 画风画出光效。
     #[serde(default)]
     pub rarity: u8,
+    /// 可选的 AI 伙伴外观；仅影响呈现，不参与出生与养成规则。
+    #[serde(default)]
+    pub companion: Option<companions::CompanionAppearance>,
 }
 
 #[derive(Serialize)]
@@ -233,6 +237,9 @@ pub fn render(i: &FrameInput) -> Frame {
     if i.charset == Charset::Blocks {
         return blocks::render(i);
     }
+    if let Some(appearance) = &i.companion {
+        return companion_label(i, appearance);
+    }
     let (w, h) = (i.w.max(1), i.h.max(1));
     let mut cells: Vec<Vec<(char, u8)>> =
         (0..h).map(|_| (0..w).map(|_| (' ', 0)).collect()).collect();
@@ -299,5 +306,35 @@ pub fn render(i: &FrameInput) -> Frame {
             .iter()
             .map(|r| r.iter().map(|_| 0).collect())
             .collect(),
+    }
+}
+
+fn companion_label(i: &FrameInput, appearance: &companions::CompanionAppearance) -> Frame {
+    let (w, h) = (i.w.max(1), i.h.max(1));
+    let action = match i.pose {
+        Pose::End | Pose::Sick | Pose::Evolve | Pose::Sleep => {
+            companions::CompanionAction::from_pose(i.pose)
+        }
+        _ => appearance
+            .action
+            .unwrap_or_else(|| companions::CompanionAction::from_pose(i.pose)),
+    };
+    let mut rows: Vec<String> = (0..h).map(|_| " ".repeat(w as usize)).collect();
+    let labels = if appearance.character.is_available() {
+        ["DeepSeek", action.name()]
+    } else {
+        ["", ""]
+    };
+    for (y, label) in labels.iter().enumerate().take(h as usize) {
+        rows[y] = label.chars().take(w as usize).collect();
+        let padding = w as usize - rows[y].len();
+        rows[y].extend(core::iter::repeat_n(' ', padding));
+    }
+    Frame {
+        w,
+        h,
+        rows,
+        colors: (0..h).map(|_| alloc::vec![0; w as usize]).collect(),
+        bg: (0..h).map(|_| alloc::vec![0; w as usize]).collect(),
     }
 }

@@ -28,8 +28,8 @@ use grid::Grid;
 use parts::Anchors;
 use serde::{Deserialize, Serialize};
 
-/// `sprite` 命令的输入。画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；
-/// 待机时会在画布里来回走动，需要更宽的画布才走得开，例如 96×40。画布更小时以身体中线居中裁切。
+/// `sprite` 命令的输入。原有物种的画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；
+/// 待机时会在画布里来回走动，例如 96×40。AI 伙伴建议 96×96。更小的画布按身体中线裁切。
 #[derive(Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PixelInput {
@@ -52,6 +52,9 @@ pub struct PixelInput {
     /// 出生稀有度 0–4（普通、不凡、稀有、史诗、传说）：不凡起有闪光，史诗与传说描边变色，传说身边有光环。
     #[serde(default)]
     pub rarity: u8,
+    /// 可选的 AI 伙伴外观；仅影响呈现，不参与出生与养成规则。
+    #[serde(default)]
+    pub companion: Option<crate::companions::CompanionAppearance>,
 }
 
 /// 像素网格。`rows` 的每个字符是 `palette` 的键,`.` 表示透明。
@@ -170,6 +173,9 @@ pub(crate) fn compose(
 }
 
 pub fn render_pixels(i: &PixelInput) -> Pixels {
+    if let Some(appearance) = &i.companion {
+        return crate::companions::render(i, appearance);
+    }
     let (w, h) = (i.w.max(1), i.h.max(1));
     let species = i.species % SPECIES_COUNT;
     let form = Form::of(i.stage, &i.lineage);

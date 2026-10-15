@@ -136,6 +136,7 @@ fn input(look: Look, w: u16, h: u16, t: u64, pose: Pose, cs: Charset) -> FrameIn
         lineage,
         outfit: look.outfit,
         rarity: look.rarity,
+        companion: None,
     }
 }
 
