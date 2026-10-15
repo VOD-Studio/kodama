@@ -1,3 +1,24 @@
+// 浏览器里作为 ES 模块加载；预览服务器在发送前去掉类型（scripts/dev/companions.mts）
+import type * as Core from "../../../packages/kodama-sdk/dist/index.js";
+import type * as Web from "../../../packages/kodama-sdk/dist/web.js";
+
+export {};
+
+type Pair = readonly [key: string, label: string];
+type Rgb = [number, number, number] | null;
+
+interface State {
+  character: string;
+  stage: 0 | 2;
+  action: string;
+  expression: string;
+  terminalColor: string;
+  tick: number;
+  speed: number;
+  playing: boolean;
+}
+
+const sdkRoot = "/packages/kodama-sdk/dist/";
 const characters = [
   { key: "deepseek", label: "DeepSeek", name: "DeepSeek 鲸娘", animal: true },
   { key: "gpt", label: "GPT", name: "GPT 龙娘", animal: true },
@@ -7,7 +28,7 @@ const characters = [
   { key: "kimi", label: "Kimi", name: "Kimi 娘", animal: false },
   { key: "gemini", label: "Gemini", name: "Gemini 娘", animal: true },
 ];
-const actions = [
+const actions: Pair[] = [
   ["idle", "待机"], ["blink", "眨眼"], ["move", "移动"], ["observe", "观察"],
   ["eat", "进食 · 原动作占位"], ["play", "玩耍 · 原动作占位"], ["sleep", "睡眠"], ["startled", "受惊"],
   ["sick", "生病 · 报错占位"], ["evolve", "进化 · 过渡待设计"], ["end", "生命终结 · 静态睡姿占位"], ["think", "思考"],
@@ -16,38 +37,42 @@ const actions = [
   ["carry", "搬运"], ["wake", "醒来"], ["poke_left", "戳左侧"], ["poke_right", "戳右侧"],
   ["tickle", "挠痒"], ["lift", "拎起"], ["praise", "赞许"],
 ];
-const expressions = [
+const expressions: Pair[] = [
   ["curious", "好奇"], ["focused", "专注"], ["shy", "害羞"],
   ["happy", "喜悦"], ["startled", "受惊"], ["smug", "得意"],
 ];
-const expressionOptions = [["auto", "自动"], ...expressions];
+const expressionOptions: Pair[] = [["auto", "自动"], ...expressions];
 const poses = new Set(["idle", "observe", "eat", "play", "sleep", "startled", "sick", "evolve", "end"]);
-const genes = [37, 8, 21, 5, 17, 12, 6, 2];
+const genes: Core.Birth["genes"] = [37, 8, 21, 5, 17, 12, 6, 2];
 const tickCount = 120;
 const tickMs = 100;
 const pixelWidth = 69;
 const pixelHeight = 66;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-const byId = (id) => document.getElementById(id);
-const canvases = [byId("stage-2")];
-const contexts = canvases.map((canvas) => canvas.getContext("2d"));
-const state = { character: "deepseek", stage: 2, action: "idle", expression: "auto", terminalColor: "truecolor", tick: 0, speed: 1, playing: !reducedMotion.matches };
+const byId = <T extends HTMLElement = HTMLElement>(id: string): T => {
+  const element = document.getElementById(id);
+  if (!element) throw new Error(`预览页缺少元素 #${id}`);
+  return element as T;
+};
+const canvases = [byId<HTMLCanvasElement>("stage-2")];
+const contexts = canvases.map((canvas) => canvas.getContext("2d") as CanvasRenderingContext2D);
+const state: State = { character: "deepseek", stage: 2, action: "idle", expression: "auto", terminalColor: "truecolor", tick: 0, speed: 1, playing: !reducedMotion.matches };
 const handlers = new AbortController();
-let timer = null;
-let previews = [];
+let timer: number | null = null;
+let previews: Web.MountedPet[] = [];
 let initialized = false;
 let suspended = false;
 let failed = false;
-let run;
-let mountPet;
+let run: typeof Core.run;
+let mountPet: typeof Web.mountPet;
 
 function pose() {
   return poses.has(state.action) ? state.action : "observe";
 }
 
-function pet() {
-  const companion = { character: "deepseek", action: state.action };
-  if (state.stage === 2 && expressions.some(([key]) => key === state.expression)) companion.expression = state.expression;
+function pet(): Web.WebPet & { stage: number } {
+  const companion: Core.CompanionAppearance = { character: "deepseek", action: state.action as Core.CompanionAction };
+  if (state.stage === 2 && expressions.some(([key]) => key === state.expression)) companion.expression = state.expression as Core.Expression;
   return { species: 0, genes, stage: state.stage, rarity: 2, companion };
 }
 
@@ -55,19 +80,20 @@ function formName() {
   return state.stage === 0 ? "原站 Deepy 小鲸" : "原站鲸娘终阶";
 }
 
-function showError(error) {
+function showError(error: unknown) {
+  const detail = error instanceof Error ? error.message : "";
   failed = true;
   state.playing = false;
   synchronizePlayback();
   byId("status").textContent = "载入失败";
   byId("status").dataset.state = "error";
-  byId("error-text").textContent = `角色预览未能载入。请先运行 make wasm，再重新载入。${error.message ? `（${error.message}）` : ""}`;
+  byId("error-text").textContent = `角色预览未能载入。请先运行 make wasm，再重新载入。${detail ? `（${detail}）` : ""}`;
   byId("error").hidden = false;
-  byId("control-fields").disabled = true;
-  document.querySelectorAll(".character-button").forEach((button) => { button.disabled = true; });
+  byId<HTMLFieldSetElement>("control-fields").disabled = true;
+  document.querySelectorAll<HTMLButtonElement>(".character-button").forEach((button) => { button.disabled = true; });
 }
 
-function drawPixels(context, sprite, scale) {
+function drawPixels(context: CanvasRenderingContext2D, sprite: Core.Pixels, scale: number) {
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
   context.imageSmoothingEnabled = false;
   sprite.rows.forEach((row, y) => {
@@ -85,7 +111,7 @@ function drawPixels(context, sprite, scale) {
   });
 }
 
-function terminalPending(message) {
+function terminalPending(message: string) {
   byId("terminal-output").hidden = true;
   byId("terminal-output").replaceChildren();
   byId("terminal-message").textContent = message;
@@ -93,9 +119,9 @@ function terminalPending(message) {
   byId("terminal-state").textContent = "终端对照待接入";
 }
 
-function color256(index) {
+function color256(index: number): string | null {
   if (!index) return null;
-  if (index < 16) return ["#000000", "#800000", "#008000", "#808000", "#000080", "#800080", "#008080", "#c0c0c0", "#808080", "#ff0000", "#00ff00", "#ffff00", "#0000ff", "#ff00ff", "#00ffff", "#ffffff"][index];
+  if (index < 16) return ["#000000", "#800000", "#008000", "#808000", "#000080", "#800080", "#008080", "#c0c0c0", "#808080", "#ff0000", "#00ff00", "#ffff00", "#0000ff", "#ff00ff", "#00ffff", "#ffffff"][index] ?? null;
   if (index >= 232) {
     const level = 8 + (index - 232) * 10;
     return `rgb(${level}, ${level}, ${level})`;
@@ -118,36 +144,36 @@ function alignTerminalGrid() {
   output.style.top = `${Math.round(box.y) - box.y}px`;
 }
 
-function renderTerminal(appearance, t) {
+function renderTerminal(appearance: Web.WebPet & { stage: number }, t: string) {
   try {
-    const result = run({ op: "frame", ...appearance, pose: pose(), charset: "blocks", w: pixelWidth, h: pixelHeight / 2, t });
+    const result = run({ op: "frame", ...appearance, genes, pose: pose() as Core.Pose, charset: "blocks", w: pixelWidth, h: pixelHeight / 2, t });
     if (!result.ok) {
       terminalPending("当前构建尚不能提供终端字符帧，请重建 SDK 后重新载入。");
       return;
     }
-    const frame = result.value;
+    const frame = (result as Core.FrameResult).value;
     const rows = frame.rows.map((row) => [...row]);
-    const matchingGrid = (grid) => Array.isArray(grid) && grid.length === pixelHeight / 2 && grid.every((row) => Array.isArray(row) && row.length === pixelWidth);
+    const matchingGrid = (grid: unknown): grid is unknown[][] => Array.isArray(grid) && grid.length === pixelHeight / 2 && grid.every((row) => Array.isArray(row) && row.length === pixelWidth);
     if (frame.w !== pixelWidth || frame.h !== pixelHeight / 2 || rows.length !== pixelHeight / 2 || rows.some((row) => row.length !== pixelWidth)) {
       terminalPending("69 列 × 33 行的终端字符帧尚未就绪，请重建 SDK 后重新载入。");
       return;
     }
     const truecolor = state.terminalColor === "truecolor";
-    const foreground = truecolor ? frame.fg_rgb : frame.colors;
-    const background = truecolor ? frame.bg_rgb : frame.bg;
+    const foreground: unknown = truecolor ? frame.fg_rgb : frame.colors;
+    const background: unknown = truecolor ? frame.bg_rgb : frame.bg;
     if (!matchingGrid(foreground) || !matchingGrid(background)) {
       terminalPending(truecolor ? "当前构建尚未提供原始 RGB 字符帧。请重建 SDK，或先选择 256 色降级。" : "当前构建尚未提供 256 色字符帧。");
       return;
     }
-    const color = (value) => truecolor ? (value === null ? null : `rgb(${value.join(", ")})`) : color256(value);
+    const color = (value: unknown): string | null => truecolor ? (value === null ? null : `rgb(${(value as number[]).join(", ")})`) : color256(value as number);
     const fragment = document.createDocumentFragment();
     rows.forEach((row, y) => {
       let x = 0;
       while (x < row.length) {
-        const fg = color(foreground[y][x]);
-        const bg = color(background[y][x]);
+        const fg = color(foreground[y]![x]);
+        const bg = color(background[y]![x]);
         let end = x + 1;
-        while (end < row.length && color(foreground[y][end]) === fg && color(background[y][end]) === bg) end++;
+        while (end < row.length && color(foreground[y]![end]) === fg && color(background[y]![end]) === bg) end++;
         const span = document.createElement("span");
         span.textContent = row.slice(x, end).join("");
         span.style.color = fg ?? "transparent";
@@ -172,13 +198,13 @@ function render() {
   try {
     const appearance = pet();
     const t = String(state.tick);
-    const result = run({ op: "sprite", ...appearance, pose: pose(), w: pixelWidth, h: pixelHeight, t });
-    if (!result.ok) throw new Error(result.error?.message ?? JSON.stringify(result.error));
-    drawPixels(contexts[0], result.value, 6);
+    const result = run({ op: "sprite", ...appearance, genes, pose: pose() as Core.Pose, w: pixelWidth, h: pixelHeight, t });
+    if (!result.ok) throw new Error((result as Core.ErrorBody).message);
+    drawPixels(contexts[0]!, (result as Core.PixelsResult).value, 6);
     renderTerminal(appearance, t);
-    byId("timeline").value = String(state.tick);
+    byId<HTMLInputElement>("timeline").value = String(state.tick);
     byId("timeline").setAttribute("aria-valuetext", `${(state.tick / 10).toFixed(1)} 秒，第 ${state.tick} 刻`);
-    byId("time").value = `${(state.tick / 10).toFixed(1)} 秒 / 12.0 秒`;
+    byId<HTMLOutputElement>("time").value = `${(state.tick / 10).toFixed(1)} 秒 / 12.0 秒`;
   } catch (error) {
     showError(error);
   }
@@ -193,7 +219,7 @@ function synchronizePlayback() {
     else preview.pause();
   }
   byId("play").textContent = state.playing ? "暂停" : "播放";
-  byId("play").disabled = reducedMotion.matches || !initialized || failed;
+  byId<HTMLButtonElement>("play").disabled = reducedMotion.matches || !initialized || failed;
   byId("motion-note").hidden = !reducedMotion.matches;
   if (active) {
     timer = window.setInterval(() => {
@@ -203,7 +229,7 @@ function synchronizePlayback() {
   }
 }
 
-function selectCharacter(key) {
+function selectCharacter(key: string) {
   if (key !== "deepseek") return;
   state.character = key;
   state.tick = 0;
@@ -221,7 +247,7 @@ function selectCharacter(key) {
   });
   byId("terminal-output").setAttribute("aria-label", `${selected}，69 列 × 33 行终端字符帧，${actionLabel}，${expressionLabel}表情`);
   byId("mini-deepseek").setAttribute("aria-label", `${selected}预览`);
-  document.querySelectorAll(".character-button").forEach((button) => {
+  document.querySelectorAll<HTMLElement>(".character-button").forEach((button) => {
     button.setAttribute("aria-pressed", String(button.dataset.character === key));
   });
   render();
@@ -230,14 +256,14 @@ function selectCharacter(key) {
 function updatePreviews() {
   previews.forEach((preview) => {
     preview.setPet(pet());
-    preview.setPose(pose());
+    preview.setPose(pose() as Core.Pose);
   });
 }
 
 function mountPreviews() {
   previews = [mountPet(byId("mini-deepseek"), {
     pet: pet(), width: pixelWidth, height: pixelHeight, scale: 2,
-    pose: pose(), reducedMotion: reducedMotion.matches,
+    pose: pose() as Core.Pose, reducedMotion: reducedMotion.matches,
     label: `DeepSeek · ${formName()}预览`,
   })];
   synchronizePlayback();
@@ -277,7 +303,7 @@ for (const character of characters) {
   byId("characters").append(button);
 }
 
-for (const [key, label] of actions) byId("action").add(new Option(label, key));
+for (const [key, label] of actions) byId<HTMLSelectElement>("action").add(new Option(label, key));
 for (const [key, text] of expressionOptions) {
   const label = document.createElement("label");
   const input = document.createElement("input");
@@ -293,9 +319,9 @@ for (const [key, text] of expressionOptions) {
 
 byId("controls").addEventListener("submit", (event) => event.preventDefault(), { signal: handlers.signal });
 byId("controls").addEventListener("change", (event) => {
-  const { name, value } = event.target;
+  const { name, value } = event.target as HTMLInputElement;
   if (name === "background") {
-    document.querySelector(".studio").dataset.background = value;
+    document.querySelector<HTMLElement>(".studio")!.dataset.background = value;
     return;
   }
   if (name === "speed") {
@@ -309,9 +335,9 @@ byId("controls").addEventListener("change", (event) => {
     return;
   }
   if (name === "form" && (value === "0" || value === "2")) {
-    state.stage = Number(value);
+    state.stage = Number(value) as 0 | 2;
     state.expression = "auto";
-    document.querySelectorAll('input[name="expression"]').forEach((input) => {
+    document.querySelectorAll<HTMLInputElement>('input[name="expression"]').forEach((input) => {
       input.checked = input.value === "auto";
       input.disabled = state.stage === 0;
     });
@@ -330,7 +356,7 @@ byId("play").addEventListener("click", () => {
   state.playing = !state.playing;
   synchronizePlayback();
 }, { signal: handlers.signal });
-for (const [id, direction] of [["previous", -1], ["next", 1]]) {
+for (const [id, direction] of [["previous", -1], ["next", 1]] as const) {
   byId(id).addEventListener("click", () => {
     state.playing = false;
     state.tick = (state.tick + direction + tickCount) % tickCount;
@@ -340,7 +366,7 @@ for (const [id, direction] of [["previous", -1], ["next", 1]]) {
 }
 byId("timeline").addEventListener("input", (event) => {
   state.playing = false;
-  state.tick = Number(event.target.value);
+  state.tick = Number((event.target as HTMLInputElement).value);
   synchronizePlayback();
   render();
 }, { signal: handlers.signal });
@@ -372,19 +398,19 @@ window.addEventListener("pageshow", (event) => {
 
 try {
   const [core, web] = await Promise.all([
-    import("/packages/kodama-sdk/dist/index.js"),
-    import("/packages/kodama-sdk/dist/web.js"),
+    import(`${sdkRoot}index.js`) as Promise<typeof Core>,
+    import(`${sdkRoot}web.js`) as Promise<typeof Web>,
   ]);
   run = core.run;
   mountPet = web.mountPet;
   await core.initPet();
   initialized = true;
-  byId("control-fields").disabled = false;
-  document.querySelectorAll(".character-button").forEach((button) => { button.disabled = button.dataset.character !== "deepseek"; });
+  byId<HTMLFieldSetElement>("control-fields").disabled = false;
+  document.querySelectorAll<HTMLButtonElement>(".character-button").forEach((button) => { button.disabled = button.dataset.character !== "deepseek"; });
   mountPreviews();
   selectCharacter(state.character);
   if (!failed) {
-    document.querySelectorAll(".loading-label").forEach((label) => { label.hidden = true; });
+    document.querySelectorAll<HTMLElement>(".loading-label").forEach((label) => { label.hidden = true; });
     byId("status").textContent = `${formName()}已载入`;
     byId("status").dataset.state = "ready";
   }
