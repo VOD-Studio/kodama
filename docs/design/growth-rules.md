@@ -1,6 +1,6 @@
 # 成长规则：经验、性格与进化
 
-#11 的实现说明。数值是**暂定默认值**，与 `parameters.md` 的节奏一起在试玩后调整；规则行为由 `crates/core/pet-core/tests/growth.rs` 的 19 项测试覆盖，关键防护用变异检查确认能被测试抓到。
+#11 的实现说明。数值是**暂定默认值**，与 `parameters.md` 的节奏一起在试玩后调整；规则行为由 `crates/core/kodama-core/tests/growth.rs` 的 19 项测试覆盖，关键防护用变异检查确认能被测试抓到。
 
 ## 三类状态分开建模
 

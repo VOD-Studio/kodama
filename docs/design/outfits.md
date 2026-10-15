@@ -16,7 +16,7 @@
 | `night_sky` | 星夜 Starry Night | 背景 | 9 | 全部 |
 | `hero_cape` | 勇者披风 Hero Cape | 背 | 10 | 行走 |
 
-物品与规则在 `crates/core/pet-term/src/outfit.rs`，名称在 `assets/catalog/items.json`，由测试保证两者一致。
+物品与规则在 `crates/core/kodama-term/src/outfit.rs`，名称在 `assets/catalog/items.json`，由测试保证两者一致。
 
 ## 怎么得到
 
@@ -49,11 +49,11 @@
 - 背景是画满整块画布的场景：晴日草地有太阳和慢慢飘的云，星夜有月亮和闪烁的星星；天空分段之间用棋盘格过渡，不出现生硬的横线。
 - 纪念形象（`end` 姿态）连同装扮一起去色。
 - `sprite` 与 `frame`（`blocks` 画风）都接受 `outfit`；网页 `mountPet` 与终端嵌入在宠物对象上传 `outfit`（即 `wardrobe.worn`）。不适合这个身体的物品不画。
-- `cargo run -p pet-term --example sprites -- outfits` 导出 8 个物种的幼体与成年 × 每件物品与两套搭配的总览图，改动美术后目视检查。
+- `cargo run -p kodama-term --example sprites -- outfits` 导出 8 个物种的幼体与成年 × 每件物品与两套搭配的总览图，改动美术后目视检查。
 
 ## 校验
 
-- 规则（`pet-core/tests/wardrobe.rs`，9 项）：出生记录物种、衣橱为空不写出；旧存档读取；每级解锁一件且不重复；照料升级同样解锁；只能穿拥有且适合身体的物品；物种不明时只能穿通用物品；穿脱不改变任何数值；逝去后不能改；旧个体补齐解锁后当次能穿。
-- 画面（`pet-term/tests/outfits.rs`，6 项）：目录与代码一致；每件物品在每个适用的物种与阶段上都改变画面且不碰画布边缘，不适用的不画；眼镜不遮住眼睛；背景铺满画布并随时钟变化；纪念去色；终端半格画带上装扮。
+- 规则（`kodama-core/tests/wardrobe.rs`，9 项）：出生记录物种、衣橱为空不写出；旧存档读取；每级解锁一件且不重复；照料升级同样解锁；只能穿拥有且适合身体的物品；物种不明时只能穿通用物品；穿脱不改变任何数值；逝去后不能改；旧个体补齐解锁后当次能穿。
+- 画面（`kodama-term/tests/outfits.rs`，6 项）：目录与代码一致；每件物品在每个适用的物种与阶段上都改变画面且不碰画布边缘，不适用的不画；眼镜不遮住眼睛；背景铺满画布并随时钟变化；纪念去色；终端半格画带上装扮。
 - 三端一致的转录包含穿戴、拒绝与带装扮的 `sprite`、`frame`；schema 校验覆盖新的动作、错误码与输入，并拒绝未知物品。
 - 服务：经 `POST /v1/pets/me/actions` 穿戴，身体结构检查与物种一致。

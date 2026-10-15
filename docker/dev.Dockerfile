@@ -1,7 +1,7 @@
 # 开发环境镜像：与 CI 相同的工具链，本机不装 Rust、Node 也能运行全部 make 目标。
 # 基于 slim 镜像以控制体积（约 1.5 GB）；构建产物在命名卷里，另需数 GB 磁盘。
 # 不直接使用，经 docker/compose.yaml 与 Makefile 的 docker-* 目标调用，见 CONTRIBUTING.md。
-# 工具版本与 CI 一致；wasm-bindgen 必须与 crates/runtimes/pet-wasm 锁定的版本相同（scripts/check/version.mjs 校验）。
+# 工具版本与 CI 一致；wasm-bindgen 必须与 crates/runtimes/kodama-wasm 锁定的版本相同（scripts/check/version.mjs 校验）。
 FROM node:22-bookworm-slim AS node
 
 FROM rust:1-slim-bookworm
@@ -47,9 +47,9 @@ RUN set -eu; \
 ENV HOME=/home/dev \
     CHROME=/usr/bin/chromium \
     CHROME_FLAGS=--no-sandbox
-RUN mkdir -p /home/dev /work/target /work/packages/pet-sdk/node_modules /usr/local/cargo/registry /usr/local/cargo/git \
+RUN mkdir -p /home/dev /work/target /work/packages/kodama-sdk/node_modules /usr/local/cargo/registry /usr/local/cargo/git \
  && chmod -R a+rwX /usr/local/cargo \
- && chmod 1777 /home/dev /work/target /work/packages/pet-sdk/node_modules \
+ && chmod 1777 /home/dev /work/target /work/packages/kodama-sdk/node_modules \
  && git config --system --add safe.directory /work
 # 容器只用来运行检查，不需要完整调试信息与增量编译缓存；target 卷因此从约 2 GB 降到几百 MB
 ENV CARGO_INCREMENTAL=0 \

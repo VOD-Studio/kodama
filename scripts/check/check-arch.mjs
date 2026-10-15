@@ -58,14 +58,14 @@ for (const layer of new Set(files.filter((f) => f.startsWith("crates/")).map((f)
 
 // 每个 crate 的层，以及允许依赖的 workspace crate。新增 crate 必须在这里登记，并同步架构文档。
 const CRATES = {
-	"pet-term": { layer: "core", deps: [] },
-	"pet-core": { layer: "core", deps: ["pet-term"] },
-	"pet-store": { layer: "service", deps: ["pet-core"] },
-	"pet-issuer": { layer: "service", deps: ["pet-core"] },
-	"pet-service": { layer: "service", deps: ["pet-core", "pet-store", "pet-issuer"] },
-	"pet-cli": { layer: "runtimes", deps: ["pet-core", "pet-term"] },
-	"pet-wasm": { layer: "runtimes", deps: ["pet-core"] },
-	"pet-schema": { layer: "tools", deps: ["pet-core", "pet-term"] },
+	"kodama-term": { layer: "core", deps: [] },
+	"kodama-core": { layer: "core", deps: ["kodama-term"] },
+	"kodama-store": { layer: "service", deps: ["kodama-core"] },
+	"kodama-issuer": { layer: "service", deps: ["kodama-core"] },
+	"kodama-service": { layer: "service", deps: ["kodama-core", "kodama-store", "kodama-issuer"] },
+	"kodama": { layer: "runtimes", deps: ["kodama-core", "kodama-term"] },
+	"kodama-wasm": { layer: "runtimes", deps: ["kodama-core"] },
+	"kodama-schema": { layer: "tools", deps: ["kodama-core", "kodama-term"] },
 };
 // 层之间的方向：每层只能依赖自己与列出的层。核心不知道服务与运行入口的存在。
 const LAYER_DEPS = {

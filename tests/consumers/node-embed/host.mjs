@@ -1,11 +1,11 @@
 // 最小宿主:一个自带输入循环的 REPL,把右上角 4 行留给宠物。
 import fs from "node:fs";
 import readline from "node:readline";
-import { initPet } from "@violetjs/pet";
-import { mountTerminalPet } from "@violetjs/pet/terminal";
+import { initPet } from "@violetjs/kodama";
+import { mountTerminalPet } from "@violetjs/kodama/terminal";
 
 // Node 里没有可用的 fetch(file:),把包导出的 .wasm 读成字节交给 initPet
-const wasm = fs.readFileSync(new URL(import.meta.resolve("@violetjs/pet/wasm")));
+const wasm = fs.readFileSync(new URL(import.meta.resolve("@violetjs/kodama/wasm")));
 await initPet(wasm);
 
 const rows = process.stdout.rows ?? 24;

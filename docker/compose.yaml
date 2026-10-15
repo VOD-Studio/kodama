@@ -20,7 +20,7 @@ services:
     volumes:
       - ..:/work
       - target:/work/target
-      - sdk-node-modules:/work/packages/pet-sdk/node_modules
+      - sdk-node-modules:/work/packages/kodama-sdk/node_modules
       - cargo-registry:/usr/local/cargo/registry
       - cargo-git:/usr/local/cargo/git
       - home:/home/dev

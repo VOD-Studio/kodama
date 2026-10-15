@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "装扮目录（#17）：物品、槽位、解锁等级、适用的身体结构与名称。物品与规则在 crates/core/pet-term/src/outfit.rs，由测试保证与本文件一致；美术在 pixel/items.rs。装扮只改变画面，不改变身份、稀有度、基因或任何数值。",
+  "note": "装扮目录（#17）：物品、槽位、解锁等级、适用的身体结构与名称。物品与规则在 crates/core/kodama-term/src/outfit.rs，由测试保证与本文件一致；美术在 pixel/items.rs。装扮只改变画面，不改变身份、稀有度、基因或任何数值。",
   "items": [
     {
       "id": "round_glasses",

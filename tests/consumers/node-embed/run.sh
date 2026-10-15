@@ -3,12 +3,12 @@
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=$(mktemp -d); trap 'rm -rf "$WORK"' EXIT
-"$HERE/../../../packages/pet-sdk/build.sh"
-(cd "$HERE/../../../packages/pet-sdk" && pnpm pack --pack-destination "$WORK" >/dev/null)
+"$HERE/../../../packages/kodama-sdk/build.sh"
+(cd "$HERE/../../../packages/kodama-sdk" && pnpm pack --pack-destination "$WORK" >/dev/null)
 mkdir "$WORK/app" && cp "$HERE/host.mjs" "$WORK/app/" && cd "$WORK/app"
 echo '{"name":"host","private":true,"type":"module"}' > package.json
 CLEAN=$(echo "$PATH" | tr ':' '\n' | grep -v cargo | paste -sd: -)
-env PATH="$CLEAN" pnpm add -s "$WORK"/violetjs-pet-*.tgz >/dev/null
+env PATH="$CLEAN" pnpm add -s "$WORK"/violetjs-kodama-*.tgz >/dev/null
 # 非 TTY:不得输出任何控制码
 printf 'hi\nquit\n' | env PATH="$CLEAN" node host.mjs | od -c | grep -q '033' && { echo "FAIL: escape codes on non-TTY"; exit 1; }
 env PATH="$CLEAN" python3 "$HERE/pty_test.py"

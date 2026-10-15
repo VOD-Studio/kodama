@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "探险见闻的种类与名称（#18）。种类在 crates/core/pet-core/src/rules/expedition.rs，由测试保证与本文件一致；见闻由宠物与探险编号经独立随机通道确定，约十六分之一闪亮。",
+  "note": "探险见闻的种类与名称（#18）。种类在 crates/core/kodama-core/src/rules/expedition.rs，由测试保证与本文件一致；见闻由宠物与探险编号经独立随机通道确定，约十六分之一闪亮。",
   "souvenirs": [
     {
       "id": "postcard",

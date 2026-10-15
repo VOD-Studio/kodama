@@ -1,6 +1,6 @@
-// 端到端：真实的 pet-service 二进制 + 真实 HTTP + 重启 + 用 WebAssembly 验证器核验证书。
-// 给出 pet-cli 时，再验收 CLI 经设备授权登录、读写同一只宠物、登出。
-// 用法: node service-e2e.mjs <服务二进制> <数据库(SQLite 路径或 Postgres 连接串)> [pet-cli 二进制]
+// 端到端：真实的 kodama-service 二进制 + 真实 HTTP + 重启 + 用 WebAssembly 验证器核验证书。
+// 给出 kodama 时，再验收 CLI 经设备授权登录、读写同一只宠物、登出。
+// 用法: node service-e2e.mjs <服务二进制> <数据库(SQLite 路径或 Postgres 连接串)> [kodama 二进制]
 import crypto from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, statSync } from "node:fs";
@@ -10,7 +10,7 @@ import { createRequire } from "node:module";
 import assert from "node:assert/strict";
 
 const [bin, db, cli] = process.argv.slice(2);
-const { execute } = createRequire(import.meta.url)("../../target/pkg-node/pet_wasm.js");
+const { execute } = createRequire(import.meta.url)("../../target/pkg-node/kodama_wasm.js");
 
 // 扮演 Violet：持有断言签名密钥。
 const { publicKey, privateKey } = crypto.generateKeyPairSync("ed25519");
@@ -39,11 +39,11 @@ const port = 20000 + Math.floor(Math.random() * 20000);
 const base = `http://127.0.0.1:${port}`;
 const env = {
   ...process.env,
-  PET_LISTEN: `127.0.0.1:${port}`, PET_DB: db, PET_WORLD: "e2e", PET_AUDIENCE: "pet-e2e", PET_ISSUER_NAME: "pet-service", PET_KID: "p1",
-  PET_SIGNING_SEED: crypto.randomBytes(32).toString("hex"), PET_TOKEN_SECRET: crypto.randomBytes(32).toString("hex"), PET_ELIGIBILITY_SECRET: crypto.randomBytes(32).toString("hex"),
-  PET_TRUSTED_ISSUERS: JSON.stringify([{ iss: "violet", keys: [{ kid: "v1", public_key: violetPub, not_before: "0" }] }]),
-  PET_DEVICE_VERIFICATION_URI: "https://site.example/pet/device",
-  PET_ACTIVITY_SOURCES: JSON.stringify([{ source: "site", iss: "violet", keys: [{ kid: "c1", public_key: connectorPub, not_before: "0" }] }]),
+  KODAMA_LISTEN: `127.0.0.1:${port}`, KODAMA_DB: db, KODAMA_WORLD: "e2e", KODAMA_AUDIENCE: "pet-e2e", KODAMA_ISSUER_NAME: "kodama-service", KODAMA_KID: "p1",
+  KODAMA_SIGNING_SEED: crypto.randomBytes(32).toString("hex"), KODAMA_TOKEN_SECRET: crypto.randomBytes(32).toString("hex"), KODAMA_ELIGIBILITY_SECRET: crypto.randomBytes(32).toString("hex"),
+  KODAMA_TRUSTED_ISSUERS: JSON.stringify([{ iss: "violet", keys: [{ kid: "v1", public_key: violetPub, not_before: "0" }] }]),
+  KODAMA_DEVICE_VERIFICATION_URI: "https://site.example/pet/device",
+  KODAMA_ACTIVITY_SOURCES: JSON.stringify([{ source: "site", iss: "violet", keys: [{ kid: "c1", public_key: connectorPub, not_before: "0" }] }]),
 };
 
 let child;
@@ -134,8 +134,8 @@ try {
 
 /** CLI 经设备授权登录，与网页读写同一只宠物，然后登出。 */
 async function cliAccount(web, cert) {
-  const home = mkdtempSync(join(tmpdir(), "pet-cli-"));
-  const cliEnv = { ...process.env, PET_CONFIG_DIR: home, PET_SERVICE: base, PET_LOGIN_POLL_MS: "100" };
+  const home = mkdtempSync(join(tmpdir(), "kodama-"));
+  const cliEnv = { ...process.env, KODAMA_CONFIG_DIR: home, KODAMA_SERVICE: base, KODAMA_LOGIN_POLL_MS: "100" };
   const run = (args, onStderr) =>
     new Promise((resolve) => {
       const p = spawn(cli, args, { env: cliEnv, stdio: ["ignore", "pipe", "pipe"] });

@@ -16,15 +16,15 @@
 
 ```mermaid
 flowchart BT
-  term["pet-term<br/>字符帧与像素画<br/><i>no_std</i>"]
-  core["pet-core<br/>规则、出生、证书、协议<br/><i>no_std</i>"]
-  issuer["pet-issuer<br/>签发出生证书"]
-  store["pet-store<br/>存储契约<br/>SQLite 与 Postgres"]
-  service["pet-service<br/>HTTP 服务"]
-  wasm["pet-wasm<br/>wasm-bindgen 包装"]
-  cli["pet-cli<br/>原生 CLI"]
-  schema["pet-schema<br/>schema 生成"]
-  sdk["@violetjs/pet<br/>TypeScript SDK"]
+  term["kodama-term<br/>字符帧与像素画<br/><i>no_std</i>"]
+  core["kodama-core<br/>规则、出生、证书、协议<br/><i>no_std</i>"]
+  issuer["kodama-issuer<br/>签发出生证书"]
+  store["kodama-store<br/>存储契约<br/>SQLite 与 Postgres"]
+  service["kodama-service<br/>HTTP 服务"]
+  wasm["kodama-wasm<br/>wasm-bindgen 包装"]
+  cli["kodama<br/>原生 CLI"]
+  schema["kodama-schema<br/>schema 生成"]
+  sdk["@violetjs/kodama<br/>TypeScript SDK"]
 
   core --> term
   issuer --> core
@@ -40,37 +40,37 @@ flowchart BT
   sdk -. "加载 .wasm" .-> wasm
 ```
 
-箭头表示「依赖」。所有边都指向上方的纯核心；`pet-service` 所依赖的各层都不知道 HTTP、账号与世界的存在。
+箭头表示「依赖」。所有边都指向上方的纯核心；`kodama-service` 所依赖的各层都不知道 HTTP、账号与世界的存在。
 
 | crate / 包 | 负责 | 不负责 |
 |---|---|---|
-| `pet-term` | 所有物种与姿态的字符帧（`frame`）与像素画（`sprite`）；各物种的身体结构，由测试保证与 `assets/catalog/species.json` 一致 | 规则、状态、终端（只返回网格） |
-| `pet-core` | 出生派生、生命与病程、成长与进化、奖励、出生证书核验、错误码、能力目录，以及唯一的 JSON 入口 `execute` | 时钟、随机源、存储、网络、签名密钥 |
-| `pet-issuer` | 用 Ed25519 密钥签发承诺与出生证书 | 核验（留在核心里，任何人都能运行） |
-| `pet-store` | `Store` trait 及其 SQLite、Postgres 实现；`run_act` 把核心的决定变成一次原子提交 | 规则、HTTP |
-| `pet-service` | 账号与世界、身份断言兑换、访问令牌、承诺—揭示的出生流程、HTTP 接口 | 任何属于接入方的数据 |
-| `pet-wasm` | 通过 wasm-bindgen 暴露 `execute` | 其他一切；它只有七行 |
-| `pet-cli` | `exec`（JSON 行）、`live`（终端里的动态宠物）、`capabilities`、`version` | 账号状态；`live` 只是本地预览 |
-| `pet-schema` | 输出线上协议的 JSON Schema | 运行时行为；它是构建期工具 |
-| `@violetjs/pet` | 显式异步初始化、强类型的 `run`、画布与终端呈现、本地模式（与 `pet-store` 同一契约的 IndexedDB 存储） | 规则；它只调用 WebAssembly |
+| `kodama-term` | 所有物种与姿态的字符帧（`frame`）与像素画（`sprite`）；各物种的身体结构，由测试保证与 `assets/catalog/species.json` 一致 | 规则、状态、终端（只返回网格） |
+| `kodama-core` | 出生派生、生命与病程、成长与进化、奖励、出生证书核验、错误码、能力目录，以及唯一的 JSON 入口 `execute` | 时钟、随机源、存储、网络、签名密钥 |
+| `kodama-issuer` | 用 Ed25519 密钥签发承诺与出生证书 | 核验（留在核心里，任何人都能运行） |
+| `kodama-store` | `Store` trait 及其 SQLite、Postgres 实现；`run_act` 把核心的决定变成一次原子提交 | 规则、HTTP |
+| `kodama-service` | 账号与世界、身份断言兑换、访问令牌、承诺—揭示的出生流程、HTTP 接口 | 任何属于接入方的数据 |
+| `kodama-wasm` | 通过 wasm-bindgen 暴露 `execute` | 其他一切；它只有七行 |
+| `kodama` | `exec`（JSON 行）、`live`（终端里的动态宠物）、`capabilities`、`version` | 账号状态；`live` 只是本地预览 |
+| `kodama-schema` | 输出线上协议的 JSON Schema | 运行时行为；它是构建期工具 |
+| `@violetjs/kodama` | 显式异步初始化、强类型的 `run`、画布与终端呈现、本地模式（与 `kodama-store` 同一契约的 IndexedDB 存储） | 规则；它只调用 WebAssembly |
 
 ### 依赖规则
 
-目录即分层：每个 crate 位于 `crates/<层>/<crate>`，workspace 包含 `crates/*/*`。crate 之间的路径只在根 `Cargo.toml` 的 `[workspace.dependencies]` 声明一次，成员写 `pet-core = { workspace = true }`。
+目录即分层：每个 crate 位于 `crates/<层>/<crate>`，workspace 包含 `crates/*/*`。crate 之间的路径只在根 `Cargo.toml` 的 `[workspace.dependencies]` 声明一次，成员写 `kodama-core = { workspace = true }`。
 
 | 层 | crate | 可以依赖 |
 |---|---|---|
-| `core` | `pet-core`、`pet-term` | 只有 `core`。`no_std`，不读时钟、不取随机源、不做 I/O |
-| `service` | `pet-store`、`pet-issuer`、`pet-service` | `core`、`service` |
-| `runtimes` | `pet-cli`、`pet-wasm` | `core` |
-| `tools` | `pet-schema` | `core` |
+| `core` | `kodama-core`、`kodama-term` | 只有 `core`。`no_std`，不读时钟、不取随机源、不做 I/O |
+| `service` | `kodama-store`、`kodama-issuer`、`kodama-service` | `core`、`service` |
+| `runtimes` | `kodama`、`kodama-wasm` | `core` |
+| `tools` | `kodama-schema` | `core` |
 
 `scripts/check/check-arch.mjs`（由 `make check-arch` 与 CI 的 Lint 作业运行）在以下情况失败：
 
 - crate 不在 `crates/<它的层>/<它的名字>`，或新增 crate 没有登记；
 - crate 依赖了上表不允许的层，或依赖了自己白名单之外的 workspace crate；
-- `pet-core` 或 `pet-term` 增加了核心允许范围之外的正常依赖。允许的是：摘要（`sha2`、`hmac`）、签名验证（`ed25519-dalek`）、序列化（`serde`、`serde_json`）、schema 派生（`schemars`，可选）；
-- `pet-core` 或 `pet-term` 去掉了 `#![no_std]` 或 `#![forbid(unsafe_code)]`。
+- `kodama-core` 或 `kodama-term` 增加了核心允许范围之外的正常依赖。允许的是：摘要（`sha2`、`hmac`）、签名验证（`ed25519-dalek`）、序列化（`serde`、`serde_json`）、schema 派生（`schemars`，可选）；
+- `kodama-core` 或 `kodama-term` 去掉了 `#![no_std]` 或 `#![forbid(unsafe_code)]`。
 
 同一目标随后在 `thumbv7em-none-eabihf`（没有标准库的目标）上编译核心层。悄悄引入 `std` 的依赖在原生与 `wasm32-unknown-unknown` 上都能编译通过，在这里会失败。
 
@@ -78,16 +78,16 @@ flowchart BT
 
 ### crate 内部
 
-`pet-core` 与 `pet-service` 按职责分模块，每个新功能都有固定的位置，而不是让一个文件越长越大：
+`kodama-core` 与 `kodama-service` 按职责分模块，每个新功能都有固定的位置，而不是让一个文件越长越大：
 
 ```
-crates/core/pet-core/src/
+crates/core/kodama-core/src/
 ├── protocol/   execute、Command、编码、能力目录。日后拆成独立协议 crate 的边界
 ├── birth/      出生派生；proof.rs 核验证书
 ├── rules/      life.rs（需求、病程、死亡）、growth.rs（等级、性格、进化）、wardrobe.rs（装扮）、expedition.rs（探险）
 └── rng.rs      HKDF 随机通道；每个功能各用一条带标签的独立通道
 
-crates/service/pet-service/src/
+crates/service/kodama-service/src/
 ├── lib.rs      路由表：全部接口的唯一清单
 ├── state.rs    Config、AppState
 ├── error.rs    {ok, value} / {ok:false, code, message} 响应格式
@@ -101,19 +101,19 @@ crates/service/pet-service/src/
 └── routes/     按资源分文件：meta、auth、births、pets、sessions、device、activity、memorials、friends
 ```
 
-公开路径不随内部结构变化：其他 crate 用到的一切都由 `pet_core` 再导出。
+公开路径不随内部结构变化：其他 crate 用到的一切都由 `kodama_core` 再导出。
 
 ## 目录结构
 
 ```
 kodama/
 ├── crates/<层>/<crate>/      Rust，按层分组（见上文）
-├── packages/<包>/            npm 包：pet-sdk 即 @violetjs/pet
+├── packages/<包>/            npm 包：kodama-sdk 即 @violetjs/kodama
 ├── assets/                   美术及其记录：目前是 catalog/species.json
 ├── tests/                    跨组件验收，按类型分组
 │   ├── fixtures/             黄金出生向量、场景步骤、证书及其生成脚本
 │   ├── parity/               原生、Node、web 输出必须逐字节一致
-│   ├── tty/                  pet-cli live 在真实终端里的行为
+│   ├── tty/                  kodama live 在真实终端里的行为
 │   ├── e2e/                  服务二进制经真实 HTTP，SQLite 与 Postgres
 │   ├── consumers/<名称>/     在仓库外使用安装后的产物；每个都有 run.sh
 │   └── bench/
@@ -140,8 +140,8 @@ kodama/
 ```mermaid
 sequenceDiagram
   participant App as 网页 / Node 宿主 / 脚本
-  participant Entry as @violetjs/pet · pet-cli exec
-  participant Core as pet-core::execute
+  participant Entry as @violetjs/kodama · kodama exec
+  participant Core as kodama-core::execute
   App->>Entry: {"op":"act","pet":…,"action":"feed","now":"60","request_id":"r1"}
   Entry->>Core: JSON 字符串
   Core->>Core: 解析 Command → act(pet, action, now, request_id)
@@ -157,14 +157,14 @@ sequenceDiagram
 sequenceDiagram
   participant Site as 接入方
   participant Client as Web / CLI 客户端
-  participant Svc as pet-service
+  participant Svc as kodama-service
   participant Store as Store（SQLite / Postgres）
   Site->>Client: 短期身份断言（Ed25519，≤ 300 秒）
   Client->>Svc: POST /v1/auth/exchange
   Svc-->>Client: 访问令牌（1 小时）
   Client->>Svc: POST /v1/pets/me/actions {action, request_id}
   Svc->>Store: load(scope) → 状态, 版本
-  Svc->>Svc: pet_core::act(状态, 动作, 服务端时间)
+  Svc->>Svc: kodama_core::act(状态, 动作, 服务端时间)
   Svc->>Store: commit(scope, 版本, request_id, changeset)
   Store-->>Svc: Committed | Replayed | Conflict | RequestIdReused
   Svc-->>Client: {ok, value}
@@ -173,17 +173,17 @@ sequenceDiagram
 - **作用域**是 `(world, owner)`。一个服务实例对应一个世界，不同接入方互相看不到对方的宠物。
 - **时间由服务端决定。** 账号模式下客户端不能指定逻辑时间。
 - **提交原子且幂等。** 状态、库存与命令结果一起写入；重放同一个 `request_id` 返回已保存的结果，同一个标识换参数会被拒绝；版本冲突时 `run_act` 重新读取并重试，最多 16 次。
-- **出生使用承诺—揭示。** 服务在客户端加入随机材料之前先承诺 `server_seed`；由 `pet-issuer` 签发的证书可以在任何运行环境里用 `verify_birth` 对照 `/v1/issuer-keys` 公布的公钥核验。
+- **出生使用承诺—揭示。** 服务在客户端加入随机材料之前先承诺 `server_seed`；由 `kodama-issuer` 签发的证书可以在任何运行环境里用 `verify_birth` 对照 `/v1/issuer-keys` 公布的公钥核验。
 
 服务从不读取接入方的数据库或 API；接入方只通过身份断言、活动事件与 SDK 与它交互（ADR-0021）。
 
 ## 线上协议与生成文件
 
 ```
-Rust 类型（pet-core、pet-term）──schemars──► pet-schema ──► schema/pet.schema.json
+Rust 类型（kodama-core、kodama-term）──schemars──► kodama-schema ──► schema/kodama.schema.json
                                                              ├─► src/types.d.ts      （json-schema-to-typescript）
-CAPABILITIES（pet-core::caps）───────────────────────────────┴─► docs/capabilities.md
-                             └─► pet-cli help、capabilities 命令、GET /v1/capabilities
+CAPABILITIES（kodama-core::caps）───────────────────────────────┴─► docs/capabilities.md
+                             └─► kodama help、capabilities 命令、GET /v1/capabilities
 ```
 
 生成的文件随仓库提交。`make schema` 重新生成；`make schema-check`（CI 的 Core 作业）在生成物过期时失败，用 schema 校验真实响应，并编译正反两组类型测试。新增命令必须在 `CAPABILITIES` 登记，否则测试失败。
@@ -224,16 +224,16 @@ CAPABILITIES（pet-core::caps）────────────────
 
 | 产物 | 渠道 |
 |---|---|
-| `@violetjs/pet` | npm |
-| `pet-cli` | GitHub Release 归档：Linux x64、arm64（musl 静态链接）与 macOS arm64，带校验和与构建来源证明 |
-| `pet-service` | `ghcr.io/vod-studio/pet-service`，amd64 与 arm64 |
+| `@violetjs/kodama` | npm |
+| `kodama` | GitHub Release 归档：Linux x64、arm64（musl 静态链接）与 macOS arm64，带校验和与构建来源证明 |
+| `kodama-service` | `ghcr.io/vod-studio/kodama-service`，amd64 与 arm64 |
 | crates | 暂不发布（`publish = false`） |
 
 所有产物共用一个版本号，由 `release.yml` 从同一个标签发布。详见[分发](operations/distribution.md)。
 
 ## 已知耦合与计划中的调整
 
-**`pet-core` 依赖 `pet-term`。** 协议入口 `execute` 与 `Command` 枚举在 `pet-core` 里（现为独立的 `protocol` 模块），其中两个命令（`frame`、`sprite`）分派给渲染；规则本身并不使用 `pet-term`。把 `protocol/` 移成独立 crate 是有意推迟的：现在拆不改变任何行为（crate 不发布，`.wasm` 里没用到的代码本来就被裁掉，输出不变）；而且 crate 发布前还要改名为 `violet-pet-*`，现在拆会让接口破坏两次。两件事留到首次发布 crate 时一起做。在那之前，模块边界与 `check-arch` 保证这条边不扩散。
+**`kodama-core` 依赖 `kodama-term`。** 协议入口 `execute` 与 `Command` 枚举在 `kodama-core` 里（现为独立的 `protocol` 模块），其中两个命令（`frame`、`sprite`）分派给渲染；规则本身并不使用 `kodama-term`。把 `protocol/` 移成独立 crate 是有意推迟的：现在拆不改变任何行为（crate 不发布，`.wasm` 里没用到的代码本来就被裁掉，输出不变）；而且 crate 发布前还要改名为 `violet-pet-*`，现在拆会让接口破坏两次。两件事留到首次发布 crate 时一起做。在那之前，模块边界与 `check-arch` 保证这条边不扩散。
 
 其他未完成项记录在 PRD 与[服务说明](operations/service.md)的「已知限制」里：令牌撤销、多实例部署的共享重放防护、`server_seed` 静态加密、连接池与速率限制。
 
@@ -241,21 +241,21 @@ CAPABILITIES（pet-core::caps）────────────────
 
 每个未完成的 issue 在这套结构里都已有位置。功能按下表新增模块，实现之后才在能力目录登记命令。
 
-| issue | 规则（`pet-core`） | 美术（`pet-term`、`assets/`） | 服务（`pet-service`、`pet-store`） | 客户端 |
+| issue | 规则（`kodama-core`） | 美术（`kodama-term`、`assets/`） | 服务（`kodama-service`、`kodama-store`） | 客户端 |
 |---|---|---|---|---|
-| 进化形态与精细画风（#6、#11、#14） | `rules/growth.rs`：条件不变；`Stage` 与 `Branch` 在 `pet_term::form` | **像素画风已完成**（[设计](design/evolution.md)）：每阶段一副身体、分支特征、每物种 16 种外形，名称在 `assets/catalog/`；终端以半格字符绘制同一套像素画（`charset: "blocks"`） | 入口仍是 `GET /v1/pets/me/evolution` | SDK 把 `lineage` 传给 `sprite` |
-| #5 规则版本迁移 | `rules/migrate.rs`：显式的 `migrate(pet, from, to)` 与不变量测试 | — | 加载时迁移并持久化；表结构变更以编号迁移放在 `pet-store` | — |
+| 进化形态与精细画风（#6、#11、#14） | `rules/growth.rs`：条件不变；`Stage` 与 `Branch` 在 `kodama_term::form` | **像素画风已完成**（[设计](design/evolution.md)）：每阶段一副身体、分支特征、每物种 16 种外形，名称在 `assets/catalog/`；终端以半格字符绘制同一套像素画（`charset: "blocks"`） | 入口仍是 `GET /v1/pets/me/evolution` | SDK 把 `lineage` 传给 `sprite` |
+| #5 规则版本迁移 | `rules/migrate.rs`：显式的 `migrate(pet, from, to)` 与不变量测试 | — | 加载时迁移并持久化；表结构变更以编号迁移放在 `kodama-store` | — |
 | #10 账号服务 | — | — | **登录会话已完成**：`session.rs`（刷新令牌轮换、重用即撤销）、`record.rs`（存储契约上的小记录）；连接池已完成；待做：速率限制、固化存储契约签名 | — |
-| #12 活动与奖励 | `grant`（已有） | — | **已完成**：`activity.rs`（签名、奖励表、每日账本）与 `routes/activity.rs`（收件 → 预留 → 发放，按资格去重）；`pet-store` 的 `run_grant` | 接入方的连接器发送签名事件 |
-| #13 浏览器本地模式 | 不变 | — | 契约向量（`tests/fixtures/store-contract.json`）也对 SQLite 与 Postgres 运行 | **已完成**（[设计](design/local-mode.md)）：`@violetjs/pet/local` 与 `/store`，IndexedDB 存储、每日口粮与活动奖励、多标签页并发 |
-| #15 CLI 账号 | — | — | **已完成**：设备授权 `device.rs` 与 `routes/device.rs`（[说明](operations/service.md#登录会话与设备授权)）；投影带上外形 | **已完成**：`pet-cli` 的 `account/`（登录、凭据、自动刷新、`live --account`），经 HTTP 访问，不链接服务端 crate |
-| #16 Skill | 能力目录（已有） | — | — | `packages/pet-sdk/skill/`，可生成部分由能力目录产出 |
-| #17 装扮与家园 | **已完成**：`rules/wardrobe.rs`（升级解锁、穿脱、身体结构检查），`Pet.species` | **已完成**：`pet-term` 的 `outfit.rs` 与 `pixel/items.rs`，`assets/catalog/items.json`（[设计](design/outfits.md)） | 动作经 `POST /v1/pets/me/actions`，无需新接口 | `sprite`、`frame`、`mountPet` 与终端嵌入接受 `outfit` |
-| #18 主题探险 | **已完成**：`rules/expedition.rs`（出发、领取、召回，独立随机通道 `expedition/v1`，每天 2 次） | 见闻目录 `assets/catalog/souvenirs.json`（[设计](design/expeditions.md)） | 动作经 `POST /v1/pets/me/actions`，无需新接口 | `pet-cli act depart/return/recall` |
+| #12 活动与奖励 | `grant`（已有） | — | **已完成**：`activity.rs`（签名、奖励表、每日账本）与 `routes/activity.rs`（收件 → 预留 → 发放，按资格去重）；`kodama-store` 的 `run_grant` | 接入方的连接器发送签名事件 |
+| #13 浏览器本地模式 | 不变 | — | 契约向量（`tests/fixtures/store-contract.json`）也对 SQLite 与 Postgres 运行 | **已完成**（[设计](design/local-mode.md)）：`@violetjs/kodama/local` 与 `/store`，IndexedDB 存储、每日口粮与活动奖励、多标签页并发 |
+| #15 CLI 账号 | — | — | **已完成**：设备授权 `device.rs` 与 `routes/device.rs`（[说明](operations/service.md#登录会话与设备授权)）；投影带上外形 | **已完成**：`kodama` 的 `account/`（登录、凭据、自动刷新、`live --account`），经 HTTP 访问，不链接服务端 crate |
+| #16 Skill | 能力目录（已有） | — | — | `packages/kodama-sdk/skill/`，可生成部分由能力目录产出 |
+| #17 装扮与家园 | **已完成**：`rules/wardrobe.rs`（升级解锁、穿脱、身体结构检查），`Pet.species` | **已完成**：`kodama-term` 的 `outfit.rs` 与 `pixel/items.rs`，`assets/catalog/items.json`（[设计](design/outfits.md)） | 动作经 `POST /v1/pets/me/actions`，无需新接口 | `sprite`、`frame`、`mountPet` 与终端嵌入接受 `outfit` |
+| #18 主题探险 | **已完成**：`rules/expedition.rs`（出发、领取、召回，独立随机通道 `expedition/v1`，每天 2 次） | 见闻目录 `assets/catalog/souvenirs.json`（[设计](design/expeditions.md)） | 动作经 `POST /v1/pets/me/actions`，无需新接口 | `kodama act depart/return/recall` |
 | #19 好友 | 不变：联合探险复用探险规则 | — | **已完成**：`friends.rs` 与 `routes/friends.rs`（邀请码、双方记录、公开投影、拜访、联合探险），存在存储契约里，不新增表 | — |
 | #20 繁育与家谱 | `birth/inherit.rs`：遗传与变异用独立通道；家谱进入证书上下文 | 遗传特征体现在形态上 | `routes/breeding.rs`：两步授权、孵化仓、退役 | — |
 | #21 AI 对话 | 能力白名单来自能力目录 | — | `routes/chat.rs`；模型接入在新的 `service` 层 crate 里以 trait 抽象，HTTP 客户端依赖保持可选 | — |
-| #7 身份与活动协议 | — | — | 由 `pet-schema` 生成 HTTP 接口的 JSON Schema，与命令协议同法 | 连接器在接入方仓库 |
+| #7 身份与活动协议 | — | — | 由 `kodama-schema` 生成 HTTP 接口的 JSON Schema，与命令协议同法 | 连接器在接入方仓库 |
 
 新的顶层目录（例如 #14 网页演示用的 `apps/`）在引入它的 PR 里加入 `check-arch` 的白名单。
 
@@ -263,10 +263,10 @@ CAPABILITIES（pet-core::caps）────────────────
 
 | 改动 | 涉及 |
 |---|---|
-| 规则（成长、病程、奖励） | `crates/core/pet-core/src/rules/` 与 `crates/core/pet-core/tests/` 里的测试；保持 `make three-end` 通过；改变既有结果需要新的 `rules_version` |
-| 新命令 | `crates/core/pet-core/src/protocol/mod.rs` 的 `Command` 与 `execute`，在 `protocol/caps.rs` 登记，然后 `make schema` |
-| 物种或姿态的画面 | `crates/core/pet-term`、`assets/catalog/species.json`；用 `make preview` 预览 |
-| 存储后端 | 在 `pet-store` 实现 `Store`，并对它运行共享的契约测试 |
-| HTTP 接口 | `crates/service/pet-service/src/routes/` 里的处理函数、`lib.rs` 路由表里的一行、`tests/api.rs` 的测试；在[服务说明](operations/service.md)里记录 |
+| 规则（成长、病程、奖励） | `crates/core/kodama-core/src/rules/` 与 `crates/core/kodama-core/tests/` 里的测试；保持 `make three-end` 通过；改变既有结果需要新的 `rules_version` |
+| 新命令 | `crates/core/kodama-core/src/protocol/mod.rs` 的 `Command` 与 `execute`，在 `protocol/caps.rs` 登记，然后 `make schema` |
+| 物种或姿态的画面 | `crates/core/kodama-term`、`assets/catalog/species.json`；用 `make preview` 预览 |
+| 存储后端 | 在 `kodama-store` 实现 `Store`，并对它运行共享的契约测试 |
+| HTTP 接口 | `crates/service/kodama-service/src/routes/` 里的处理函数、`lib.rs` 路由表里的一行、`tests/api.rs` 的测试；在[服务说明](operations/service.md)里记录 |
 | 跨组件检查 | `tests/` 下新建目录与 `run.sh`，加 `make` 目标与 CI 步骤 |
 | CLI 支持的平台 | `.github/workflows/package.yml` 的 `cli` 矩阵、CLI README 的平台表、[分发](operations/distribution.md) |

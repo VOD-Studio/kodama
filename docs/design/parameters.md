@@ -1,6 +1,6 @@
 # 数值参数与病程（R-03）
 
-本文是 #4 的评审输出：规则核心的默认参数、快进体验记录，以及尚未实现部分的草案。**「已实现」的数值来自 `crates/core/pet-core/src/life.rs`，快进结果可用 `cargo run -p pet-core --example timeline` 复现；「草案」未实现、未实测，属于 #11 与 #12 的输入。**
+本文是 #4 的评审输出：规则核心的默认参数、快进体验记录，以及尚未实现部分的草案。**「已实现」的数值来自 `crates/core/kodama-core/src/life.rs`，快进结果可用 `cargo run -p kodama-core --example timeline` 复现；「草案」未实现、未实测，属于 #11 与 #12 的输入。**
 
 ## 时间与观察
 

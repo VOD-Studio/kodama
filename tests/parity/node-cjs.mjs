@@ -1,2 +1,2 @@
 import { createRequire } from "node:module";
-export const { execute } = createRequire(import.meta.url)("../../target/pkg-node/pet_wasm.js");
+export const { execute } = createRequire(import.meta.url)("../../target/pkg-node/kodama_wasm.js");

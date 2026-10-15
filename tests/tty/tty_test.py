@@ -1,8 +1,8 @@
-"""真实 pty 验证 pet-cli live:动态、resize、退出清理、降级。"""
+"""真实 pty 验证 kodama live:动态、resize、退出清理、降级。"""
 import os, pty, sys, time, fcntl, termios, struct, signal, select, re
 
-# PET_CLI_BIN 指向发布归档里的二进制(tests/consumers/cli-archive/run.sh);缺省为本仓库的 release 构建
-BIN = os.environ.get("PET_CLI_BIN") or os.path.join(os.path.dirname(__file__), "../../target/release/pet-cli")
+# KODAMA_CLI_BIN 指向发布归档里的二进制(tests/consumers/cli-archive/run.sh);缺省为本仓库的 release 构建
+BIN = os.environ.get("KODAMA_CLI_BIN") or os.path.join(os.path.dirname(__file__), "../../target/release/kodama")
 
 def fresh_termios():
     # 子进程启动时拿到的是新建 pty 的默认属性。不能在 fork 之后读取：子进程可能已经切到原始模式，

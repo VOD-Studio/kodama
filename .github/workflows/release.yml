@@ -2,9 +2,9 @@ name: Release
 
 # 合并到 main 后由 release-please 维护「发版 PR」(版本号、CHANGELOG)。
 # 合并发版 PR 会打标签、建 GitHub Release,并在同一个工作流里发布全部产物:
-#   @violetjs/pet       → npm(npm 环境,人工批准)
-#   pet-cli 各平台归档   → 该 GitHub Release 的附件,带 SHA256SUMS 与构建来源证明
-#   pet-service 镜像     → ghcr.io/vod-studio/pet-service,多架构,带构建来源证明
+#   @violetjs/kodama     → npm(npm 环境,人工批准)
+#   kodama 各平台归档    → 该 GitHub Release 的附件,带 SHA256SUMS 与构建来源证明
+#   kodama-service 镜像  → ghcr.io/vod-studio/kodama-service,多架构,带构建来源证明
 # 发布放在这里而不是监听 release 事件:GITHUB_TOKEN 创建的 Release 不会触发其他工作流。
 # package.yml 的构建作业接触不到凭据;NPM_TOKEN 只配置在 npm 环境里,只有 npm 作业能读到。
 on:
@@ -15,7 +15,7 @@ on:
 permissions: {}
 
 env:
-  IMAGE: ghcr.io/vod-studio/pet-service
+  IMAGE: ghcr.io/vod-studio/kodama-service
 
 # release-please 会改写 git 状态,串行排队,不取消进行中的 run
 concurrency:
@@ -109,7 +109,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VERSION: ${{ needs.release-please.outputs.version }}
-        run: scripts/release/npm-publish.sh "pkgs/violetjs-pet-$VERSION.tgz" publish
+        run: scripts/release/npm-publish.sh "pkgs/violetjs-kodama-$VERSION.tgz" publish
 
   cli:
     name: CLI release assets
@@ -129,11 +129,11 @@ jobs:
       - name: Checksums
         working-directory: dist
         run: |
-          sha256sum pet-cli-*.tar.gz > SHA256SUMS
+          sha256sum kodama-*.tar.gz > SHA256SUMS
           cat SHA256SUMS
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: dist/pet-cli-*.tar.gz
+          subject-path: dist/kodama-*.tar.gz
       # 重跑时覆盖同名附件;附件名不带版本号,releases/latest/download/ 链接长期有效
       - name: Upload to the GitHub Release
         env:
@@ -171,8 +171,8 @@ jobs:
           file: docker/service.Dockerfile
           platforms: linux/${{ matrix.arch }}
           load: true
-          tags: pet-service:smoke
-      - run: sh scripts/release/smoke-service-image.sh pet-service:smoke
+          tags: kodama-service:smoke
+      - run: sh scripts/release/smoke-service-image.sh kodama-service:smoke
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io

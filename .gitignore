@@ -7,7 +7,7 @@ target/
 dist/
 *.tgz
 # 构建时从仓库根复制进 SDK 的许可证（随包发布，源文件只有根目录一份）
-packages/pet-sdk/LICENSE
+packages/kodama-sdk/LICENSE
 
 # 依赖与缓存 —————————————————————————————————————————
 node_modules/

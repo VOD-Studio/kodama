@@ -26,7 +26,7 @@ confidence-threshold = 0.93
 
 # 只在个别目标上出现、不进入任何发布产物的依赖，逐个列出理由
 [[licenses.exceptions]]
-# 根证书数据。rustls-platform-verifier 只在 wasm32 上依赖它，pet-cli 从不为 wasm32 构建；
+# 根证书数据。rustls-platform-verifier 只在 wasm32 上依赖它，kodama 从不为 wasm32 构建；
 # 原生构建使用操作系统的信任库
 crate = "webpki-root-certs"
 allow = ["CDLA-Permissive-2.0"]

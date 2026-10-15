@@ -2,11 +2,11 @@
 
 #13 的实现说明。本地模式让宠物住在浏览器里，不需要账号、后端或网络（PRD US-21、AC-09）。规则与服务端完全相同：每个动作都由同一个 WebAssembly 规则核心结算，再以一次原子提交写入本机存储。
 
-入口是 `@violetjs/pet/local`，存储契约在 `@violetjs/pet/store`。
+入口是 `@violetjs/kodama/local`，存储契约在 `@violetjs/kodama/store`。
 
 ## 存储契约
 
-与服务端 `pet-store` 相同的形状：`load(scope)` 读取版本与状态；`commit(scope, expected, requestId, changeset)` 一次写入状态与请求结果，返回已提交、重放、版本冲突或请求标识被换了参数四种之一，失败不出现部分提交。
+与服务端 `kodama-store` 相同的形状：`load(scope)` 读取版本与状态；`commit(scope, expected, requestId, changeset)` 一次写入状态与请求结果，返回已提交、重放、版本冲突或请求标识被换了参数四种之一，失败不出现部分提交。
 
 | 实现 | 用途 | 验证 |
 |---|---|---|

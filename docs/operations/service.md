@@ -1,36 +1,38 @@
 # 独立宠物服务
 
-#10 的实现说明。`pet-service` 持有账号宠物的**唯一权威状态**，使用自己的凭据与存储，直接执行规则核心。它不读取 Violet 的任何表，不调用 Violet 的 API，也不依赖 SSR。
+#10 的实现说明。`kodama-service` 持有账号宠物的**唯一权威状态**，使用自己的凭据与存储，直接执行规则核心。它不读取 Violet 的任何表，不调用 Violet 的 API，也不依赖 SSR。
 
 > **出生协议尚未经过独立安全评审（#3）**，评审通过前不要对外宣称“正式可验证发行”。下面的“已知限制”列出了这个增量刻意没做的部分。
 
 ## 运行
 
 ```sh
-cargo build --release -p pet-service
-PET_DB=./pet.db PET_WORLD=my-site PET_AUDIENCE=pet.example.com PET_ISSUER_NAME=pet.example.com PET_KID=p1 \
-PET_SIGNING_SEED=<64 位十六进制> PET_TOKEN_SECRET=<64 位十六进制> PET_ELIGIBILITY_SECRET=<64 位十六进制> \
-PET_TRUSTED_ISSUERS='[{"iss":"violet","keys":[{"kid":"v1","public_key":"<64 位十六进制>","not_before":"0"}]}]' \
-./target/release/pet-service
+cargo build --release -p kodama-service
+KODAMA_DB=./pet.db KODAMA_WORLD=my-site KODAMA_AUDIENCE=pet.example.com KODAMA_ISSUER_NAME=pet.example.com KODAMA_KID=p1 \
+KODAMA_SIGNING_SEED=<64 位十六进制> KODAMA_TOKEN_SECRET=<64 位十六进制> KODAMA_ELIGIBILITY_SECRET=<64 位十六进制> \
+KODAMA_TRUSTED_ISSUERS='[{"iss":"violet","keys":[{"kid":"v1","public_key":"<64 位十六进制>","not_before":"0"}]}]' \
+./target/release/kodama-service
 ```
 
 缺少必需项时服务**直接退出并说明**，不使用不安全的默认值。三个 32 字节密钥用 `openssl rand -hex 32` 生成，彼此独立。
 
+0.4.0 及以前的变量前缀为 `PET_`，镜像为 `ghcr.io/vod-studio/pet-service`；升级时把变量逐个改为 `KODAMA_` 前缀，取值、数据库与已签发的令牌都不受影响。旧前缀不再读取。
+
 | 变量 | 含义 |
 |---|---|
-| `PET_DB` | SQLite 文件路径，或 Postgres 连接串（`postgres://…` 或含 `host=`） |
-| `PET_DB_SCHEMA` | Postgres schema，默认 `pet`；启动时自动建表 |
-| `PET_WORLD` | 本实例的世界。一个实例对应一个世界，不同世界互不可见 |
-| `PET_AUDIENCE` | 身份断言必须面向的受众 |
-| `PET_ISSUER_NAME`、`PET_KID` | 出生证书中的发行者名与签名密钥标识 |
-| `PET_SIGNING_SEED` | 出生证书的 Ed25519 签名密钥种子 |
-| `PET_TOKEN_SECRET` | 访问令牌的 HMAC 密钥 |
-| `PET_ELIGIBILITY_SECRET` | 资格摘要的盐，使外部无法反推账号 |
-| `PET_TRUSTED_ISSUERS` | 受信任的身份发行者及其公钥集（JSON，支持轮换窗口与撤销） |
-| `PET_PUBLISHED_KEYS` | 可选。轮换后需继续公开的旧证书公钥（JSON 数组），当前钥自动加入 |
-| `PET_DEVICE_VERIFICATION_URI` | 可选。设备授权（CLI 登录）的确认页面，由接入方实现，见下文；不配置则关闭设备授权 |
-| `PET_ACTIVITY_SOURCES` | 可选。受信任的活动连接器（JSON 数组：`source`、它代表的身份发行者 `iss`、签名公钥集 `keys`，格式同 `PET_TRUSTED_ISSUERS` 的密钥）；不配置则不接受任何活动 |
-| `PET_LISTEN` | 监听地址，默认 `127.0.0.1:8787` |
+| `KODAMA_DB` | SQLite 文件路径，或 Postgres 连接串（`postgres://…` 或含 `host=`） |
+| `KODAMA_DB_SCHEMA` | Postgres schema，默认 `pet`；启动时自动建表 |
+| `KODAMA_WORLD` | 本实例的世界。一个实例对应一个世界，不同世界互不可见 |
+| `KODAMA_AUDIENCE` | 身份断言必须面向的受众 |
+| `KODAMA_ISSUER_NAME`、`KODAMA_KID` | 出生证书中的发行者名与签名密钥标识 |
+| `KODAMA_SIGNING_SEED` | 出生证书的 Ed25519 签名密钥种子 |
+| `KODAMA_TOKEN_SECRET` | 访问令牌的 HMAC 密钥 |
+| `KODAMA_ELIGIBILITY_SECRET` | 资格摘要的盐，使外部无法反推账号 |
+| `KODAMA_TRUSTED_ISSUERS` | 受信任的身份发行者及其公钥集（JSON，支持轮换窗口与撤销） |
+| `KODAMA_PUBLISHED_KEYS` | 可选。轮换后需继续公开的旧证书公钥（JSON 数组），当前钥自动加入 |
+| `KODAMA_DEVICE_VERIFICATION_URI` | 可选。设备授权（CLI 登录）的确认页面，由接入方实现，见下文；不配置则关闭设备授权 |
+| `KODAMA_ACTIVITY_SOURCES` | 可选。受信任的活动连接器（JSON 数组：`source`、它代表的身份发行者 `iss`、签名公钥集 `keys`，格式同 `KODAMA_TRUSTED_ISSUERS` 的密钥）；不配置则不接受任何活动 |
+| `KODAMA_LISTEN` | 监听地址，默认 `127.0.0.1:8787` |
 
 服务不终止 TLS，应放在反向代理之后。
 
@@ -84,7 +86,7 @@ PET_TRUSTED_ISSUERS='[{"iss":"violet","keys":[{"kid":"v1","public_key":"<64 位�
 2. 用户打开 `verification_uri`（或带上用户码的 `verification_uri_complete`），在接入方页面登录后核对客户端名称，确认或拒绝。
 3. 客户端每 5 秒轮询 `POST /v1/device/token`：等待中返回 `authorization_pending`，拒绝返回 `access_denied`，过期或已用过返回 `expired_token`；确认后得到访问令牌、刷新令牌与会话标识。一个设备码只能换一次。
 
-**接入方的确认页面**（`PET_DEVICE_VERIFICATION_URI`）：读取地址里的 `code`（或让用户输入），以已登录用户的访问令牌调用 `GET /v1/device/{code}` 展示客户端名称与状态，再按用户的选择调用 `approve` 或 `deny`。页面必须让用户看清是哪个客户端在请求，防止被诱导确认别人的设备。
+**接入方的确认页面**（`KODAMA_DEVICE_VERIFICATION_URI`）：读取地址里的 `code`（或让用户输入），以已登录用户的访问令牌调用 `GET /v1/device/{code}` 展示客户端名称与状态，再按用户的选择调用 `approve` 或 `deny`。页面必须让用户看清是哪个客户端在请求，防止被诱导确认别人的设备。
 
 会话的规则：
 
@@ -97,7 +99,7 @@ PET_TRUSTED_ISSUERS='[{"iss":"violet","keys":[{"kid":"v1","public_key":"<64 位�
 | 闲置失效 | 30 天没有刷新则失效；每次刷新顺延 |
 | 每个账号的会话数 | 至多 20 个，超出时淘汰最久未使用的 |
 
-刷新令牌由 `PET_TOKEN_SECRET` 签名，携带账号、会话与代数；数据库只存会话的代数与时间，不存任何令牌或其哈希，只拿到数据库无法伪造令牌。轮换 `PET_TOKEN_SECRET` 会让所有会话失效。一个账号的全部会话是存储契约里的一条记录，刷新、撤销都是一次原子提交。
+刷新令牌由 `KODAMA_TOKEN_SECRET` 签名，携带账号、会话与代数；数据库只存会话的代数与时间，不存任何令牌或其哈希，只拿到数据库无法伪造令牌。轮换 `KODAMA_TOKEN_SECRET` 会让所有会话失效。一个账号的全部会话是存储契约里的一条记录，刷新、撤销都是一次原子提交。
 
 ## 活动与奖励
 
@@ -176,14 +178,14 @@ Violet 没有用户之间的好友关系，所以关系建在宠物服务自己�
 
 ## 镜像
 
-发版时发布到 `ghcr.io/vod-studio/pet-service`，标签为 `X.Y.Z`、`X.Y` 与 `latest`，含 `linux/amd64` 与 `linux/arm64`，带构建来源证明（`gh attestation verify oci://ghcr.io/vod-studio/pet-service:X.Y.Z --repo VOD-Studio/kodama`）。
+发版时发布到 `ghcr.io/vod-studio/kodama-service`，标签为 `X.Y.Z`、`X.Y` 与 `latest`，含 `linux/amd64` 与 `linux/arm64`，带构建来源证明（`gh attestation verify oci://ghcr.io/vod-studio/kodama-service:X.Y.Z --repo VOD-Studio/kodama`）。
 
 ```sh
-docker run --rm -p 8787:8787 -v pet-data:/data -e PET_DB=/data/pet.db -e … ghcr.io/vod-studio/pet-service:X.Y.Z
+docker run --rm -p 8787:8787 -v pet-data:/data -e KODAMA_DB=/data/pet.db -e … ghcr.io/vod-studio/kodama-service:X.Y.Z
 ```
 
 `docker/service.Dockerfile` 是多阶段构建：构建阶段编译，运行阶段以非 root 用户（uid 10001）运行，数据放在 `/data` 卷。CI 在每个 PR 上构建 amd64 镜像，并用 `scripts/release/smoke-service-image.sh` 检查它以非 root 用户启动、应答 `/healthz` 与能力目录；发版时两个架构各在原生 runner 上构建并跑同一检查后才推送。本地：
 
 ```sh
-make image-smoke    # 构建 pet-service:dev 并跑同一检查
+make image-smoke    # 构建 kodama-service:dev 并跑同一检查
 ```

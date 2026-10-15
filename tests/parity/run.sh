@@ -2,9 +2,9 @@
 # 同一场景在原生 CLI、Node WebAssembly、web target 下的转录必须逐字节一致。
 set -e
 cd "$(dirname "$0")/../.."
-cargo build --release -q -p pet-cli
-cargo build --release -q -p pet-wasm --target wasm32-unknown-unknown
-W=target/wasm32-unknown-unknown/release/pet_wasm.wasm
+cargo build --release -q -p kodama
+cargo build --release -q -p kodama-wasm --target wasm32-unknown-unknown
+W=target/wasm32-unknown-unknown/release/kodama_wasm.wasm
 wasm-bindgen --target nodejs --out-dir target/pkg-node "$W"
 wasm-bindgen --target web --out-dir target/pkg-web "$W"
 node tests/parity/run.mjs native > target/out-native.txt

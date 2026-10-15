@@ -12,14 +12,14 @@ const SEMVER = /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
 function read() {
 	const toml = fs.readFileSync(path.join(root, "Cargo.toml"), "utf8");
 	const cargo = toml.match(/\[workspace\.package\][^[]*?\bversion\s*=\s*"([^"]+)"/s)?.[1];
-	const sdk = JSON.parse(fs.readFileSync(path.join(root, "packages/pet-sdk/package.json"), "utf8")).version;
+	const sdk = JSON.parse(fs.readFileSync(path.join(root, "packages/kodama-sdk/package.json"), "utf8")).version;
 	return { cargo, sdk };
 }
 
 function wasmBindgen() {
 	const at = (f) => fs.readFileSync(path.join(root, f), "utf8");
 	const found = {
-		"crates/runtimes/pet-wasm/Cargo.toml": at("crates/runtimes/pet-wasm/Cargo.toml").match(/^wasm-bindgen\s*=\s*"=([^"]+)"/m)?.[1],
+		"crates/runtimes/kodama-wasm/Cargo.toml": at("crates/runtimes/kodama-wasm/Cargo.toml").match(/^wasm-bindgen\s*=\s*"=([^"]+)"/m)?.[1],
 		"docker/dev.Dockerfile": at("docker/dev.Dockerfile").match(/^ARG WASM_BINDGEN_VERSION=(\S+)/m)?.[1],
 	};
 	const wf = path.join(root, ".github/workflows");
@@ -33,7 +33,7 @@ function wasmBindgen() {
 const [cmd, tag] = process.argv.slice(2);
 const v = read();
 if (cmd === "get") {
-	console.log(`Cargo workspace: ${v.cargo}\n@violetjs/pet:   ${v.sdk}`);
+	console.log(`Cargo workspace: ${v.cargo}\n@violetjs/kodama: ${v.sdk}`);
 	for (const [f, ver] of Object.entries(wasmBindgen())) console.log(`wasm-bindgen ${ver.padEnd(8)} ${f}`);
 } else if (cmd === "check") {
 	const problems = [];

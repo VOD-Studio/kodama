@@ -1,6 +1,6 @@
-"""真实 pty 验收 pet-cli live --account：画出账号宠物、按 f 喂食由服务确认、q 退出并恢复终端。
+"""真实 pty 验收 kodama live --account：画出账号宠物、按 f 喂食由服务确认、q 退出并恢复终端。
 
-用法: python3 account_live.py <pet-cli>   （环境变量里已有登录凭据，见 tests/e2e/service-e2e.mjs）
+用法: python3 account_live.py <kodama>   （环境变量里已有登录凭据，见 tests/e2e/service-e2e.mjs）
 """
 import os, pty, sys, time, select, termios, struct, fcntl
 
