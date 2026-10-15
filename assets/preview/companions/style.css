@@ -184,7 +184,7 @@ h1 { margin: 0 0 10px; font-size: 34px; line-height: 1.2; letter-spacing: -0.03e
 /* 工作区：左侧设置，右侧舞台 */
 #control-fields {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: 260px minmax(0, 1fr);
   grid-template-areas: "settings stage" "settings playback";
   gap: 20px 28px;
   align-items: start;
@@ -218,7 +218,7 @@ h2.panel-title { font-size: 13px; letter-spacing: 0.08em; }
 .series-label { padding: 3px 12px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font-size: 12px; font-weight: 500; }
 .comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
 .stage {
-  min-width: 0; padding: 18px 18px 6px;
+  min-width: 0; padding: 16px 14px 6px;
   border: 1px solid var(--line); border-radius: var(--radius);
   background: var(--surface); box-shadow: var(--shadow);
 }
@@ -231,8 +231,8 @@ h3 { margin: 0; font-size: 15px; line-height: 1.5; font-weight: 600; }
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 6%);
 }
 .stage-viewport { display: flex; align-items: center; justify-content: flex-start; overflow: auto; padding: 16px; }
-.stage-viewport canvas { width: 414px; height: 396px; flex: 0 0 auto; position: relative; margin-inline: auto; }
-.terminal-viewport { display: flex; align-items: center; overflow-x: auto; padding: 16px; scrollbar-color: var(--line) transparent; scrollbar-width: thin; }
+.stage-viewport canvas { width: var(--canvas-w, 414px); height: var(--canvas-h, 396px); flex: 0 0 auto; position: relative; margin-inline: auto; }
+.terminal-viewport { display: flex; align-items: center; overflow-x: auto; padding: 16px 0; scrollbar-color: var(--line) transparent; scrollbar-width: thin; }
 .terminal-output {
   position: relative; flex: 0 0 auto; margin: 0 auto;
   font-family: "Kodama Block Grid", monospace; font-size: 12px; line-height: 12px;
@@ -297,7 +297,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer;
   .character-button { flex-basis: 118px; }
   .expression-field, .background-field { width: 100%; }
   .stage-viewport { padding: 8px; }
-  .stage-viewport canvas { width: 100%; height: auto; aspect-ratio: 414 / 396; }
+  .stage-viewport canvas { width: min(100%, var(--canvas-w, 414px)); height: auto; aspect-ratio: var(--canvas-ratio, 414 / 396); }
   .terminal-viewport { padding: 8px; }
   .section-heading { align-items: flex-start; }
   .terminal-caption { flex-wrap: wrap; }

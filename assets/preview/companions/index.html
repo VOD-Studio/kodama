@@ -14,12 +14,12 @@
         <div class="brand">
           <p class="eyebrow">Kodama · Companion Studio</p>
           <h1>稀有伙伴工作台</h1>
-          <p class="lede">网页与终端共用同一份动作、表情与时间轴。当前仅查看 DeepSeek 原站形态，其余六位角色重制中。</p>
+          <p class="lede">网页与终端共用同一份动作、表情与时间轴。</p>
         </div>
         <p class="status" id="status" role="status">正在载入角色…</p>
       </header>
 
-      <p class="quality-note"><span class="dot" aria-hidden="true"></span>当前未通过质量验收。旧稿已撤下，其他六位角色重制中。</p>
+      <p class="quality-note"><span class="dot" aria-hidden="true"></span>当前未通过质量验收。DeepSeek 使用原站素材，GPT 目前只有成年形态，其余五位重制中。</p>
 
       <div class="error-message" id="error" role="alert" hidden>
         <p id="error-text"></p>
@@ -37,7 +37,7 @@
             <h2 class="panel-title">预览设置</h2>
             <label class="field" for="form">
               <span>形态</span>
-              <select id="form" name="form"><option value="0">原站 Deepy 小鲸</option><option value="2" selected>原站鲸娘终阶</option></select>
+              <select id="form" name="form"></select>
             </label>
             <label class="field action-field" for="action">
               <span>动作</span>
@@ -65,21 +65,21 @@
             </div>
             <div class="comparison">
               <figure class="stage web-comparison">
-                <div class="comparison-heading"><h3>网页</h3><span>69 × 66 像素</span></div>
+                <div class="comparison-heading"><h3>网页</h3><span id="web-size">69 × 66 像素</span></div>
                 <div class="stage-viewport"><span class="loading-label">载入中</span><canvas id="stage-2" width="414" height="396" role="img" aria-label="DeepSeek Q版拟人终阶预览"></canvas></div>
-                <figcaption><strong id="web-form-caption">原站鲸娘终阶动画</strong><span>整数 6 倍显示</span></figcaption>
+                <figcaption><strong id="web-form-caption">原站鲸娘终阶动画</strong><span id="scale-note">整数 6 倍显示</span></figcaption>
               </figure>
               <figure class="stage terminal-comparison">
-                <div class="comparison-heading"><h3>终端</h3><span>69 列 × 33 行</span></div>
+                <div class="comparison-heading"><h3>终端</h3><span id="terminal-size">69 列 × 33 行</span></div>
                 <div class="terminal-viewport" tabindex="0" role="region" aria-label="终端字符输出，可横向滚动">
                   <p class="terminal-message" id="terminal-message">等待真实字符帧…</p>
                   <pre class="terminal-output" id="terminal-output" role="img" aria-label="DeepSeek 参考终阶的终端半格字符帧" hidden></pre>
                 </div>
                 <figcaption class="terminal-caption"><label for="terminal-color">颜色 <select id="terminal-color" name="terminal-color"><option value="truecolor">真彩色 · 原始 RGB</option><option value="256">256 色降级</option></select></label><span id="terminal-state">等待 RGB 字符帧</span></figcaption>
-                <p class="grid-note">半块字符预览 · 每格 6 × 12 px · 实际终端比例由字体决定</p>
+                <p class="grid-note" id="grid-note">半块字符预览 · 每格 6 × 12 px · 实际终端比例由字体决定</p>
               </figure>
             </div>
-            <div class="pending-stages" aria-label="少年阶段说明"><p><strong>少年</strong>独立过渡形态待设计，当前技术占位沿用 Deepy。</p></div>
+            <div class="pending-stages" aria-label="阶段说明"><p id="pending-note"></p></div>
           </section>
 
           <div class="playback-bar">

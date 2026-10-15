@@ -4,15 +4,15 @@ import { readFile } from "node:fs/promises";
 import type * as Core from "../../packages/kodama-sdk/dist/index.js";
 import type * as Terminal from "../../packages/kodama-sdk/dist/terminal.js";
 
-const usage = "用法：make companions-terminal [ARGS=\"baby|adult action\"]，默认 adult idle；q / Ctrl+C 退出。";
+const usage = "用法：make companions-terminal [ARGS=\"[deepseek|gpt] [baby|adult] [action]\"]，默认 deepseek adult idle（gpt 只有 adult）；q / Ctrl+C 退出。";
 const { stdin, stdout } = process;
-const width = 69;
-const height = 33;
-const requiredRows = 37;
-const region = { row: 5, col: 1, width, height };
+// 画布与源素材一致：DeepSeek 69 × 66 像素，GPT 80 × 92 像素；半块字符使行数减半。
+const canvases = { deepseek: { width: 69, height: 33, name: ["DeepSeek · 原站 Deepy 小鲸", "DeepSeek · 原站鲸娘终阶"] }, gpt: { width: 80, height: 46, name: ["", "GPT · 白龙娘 · 成年"] } } as const;
+type Character = keyof typeof canvases;
+const isCharacter = (value: string | undefined): value is Character => value !== undefined && value in canvases;
 
-function enoughRoom(): boolean {
-  return stdout.columns >= width && stdout.rows >= requiredRows;
+function enoughRoom(width: number, height: number): boolean {
+  return stdout.columns >= width && stdout.rows >= height + 4;
 }
 
 function colorLabel(frame: Core.Frame): string {
@@ -34,14 +34,17 @@ async function main() {
     return;
   }
   if (!stdin.isTTY || !stdout.isTTY || typeof stdin.setRawMode !== "function") {
-    console.log("伙伴预览需要交互终端（至少 69 列 × 37 行）；请在本机终端运行 make companions-terminal。");
+    console.log("伙伴预览需要交互终端（DeepSeek 至少 69 列 × 37 行，GPT 至少 80 列 × 50 行）；请在本机终端运行 make companions-terminal。");
     process.exitCode = 1;
     return;
   }
-  if (!enoughRoom()) throw new Error(`终端需要至少 69 列 × 37 行，当前为 ${stdout.columns ?? 0} 列 × ${stdout.rows ?? 0} 行。`);
+  const character: Character = isCharacter(args[0]) ? (args.shift() as Character) : "deepseek";
+  const { width, height, name } = canvases[character];
+  const region = { row: 5, col: 1, width, height };
+  if (!enoughRoom(width, height)) throw new Error(`终端需要至少 ${width} 列 × ${height + 4} 行，当前为 ${stdout.columns ?? 0} 列 × ${stdout.rows ?? 0} 行。`);
 
   const [form = "adult", action = "idle"] = args;
-  if (args.length > 2 || !["baby", "adult"].includes(form)) throw new Error(usage);
+  if (args.length > 2 || !["baby", "adult"].includes(form) || (character === "gpt" && form !== "adult")) throw new Error(usage);
   const schema = JSON.parse(await readFile(new URL("../../packages/kodama-sdk/schema/kodama.schema.json", import.meta.url), "utf8"));
   const actions: string[] = schema.$defs.CompanionAction.enum;
   if (!actions.includes(action)) throw new Error(`未知动作 ${action}。可选：${actions.join(", ")}。`);
@@ -58,7 +61,7 @@ async function main() {
     genes: [37, 8, 21, 5, 17, 12, 6, 2] as Core.Birth["genes"],
     stage: form === "baby" ? 0 : 2,
     rarity: 2,
-    companion: { character: "deepseek", action: action as Core.CompanionAction } satisfies Core.CompanionAppearance,
+    companion: { character, action: action as Core.CompanionAction } satisfies Core.CompanionAppearance,
   };
   const frame = core.run({ op: "frame", ...pet, pose, charset: "blocks", w: width, h: height, t: "0" });
   if (!frame.ok) throw new Error(`无法载入终端帧：${(frame as Core.ErrorBody).message}`);
@@ -100,7 +103,7 @@ async function main() {
   listen(stdin, "error", (error) => finish(1, error));
   listen(stdin, "end", () => finish());
   listen(stdout, "resize", () => {
-    if (!enoughRoom()) finish(1, new Error("终端缩小到 69 列 × 37 行以下，预览已退出。"));
+    if (!enoughRoom(width, height)) finish(1, new Error(`终端缩小到 ${width} 列 × ${height + 4} 行以下，预览已退出。`));
   });
   listen(stdin, "data", (data: Buffer) => {
     const keys = data.toString("utf8");
@@ -113,8 +116,8 @@ async function main() {
     stdout.write("\x1b[?1049h\x1b[?25l\x1b[0m\x1b[2J\x1b[H");
     stdin.setRawMode(true);
     stdin.resume();
-    const title = form === "baby" ? "DeepSeek · 原站 Deepy 小鲸" : "DeepSeek · 原站鲸娘终阶";
-    stdout.write(`\x1b[1;1H${title} · ${action}\x1b[2;1H${colorLabel((frame as Core.FrameResult).value)} · 69 列 × 33 行\x1b[3;1Hq / Ctrl+C 退出 · 当前未通过质量验收`);
+    const title = name[form === "baby" ? 0 : 1];
+    stdout.write(`\x1b[1;1H${title} · ${action}\x1b[2;1H${colorLabel((frame as Core.FrameResult).value)} · ${width} 列 × ${height} 行\x1b[3;1Hq / Ctrl+C 退出 · 当前未通过质量验收`);
     mounted = terminal.mountTerminalPet({ stream: stdout, region, pet, getPose: () => pose, charset: "blocks", colorMode: "auto" });
   } catch (error) {
     finish(1, error);

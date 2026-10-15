@@ -65,12 +65,17 @@ for (const character of ["deepseek", "gpt", "claude", "grok", "glm", "kimi", "ge
     out.push(exec(JSON.stringify({ op: "sprite", species: 0, genes: [37, 1, 2, 3, 4, 5, 6, 7], pose: "observe", stage, w: 96, h: 96, t: "37", rarity: 2, companion: { character, action: "work", expression: "focused" } })));
 for (const charset of ["ascii", "blocks"])
   out.push(exec(JSON.stringify({ op: "frame", species: 0, genes: [37, 1, 2, 3, 4, 5, 6, 7], pose: "end", stage: 2, charset, w: 48, h: 40, t: "9000000000000000000", companion: { character: "gpt", action: "play", expression: "happy" } })));
-for (const character of ["gpt", "claude", "grok", "glm", "kimi", "gemini"]) {
-  const result = exec(JSON.stringify({ op: "frame", species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], pose: "idle", stage: 2, charset: "blocks", w: 69, h: 33, t: "0", companion: { character } }));
+// GPT 只有成年可用：幼体与少年同样必须是 artwork-not-ready。
+for (const [character, stage] of [["gpt", 0], ["gpt", 1], ["claude", 2], ["grok", 2], ["glm", 2], ["kimi", 2], ["gemini", 2]] as const) {
+  const result = exec(JSON.stringify({ op: "frame", species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], pose: "idle", stage, charset: "blocks", w: 69, h: 33, t: "0", companion: { character } }));
   const error = JSON.parse(result);
   if (error.ok !== false || error.code !== "bad_input" || error.message !== `${character} artwork not ready`) throw new Error(`${character} exposed unavailable artwork`);
   out.push(result);
 }
+// GPT 成年的两个关键姿态（睁眼、闭眼）：原尺寸精灵与半格帧三端一致。
+for (const [pose, action] of [["idle", "idle"], ["sleep", "sleep"]])
+  for (const op of ["sprite", "frame"])
+    out.push(exec(JSON.stringify({ op, species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], pose, stage: 2, w: 80, h: op === "frame" ? 46 : 92, charset: "blocks", t: "0", companion: { character: "gpt", action } })));
 // 原尺寸鲸娘与 Deepy：原 RGB 半格帧、共享 alpha 采样也必须三端相同。
 for (const stage of [0, 1, 2]) {
   for (const t of ["0", "7"]) {
