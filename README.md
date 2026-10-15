@@ -16,6 +16,7 @@ An electronic pet that lives in your site. Pets are born, need care, grow, evolv
 ## What a pet does
 
 - **Care and life.** Hunger, energy, mood, illness and medicine. Time away is settled when you come back, and a pet is never found dead after an absence, only sick at worst. Neglect while you watch can kill it; it is then kept as a memorial, and a new adoption is a new individual.
+- **Every pet looks like itself.** Markings from its genes (spots, stripes, a blaze, an eye patch, tipped ears) and visible birth rarity, from an occasional sparkle to a golden outline with an aura, so two pets of the same species and form tell apart at a glance.
 - **Growth and evolution.** Experience and levels, a personality that drifts with how you care for it, and evolution you choose: each of the 8 species has a body for each of 3 stages and 16 forms in all, decided by the branches you pick.
 - **Outfits and scenes.** Each level from 2 to 10 unlocks an item: glasses, a scarf, hats, a backpack, a cape, a meadow or a starry night. Items change only the picture, never the numbers.
 - **Expeditions.** Send the pet off on a topic for 4, 12 or 24 hours; it comes back with experience and a souvenir.
