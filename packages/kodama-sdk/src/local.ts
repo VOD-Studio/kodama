@@ -1,5 +1,8 @@
 import { run } from "./index.js";
+import type { Action, BirthResult, ErrorBody, ErrorCode, Mood, OutcomeResult, Pet, Phase } from "./types.js";
+import type { Scope, Store } from "./store.js";
 
+export type { Changeset, CommitOutcome, Scope, Store } from "./store.js";
 export { createMemoryStore, openIndexedDbStore } from "./store.js";
 
 /**
@@ -14,7 +17,7 @@ export { createMemoryStore, openIndexedDbStore } from "./store.js";
  * - 多个标签页同时操作时，版本冲突会重新读取并重试；同一请求标识重放返回原结果，不会重复扣费。
  * - 导入本模块没有副作用；存储由调用方传入（openIndexedDbStore 或 createMemoryStore）。
  */
-export const LOCAL_WORLD = "local";
+export const LOCAL_WORLD = "local" as const;
 
 /** 本地存档格式：{ format, pet, ledger, appearance }。改动需要迁移（#5）。 */
 const FORMAT = 1;
@@ -26,34 +29,120 @@ const DAILY_EXP = 100;
 const DAILY_REWARDS = 20;
 const SOURCE = /^[A-Za-z0-9_.:-]{1,56}$/;
 
-const fail = (code, message) => ({ ok: false, code, message });
+/** 本地模式的错误：规则核心的错误码，加上与服务端同名的存储错误。 */
+export interface LocalError {
+  ok: false;
+  code: ErrorCode | "not_found" | "already_has_pet" | "request_conflict" | "busy" | "already_claimed" | "daily_limit";
+  message: string;
+}
 
-function randomHex(bytes) {
+interface Appearance {
+  species: number;
+  genes: number[];
+  rarity: number;
+}
+
+export interface LocalView {
+  pet: Pet;
+  phase: Phase;
+  /** 已逝去的个体没有情绪。 */
+  mood?: Mood;
+  version: number;
+  /** 本地宠物没有出生证书，不是服务签发的正式个体。 */
+  local: true;
+  /** 出生时确定的外形，交给 `mountPet` 画出这只宠物。 */
+  appearance: Appearance | null;
+  /** 本地自然日内还剩的资源：今天的口粮能否领取，活动奖励还能给多少经验、多少次。 */
+  allowance: { ration: boolean; exp: number; rewards: number };
+}
+
+/** 接入方上报的活动奖励：只给经验与主题。 */
+export interface LocalReward {
+  /** 0 到 100 的整数，缺省 0；超出当天剩余额度的部分不发。 */
+  exp?: number;
+  /** 接入方映射后的主题标签，至多 32 字节。 */
+  topic?: string;
+}
+
+export interface LocalPet {
+  readonly scope: Scope;
+  /** 结算到现在的投影，只用于展示、不写存储；还没有宠物时为 null。 */
+  get(): Promise<LocalView | null>;
+  /** 领养；已有在世的宠物时返回 already_has_pet。 */
+  adopt(): Promise<BirthResult | LocalError>;
+  /** 执行动作；同一请求标识重放返回第一次的结果（`value.replayed` 为 true），不会重复扣费。 */
+  act(action: Action, requestId?: string): Promise<OutcomeResult | LocalError>;
+  /** 每日口粮：每个本地自然日一次，3 份食物，没有药品时另给 1 份；已领过返回 already_claimed。 */
+  claimDaily(): Promise<OutcomeResult | LocalError>;
+  /**
+   * 活动奖励：`source` 是活动的稳定标识（1 到 56 个 `[A-Za-z0-9-_.:]` 字符），同一来源只奖励一次。
+   * 每个本地自然日至多 20 次、合计 100 经验；用完返回 daily_limit。
+   */
+  reward(source: string, reward?: LocalReward): Promise<OutcomeResult | LocalError>;
+}
+
+interface Ledger {
+  day: number;
+  ration: boolean;
+  exp: number;
+  rewards: number;
+}
+
+interface Save {
+  format: number;
+  pet: Pet;
+  ledger: Ledger | null;
+  appearance: Appearance | null;
+}
+
+type Current = Save & { version: number };
+type Result = BirthResult | OutcomeResult;
+/** 结算的结果：要提交的规则核心结果与新账本，或一个错误（什么都不写）。 */
+type Settlement<R extends Result> = { ok: true; result: R; ledger: Ledger; appearance?: Appearance } | LocalError;
+
+const fail = (code: LocalError["code"], message: string): LocalError => ({ ok: false, code, message });
+// 规则核心的错误信封按原样透传给调用方
+const asError = (e: ErrorBody): LocalError => e as LocalError;
+const isOk = <R extends Result>(r: R | ErrorBody): r is R => r.ok;
+
+function randomHex(bytes: number): string {
   const b = new Uint8Array(bytes);
   globalThis.crypto.getRandomValues(b);
   return Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
 }
 
-function decode(state) {
-  const s = JSON.parse(state);
+function decode(state: string): Save {
+  const s: Save = JSON.parse(state);
   if (s.format !== FORMAT) throw new Error(`kodama-sdk: unsupported local save format ${s.format}`);
   return s;
 }
 
-export function createLocalPet({ store, owner = "me", clock = () => Date.now() }) {
+export function createLocalPet({
+  store,
+  owner = "me",
+  clock = () => Date.now(),
+}: {
+  store: Store;
+  /** 同一存储里区分多只本地宠物，缺省 "me"。 */
+  owner?: string;
+  /** 毫秒时钟，缺省 Date.now；逻辑时间取其分钟数。 */
+  clock?: () => number;
+}): LocalPet {
   const scope = { world: LOCAL_WORLD, owner };
   // 本机时钟被调回过去时，宠物的时间不倒流：取「现在」与宠物最近一次结算中较晚的一个
-  const at = (pet) => {
+  const at = (pet: Pet | null): bigint => {
     const m = BigInt(Math.floor(clock() / 60000));
     const last = BigInt(pet?.last_tick ?? 0);
     return m > last ? m : last;
   };
   // 本地自然日：按本机时区的午夜换日
-  const dayOf = (minutes) => Math.floor((Number(minutes) - new Date(clock()).getTimezoneOffset()) / 1440);
-  const ledgerOn = (ledger, day) => (ledger?.day === day ? ledger : { day, ration: false, exp: 0, rewards: 0 });
-  const isDead = (pet) => run({ op: "act", pet, action: "wait", now: String(at(pet)), request_id: "" }).code === "dead";
+  const dayOf = (minutes: bigint | number): number => Math.floor((Number(minutes) - new Date(clock()).getTimezoneOffset()) / 1440);
+  const ledgerOn = (ledger: Ledger | null | undefined, day: number): Ledger =>
+    ledger?.day === day ? ledger : { day, ration: false, exp: 0, rewards: 0 };
+  const isDead = (pet: Pet): boolean =>
+    (run({ op: "act", pet, action: "wait", now: String(at(pet)), request_id: "" }) as ErrorBody).code === "dead";
 
-  async function current() {
+  async function current(): Promise<Current | null> {
     const v = await store.load(scope);
     return v ? { version: v.version, ...decode(v.state) } : null;
   }
@@ -62,7 +151,11 @@ export function createLocalPet({ store, owner = "me", clock = () => Date.now() }
    * 读取 → 结算 → 原子提交；版本冲突时重读重试。`settle(cur)` 返回规则核心的结果与新账本，
    * 或一个错误（什么都不写）。同一请求标识重放返回第一次的结果，并标记为重放。
    */
-  async function commit(requestId, paramsHash, settle) {
+  async function commit<R extends Result>(
+    requestId: string,
+    paramsHash: string,
+    settle: (cur: Current | null) => Settlement<R>,
+  ): Promise<R | LocalError> {
     for (let i = 0; i < RETRIES; i++) {
       const cur = await current();
       const out = settle(cur);
@@ -87,14 +180,16 @@ export function createLocalPet({ store, owner = "me", clock = () => Date.now() }
   }
 
   /** 结算到现在的投影：只用于展示，不写存储。已逝去的个体按存档原样返回。 */
-  async function get() {
+  async function get(): Promise<LocalView | null> {
     const cur = await current();
     if (!cur) return null;
     const now = at(cur.pet);
     // 空请求标识不会命中重放，投影总是结算到现在
     const r = run({ op: "act", pet: cur.pet, action: "wait", now: String(now), request_id: "" });
-    if (!r.ok && r.code !== "dead") throw new Error(`kodama-sdk: local pet cannot be projected: ${r.code}`);
-    const view = r.ok ? { pet: r.value.pet, phase: r.value.phase, mood: r.value.mood } : { pet: cur.pet, phase: "dead" };
+    if (!r.ok && (r as ErrorBody).code !== "dead") throw new Error(`kodama-sdk: local pet cannot be projected: ${(r as ErrorBody).code}`);
+    const view: Pick<LocalView, "pet" | "phase" | "mood"> = r.ok
+      ? { pet: (r as OutcomeResult).value.pet, phase: (r as OutcomeResult).value.phase, mood: (r as OutcomeResult).value.mood }
+      : { pet: cur.pet, phase: "dead" };
     const today = ledgerOn(cur.ledger, dayOf(now));
     return {
       ...view,
@@ -106,9 +201,9 @@ export function createLocalPet({ store, owner = "me", clock = () => Date.now() }
   }
 
   /** 领养：已有在世的宠物时拒绝；已逝去的个体被新个体替换（新个体是新身份，当天的账本保留）。 */
-  function adopt() {
+  function adopt(): Promise<BirthResult | LocalError> {
     const id = randomHex(16);
-    let born;
+    let born: BirthResult | ErrorBody | undefined;
     return commit(`adopt:${id}`, "adopt", (cur) => {
       if (cur && !isDead(cur.pet)) return fail("already_has_pet", "a living pet already exists in local mode");
       born ??= run({
@@ -119,33 +214,33 @@ export function createLocalPet({ store, owner = "me", clock = () => Date.now() }
         client_seed: randomHex(32),
         born_at: String(at(null)),
       });
-      if (!born.ok) return born;
+      if (!isOk(born)) return asError(born);
       const { species, genes, rarity } = born.value;
       return { ok: true, result: born, ledger: cur?.ledger ?? ledgerOn(null, dayOf(at(null))), appearance: { species, genes, rarity } };
     });
   }
 
   /** 执行动作；同一请求标识重放返回第一次的结果，不会重复扣费。 */
-  function act(action, requestId = randomHex(16)) {
+  function act(action: Action, requestId = randomHex(16)): Promise<OutcomeResult | LocalError> {
     return commit(requestId, JSON.stringify(action), (cur) => {
       if (!cur) return fail("not_found", "no pet; adopt one first");
       const result = run({ op: "act", pet: cur.pet, action, now: String(at(cur.pet)), request_id: requestId });
-      return result.ok ? { ok: true, result, ledger: cur.ledger } : result;
+      return isOk(result) ? { ok: true, result, ledger: cur.ledger as Ledger } : asError(result);
     });
   }
 
-  const grant = (cur, reward, requestId) =>
+  const grant = (cur: Current, reward: { exp: number; food: number; medicine: number; topic?: string }, requestId: string) =>
     run({ op: "grant", pet: cur.pet, reward, now: String(at(cur.pet)), request_id: requestId });
 
   /** 每日口粮：每个本地自然日一次，3 份食物；手里没有药品时另给 1 份。 */
-  function claimDaily() {
+  function claimDaily(): Promise<OutcomeResult | LocalError> {
     const requestId = randomHex(16);
     return commit(requestId, "daily", (cur) => {
       if (!cur) return fail("not_found", "no pet; adopt one first");
       const today = ledgerOn(cur.ledger, dayOf(at(cur.pet)));
       if (today.ration) return fail("already_claimed", "today's ration was already claimed");
       const result = grant(cur, { exp: 0, food: RATION_FOOD, medicine: cur.pet.medicine === 0 ? 1 : 0 }, requestId);
-      return result.ok ? { ok: true, result, ledger: { ...today, ration: true } } : result;
+      return isOk(result) ? { ok: true, result, ledger: { ...today, ration: true } } : asError(result);
     });
   }
 
@@ -153,7 +248,7 @@ export function createLocalPet({ store, owner = "me", clock = () => Date.now() }
    * 接入方上报的活动奖励：经验与主题，不给食物或药品。同一来源只奖励一次（重放返回第一次的结果）；
    * 每个本地自然日至多 20 次、合计 100 经验，超出的经验不发。
    */
-  async function reward(source, { exp = 0, topic } = {}) {
+  async function reward(source: string, { exp = 0, topic }: LocalReward = {}): Promise<OutcomeResult | LocalError> {
     if (typeof source !== "string" || !SOURCE.test(source)) {
       return fail("bad_input", "source must be 1-56 characters of [A-Za-z0-9-_.:]");
     }
@@ -170,7 +265,9 @@ export function createLocalPet({ store, owner = "me", clock = () => Date.now() }
       }
       const r = { exp: granted, food: 0, medicine: 0, ...(topic === undefined ? {} : { topic }) };
       const result = grant(cur, r, requestId);
-      return result.ok ? { ok: true, result, ledger: { ...today, exp: today.exp + granted, rewards: today.rewards + 1 } } : result;
+      return isOk(result)
+        ? { ok: true, result, ledger: { ...today, exp: today.exp + granted, rewards: today.rewards + 1 } }
+        : asError(result);
     });
   }
 

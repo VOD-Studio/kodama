@@ -1,4 +1,4 @@
-/* 由 scripts/gen-types.mjs 从 schema/kodama.schema.json 生成,请勿手改。 */
+/* 由 scripts/gen-types.ts 从 schema/kodama.schema.json 生成,请勿手改。 */
 
 /**
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema

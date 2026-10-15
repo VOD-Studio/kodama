@@ -6,7 +6,12 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import { IDBFactory } from "fake-indexeddb";
 import { initPet } from "../dist/index.js";
-import { createLocalPet, createMemoryStore, LOCAL_WORLD, openIndexedDbStore } from "../dist/local.js";
+import { createLocalPet as createTypedPet, createMemoryStore, LOCAL_WORLD, openIndexedDbStore } from "../dist/local.js";
+import type { LocalPet } from "../dist/local.js";
+
+// 结果信封在线上类型里是 `ok: boolean` 的联合；测试按场景直接断言字段，因此放宽结果类型
+type Loose<T> = { [K in keyof T]: T[K] extends (...args: infer A) => Promise<unknown> ? (...args: A) => Promise<any> : T[K] };
+const createLocalPet = (...args: Parameters<typeof createTypedPet>): Loose<LocalPet> => createTypedPet(...args) as Loose<LocalPet>;
 
 await initPet(await readFile(new URL("../dist/kodama_wasm_bg.wasm", import.meta.url)));
 
@@ -16,9 +21,8 @@ globalThis.fetch = () => {
 };
 
 const HOUR = 60 * 60 * 1000;
-const clockAt = (ms) => {
-  const c = () => c.now;
-  c.now = ms;
+const clockAt = (ms: number) => {
+  const c = Object.assign(() => c.now, { now: ms });
   return c;
 };
 
@@ -118,7 +122,7 @@ test("a dead pet can be replaced by a new adoption", async () => {
   const local = createLocalPet({ store, clock: clockAt(10 * HOUR) });
   const born = await local.adopt();
   // 直接改写存档，把失养推过死亡线
-  const save = JSON.parse((await store.load(local.scope)).state);
+  const save = JSON.parse((await store.load(local.scope))!.state);
   save.pet.neglect = "7200";
   await store.commit(local.scope, 1, "test:die", { state: JSON.stringify(save), result: "{}", paramsHash: "die" });
   assert.equal((await local.get()).phase, "dead");
@@ -161,7 +165,7 @@ test("the ration brings medicine only when the pet has none", async () => {
   const store = createMemoryStore();
   const local = createLocalPet({ store, clock });
   await local.adopt();
-  const save = JSON.parse((await store.load(local.scope)).state);
+  const save = JSON.parse((await store.load(local.scope))!.state);
   save.pet.medicine = 0;
   await store.commit(local.scope, 1, "test:empty", { state: JSON.stringify(save), result: "{}", paramsHash: "x" });
   assert.equal((await local.claimDaily()).value.pet.medicine, 1);

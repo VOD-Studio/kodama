@@ -4,14 +4,26 @@ import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { initPet } from "../dist/index.js";
 import { mountPet } from "../dist/web.js";
+import type { WebPet } from "../dist/web.js";
 
 await initPet(await readFile(new URL("../dist/kodama_wasm_bg.wasm", import.meta.url)));
 
-const PET = { species: 0, genes: [37, 0, 0, 0, 0, 0, 0, 0] };
+const PET: WebPet = { species: 0, genes: [37, 0, 0, 0, 0, 0, 0, 0] };
 
-function fakeCanvas() {
-  const listeners = new Map();
-  const ctx = {
+type Rect = [fillStyle: string, x: number, y: number, w: number, h: number];
+interface FakeCtx {
+  rects: Rect[];
+  clears: number;
+  fillStyle: string;
+  imageSmoothingEnabled: boolean;
+  clearRect(): void;
+  fillRect(x: number, y: number, w: number, h: number): void;
+}
+type FakeCanvas = HTMLCanvasElement & { ctx: FakeCtx; listeners: Map<string, (e?: unknown) => void> };
+
+function fakeCanvas(): FakeCanvas {
+  const listeners = new Map<string, (e?: unknown) => void>();
+  const ctx: FakeCtx = {
     rects: [],
     clears: 0,
     fillStyle: "",
@@ -33,31 +45,31 @@ function fakeCanvas() {
     tabIndex: -1,
     style: {},
     getContext: () => ctx,
-    getAttribute: (k) => (attrs.has(k) ? attrs.get(k) : null),
-    setAttribute: (k, v) => attrs.set(k, String(v)),
-    removeAttribute: (k) => attrs.delete(k),
-    addEventListener: (type, f) => listeners.set(type, f),
-    removeEventListener: (type) => listeners.delete(type),
-  };
+    getAttribute: (k: string) => (attrs.has(k) ? attrs.get(k) : null),
+    setAttribute: (k: string, v: unknown) => attrs.set(k, String(v)),
+    removeAttribute: (k: string) => attrs.delete(k),
+    addEventListener: (type: string, f: (e?: unknown) => void) => listeners.set(type, f),
+    removeEventListener: (type: string) => listeners.delete(type),
+  } as unknown as FakeCanvas;
 }
 
 function fakeWindow({ reduced = false, dpr = 1 } = {}) {
-  const timers = new Map();
+  const timers = new Map<number, () => void>();
   let next = 1;
   return {
     timers,
     devicePixelRatio: dpr,
     document: { visibilityState: "visible" },
-    matchMedia: (q) => ({ matches: reduced && q.includes("reduce") }),
-    setInterval: (f) => (timers.set(next, f), next++),
-    clearInterval: (id) => timers.delete(id),
+    matchMedia: (q: string) => ({ matches: reduced && q.includes("reduce") }),
+    setInterval: (f: () => void) => (timers.set(next, f), next++),
+    clearInterval: (id: number) => timers.delete(id),
     tick() {
       for (const f of timers.values()) f();
     },
   };
 }
 
-const snapshot = (ctx) => JSON.stringify(ctx.rects);
+const snapshot = (ctx: FakeCtx) => JSON.stringify(ctx.rects);
 
 test("draws a crisp first frame immediately at the requested size", () => {
   const canvas = fakeCanvas();
@@ -155,10 +167,10 @@ test("passive pets let clicks through; interactive pets are keyboard buttons; di
   assert.equal(button.getAttribute("role"), "button");
   assert.equal(button.getAttribute("aria-label"), "Ember Kit");
   assert.equal(button.tabIndex, 0);
-  button.listeners.get("keydown")({ key: "Enter" });
-  button.listeners.get("keydown")({ key: " " });
-  button.listeners.get("keydown")({ key: "a" });
-  button.listeners.get("click")();
+  button.listeners.get("keydown")!({ key: "Enter" });
+  button.listeners.get("keydown")!({ key: " " });
+  button.listeners.get("keydown")!({ key: "a" });
+  button.listeners.get("click")!();
   assert.equal(activated, 3);
   b.dispose();
   assert.equal(button.listeners.size, 0);
@@ -202,7 +214,7 @@ test("companions use a square default canvas and presentation setters leave the 
 });
 
 test("companion presentation cannot override life poses and keeps explicit canvas sizes", () => {
-  for (const pose of ["sick", "evolve", "end", "sleep"]) {
+  for (const pose of ["sick", "evolve", "end", "sleep"] as const) {
     const canvas = fakeCanvas();
     const m = mountPet(canvas, {
       pet: { ...PET, stage: 2, companion: { character: "deepseek" } },

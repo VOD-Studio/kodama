@@ -2,11 +2,11 @@
 import fs from "node:fs";
 import { compile } from "json-schema-to-typescript";
 
-const schema = JSON.parse(fs.readFileSync(new URL("../schema/kodama.schema.json", import.meta.url)));
+const schema = JSON.parse(fs.readFileSync(new URL("../schema/kodama.schema.json", import.meta.url), "utf8"));
 const results = schema["x-op-results"];
 
 // schemars 对内部标签枚举输出 `$ref` 与 `properties` 并列;生成器会丢弃 `$ref`,先改写为 allOf 交叉类型。
-for (const v of schema.$defs.Command.oneOf) {
+for (const v of schema.$defs.Command.oneOf as Record<string, unknown>[]) {
   if (v.$ref && v.properties) {
     const { $ref, ...rest } = v;
     for (const k of Object.keys(v)) delete v[k];
@@ -15,19 +15,20 @@ for (const v of schema.$defs.Command.oneOf) {
 }
 // `$ref` 旁边的 description、default（字段说明与缺省值）会让生成器为同一个类型另起 Outfit1、Growth1 这样的副本；
 // 类型本身的说明在定义处保留，这里只去掉引用旁的兄弟字段。
-(function strip(node) {
+(function strip(node: unknown): void {
   if (Array.isArray(node)) return node.forEach(strip);
   if (node === null || typeof node !== "object") return;
-  if (node.$ref) {
-    delete node.description;
-    delete node.default;
+  const o = node as Record<string, unknown>;
+  if (o.$ref) {
+    delete o.description;
+    delete o.default;
   }
-  Object.values(node).forEach(strip);
+  Object.values(o).forEach(strip);
 })(schema);
 
 const body = await compile(schema, "PetWire", {
   unreachableDefinitions: true,
-  bannerComment: "/* 由 scripts/gen-types.mjs 从 schema/kodama.schema.json 生成,请勿手改。 */",
+  bannerComment: "/* 由 scripts/gen-types.ts 从 schema/kodama.schema.json 生成,请勿手改。 */",
   additionalProperties: false,
 });
 const ops = Object.entries(results).map(([op, ty]) => `  ${op}: ${ty};`).join("\n");

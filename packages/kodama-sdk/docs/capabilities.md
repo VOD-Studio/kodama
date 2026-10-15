@@ -1,4 +1,4 @@
-<!-- 由 scripts/gen-docs.mjs 生成,请勿手改。事实源:Rust 的 CAPABILITIES 与线上类型。 -->
+<!-- 由 scripts/gen-docs.ts 生成,请勿手改。事实源:Rust 的 CAPABILITIES 与线上类型。 -->
 # Pet 能力目录
 
 规则版本:1。所有命令为 JSON,`op` 字段选择能力;64 位整数以十进制字符串编码。

@@ -1,27 +1,31 @@
 // 用真实三端转录校验 schema:每行响应必须符合对应 op 的结果类型或错误信封。
 import fs from "node:fs";
-import Ajv from "ajv/dist/2020.js";
+import { Ajv2020 } from "ajv/dist/2020.js";
 
-const schema = JSON.parse(fs.readFileSync(new URL("../schema/kodama.schema.json", import.meta.url)));
-const ajv = new Ajv({ strict: false, validateFormats: false });
+const schema = JSON.parse(fs.readFileSync(new URL("../schema/kodama.schema.json", import.meta.url), "utf8"));
+const ajv = new Ajv2020({ strict: false, validateFormats: false });
 ajv.addSchema(schema, "pet");
-const check = (name) => ajv.getSchema(`pet#/$defs/${name}`);
+const check = (name: string) => {
+  const validate = ajv.getSchema(`pet#/$defs/${name}`);
+  if (!validate) throw new Error(`schema has no definition ${name}`);
+  return validate;
+};
 
 const transcript = fs.readFileSync(new URL("../../../target/out-native.txt", import.meta.url), "utf8").trim().split("\n");
-const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url))).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", ...Array(4).fill("act"), ...Array(5).fill("act"), ...Array(3).fill("sprite"), "frame", ...Array(6).fill("sprite"), ...Array(21).fill("sprite"), ...Array(8).fill("frame"), ...Array.from({ length: 6 }, () => ["sprite", "frame"]).flat(), "capabilities"];
+const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url), "utf8")).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", ...Array(4).fill("act"), ...Array(5).fill("act"), ...Array(3).fill("sprite"), "frame", ...Array(6).fill("sprite"), ...Array(21).fill("sprite"), ...Array(8).fill("frame"), ...Array.from({ length: 6 }, () => ["sprite", "frame"]).flat(), "capabilities"];
 if (ops.length !== transcript.length) throw new Error(`op count ${ops.length} != transcript ${transcript.length}`);
 
 let n = 0;
-transcript.forEach((line, i) => {
+transcript.forEach((line: string, i: number) => {
   const j = JSON.parse(line);
-  const validate = j.ok ? check(schema["x-op-results"][ops[i]]) : check("ErrorBody");
+  const validate = j.ok ? check(schema["x-op-results"][ops[i]!]) : check("ErrorBody");
   if (!validate(j)) throw new Error(`line ${i} (${ops[i]}) violates schema: ${ajv.errorsText(validate.errors)}`);
   n++;
 });
 
 // 输入侧:场景里发出的命令也必须符合 Command。
 const cmd = check("Command");
-const fx = JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/cert.json", import.meta.url)));
+const fx = JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/cert.json", import.meta.url), "utf8"));
 const inputs = [
   { op: "birth", world: "w1", request_id: "r1", server_seed: "aa".repeat(32), client_seed: "bb".repeat(32), born_at: "0" },
   { op: "verify_birth", ...fx },
@@ -38,7 +42,7 @@ const inputs = [
   { op: "frame", species: 0, genes: [1, 2, 3, 4, 5, 6, 7, 8], pose: "idle", charset: "blocks", w: 96, h: 48, t: "0", companion: { character: "deepseek" } },
 ];
 for (const c of inputs) if (!cmd(c)) throw new Error(`${c.op} input violates Command: ${ajv.errorsText(cmd.errors)}`);
-const bad = { op: "frame", species: 5, genes: [1], pose: "idle", charset: "ascii", w: 10, h: 4, t: 0 };
+const bad: Record<string, unknown> = { op: "frame", species: 5, genes: [1], pose: "idle", charset: "ascii", w: 10, h: 4, t: 0 };
 if (cmd(bad)) throw new Error("Command schema accepted an invalid frame input");
 const badSprite = { op: "sprite", species: 5, genes: [1, 2, 3, 4, 5, 6, 7, 8], pose: "idle", stage: "adult", w: 14, h: 16, t: "0" };
 if (cmd(badSprite)) throw new Error("Command schema accepted a non-numeric sprite stage");

@@ -5,13 +5,14 @@ import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { IDBFactory } from "fake-indexeddb";
 import { createMemoryStore, openIndexedDbStore } from "../dist/store.js";
+import type { CommitOutcome, Store } from "../dist/store.js";
 
 const vectors = JSON.parse(await readFile(new URL("../../../tests/fixtures/store-contract.json", import.meta.url), "utf8"));
 
 // 向量里的期望按 Rust 的命名书写；SDK 返回驼峰命名
-const wire = (c) => ("requestIdReused" in c ? { request_id_reused: true } : c);
+const wire = (c: CommitOutcome) => ("requestIdReused" in c ? { request_id_reused: true } : c);
 
-async function runVectors(open) {
+async function runVectors(open: () => Promise<Store & { close?(): void }>) {
   for (const c of vectors.cases) {
     const store = await open();
     for (const [n, step] of c.steps.entries()) {
@@ -42,7 +43,7 @@ test("a failed IndexedDB commit rolls back the state it already wrote", async ()
   const scope = { world: "w", owner: "a" };
   await store.commit(scope, 0, "r1", { state: "s1", result: "x1", paramsHash: "h" });
   // 状态先写入，结果不能被结构化克隆：事务必须整体回滚
-  await assert.rejects(store.commit(scope, 1, "bad", { state: "poison", result: () => {}, paramsHash: "h" }));
+  await assert.rejects(store.commit(scope, 1, "bad", { state: "poison", result: (() => {}) as unknown as string, paramsHash: "h" }));
   assert.deepEqual(await store.load(scope), { version: 1, state: "s1" });
   assert.deepEqual(
     await store.commit(scope, 1, "bad", { state: "s2", result: "x2", paramsHash: "h" }),
