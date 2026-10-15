@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light">
+    <meta name="color-scheme" content="light dark">
     <title>稀有伙伴工作台 · Kodama</title>
     <link rel="stylesheet" href="/assets/preview/companions/style.css">
     <script type="module" src="/assets/preview/companions/app.ts"></script>
@@ -11,14 +11,15 @@
   <body>
     <main class="studio" data-background="light">
       <header class="page-header">
-        <div>
+        <div class="brand">
+          <p class="eyebrow">Kodama · Companion Studio</p>
           <h1>稀有伙伴工作台</h1>
-          <p>当前仅查看 DeepSeek 原站形态，其余六位角色重制中。</p>
+          <p class="lede">网页与终端共用同一份动作、表情与时间轴。当前仅查看 DeepSeek 原站形态，其余六位角色重制中。</p>
         </div>
         <p class="status" id="status" role="status">正在载入角色…</p>
       </header>
 
-      <p class="quality-note">当前未通过质量验收。旧稿已撤下，其他六位角色重制中。</p>
+      <p class="quality-note"><span class="dot" aria-hidden="true"></span>当前未通过质量验收。旧稿已撤下，其他六位角色重制中。</p>
 
       <div class="error-message" id="error" role="alert" hidden>
         <p id="error-text"></p>
@@ -33,6 +34,7 @@
         <fieldset id="control-fields" disabled>
           <legend class="sr-only">预览设置</legend>
           <div class="settings-bar">
+            <h2 class="panel-title">预览设置</h2>
             <label class="field" for="form">
               <span>形态</span>
               <select id="form" name="form"><option value="0">原站 Deepy 小鲸</option><option value="2" selected>原站鲸娘终阶</option></select>
