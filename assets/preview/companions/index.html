@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>稀有伙伴工作台 · Kodama</title>
+    <link rel="stylesheet" href="/assets/preview/companions/style.css">
+    <script type="module" src="/assets/preview/companions/app.js"></script>
+  </head>
+  <body>
+    <main class="studio" data-background="light">
+      <header class="page-header">
+        <div>
+          <h1>稀有伙伴工作台</h1>
+          <p>当前仅查看 DeepSeek 原站形态，其余六位角色重制中。</p>
+        </div>
+        <p class="status" id="status" role="status">正在载入角色…</p>
+      </header>
+
+      <p class="quality-note">当前未通过质量验收。旧稿已撤下，其他六位角色重制中。</p>
+
+      <div class="error-message" id="error" role="alert" hidden>
+        <p id="error-text"></p>
+        <button type="button" id="reload">重新载入</button>
+      </div>
+
+      <section class="character-section" aria-label="选择伙伴">
+        <div class="character-strip" id="characters"></div>
+      </section>
+
+      <form id="controls" autocomplete="off">
+        <fieldset id="control-fields" disabled>
+          <legend class="sr-only">预览设置</legend>
+          <div class="settings-bar">
+            <label class="field" for="form">
+              <span>形态</span>
+              <select id="form" name="form"><option value="0">原站 Deepy 小鲸</option><option value="2" selected>原站鲸娘终阶</option></select>
+            </label>
+            <label class="field action-field" for="action">
+              <span>动作</span>
+              <select id="action" name="action"></select>
+            </label>
+            <div class="expression-field">
+              <span id="expression-label" class="field-label">表情</span>
+              <div class="segmented expressions" id="expressions" role="group" aria-labelledby="expression-label"></div>
+              <span class="expression-note" id="expression-note" hidden>小鲸保留原站动作，表情使用自动。</span>
+            </div>
+            <div class="background-field">
+              <span id="background-label" class="field-label">画布背景</span>
+              <div class="segmented" role="group" aria-labelledby="background-label">
+                <label><input type="radio" name="background" value="light" checked><span>浅色</span></label>
+                <label><input type="radio" name="background" value="dark"><span>深色</span></label>
+                <label><input type="radio" name="background" value="transparent"><span>透明</span></label>
+              </div>
+            </div>
+          </div>
+
+          <section class="stage-section" aria-labelledby="character-name">
+            <div class="section-heading">
+              <h2 id="character-name">DeepSeek · 原站鲸娘终阶</h2>
+              <span class="series-label" id="form-stage-label">稀有系列 · 终阶</span>
+            </div>
+            <div class="comparison">
+              <figure class="stage web-comparison">
+                <div class="comparison-heading"><h3>网页</h3><span>69 × 66 像素</span></div>
+                <div class="stage-viewport"><span class="loading-label">载入中</span><canvas id="stage-2" width="414" height="396" role="img" aria-label="DeepSeek Q版拟人终阶预览"></canvas></div>
+                <figcaption><strong id="web-form-caption">原站鲸娘终阶动画</strong><span>整数 6 倍显示</span></figcaption>
+              </figure>
+              <figure class="stage terminal-comparison">
+                <div class="comparison-heading"><h3>终端</h3><span>69 列 × 33 行</span></div>
+                <div class="terminal-viewport" tabindex="0" role="region" aria-label="终端字符输出，可横向滚动">
+                  <p class="terminal-message" id="terminal-message">等待真实字符帧…</p>
+                  <pre class="terminal-output" id="terminal-output" role="img" aria-label="DeepSeek 参考终阶的终端半格字符帧" hidden></pre>
+                </div>
+                <figcaption class="terminal-caption"><label for="terminal-color">颜色 <select id="terminal-color" name="terminal-color"><option value="truecolor">真彩色 · 原始 RGB</option><option value="256">256 色降级</option></select></label><span id="terminal-state">等待 RGB 字符帧</span></figcaption>
+                <p class="grid-note">半块字符预览 · 每格 6 × 12 px · 实际终端比例由字体决定</p>
+              </figure>
+            </div>
+            <div class="pending-stages" aria-label="少年阶段说明"><p><strong>少年</strong>独立过渡形态待设计，当前技术占位沿用 Deepy。</p></div>
+          </section>
+
+          <div class="playback-bar">
+            <div class="playback-buttons">
+              <button type="button" id="play" class="primary">暂停</button>
+              <button type="button" id="previous" aria-label="后退一刻">上一刻</button>
+              <button type="button" id="next" aria-label="前进一刻">下一刻</button>
+            </div>
+            <label class="speed-control" for="speed">主画面速度
+              <select id="speed" name="speed">
+                <option value="0.25">0.25×</option>
+                <option value="0.5">0.5×</option>
+                <option value="1" selected>1×</option>
+                <option value="2">2×</option>
+              </select>
+            </label>
+            <output id="time" class="time-readout" for="timeline">0.0 秒 / 12.0 秒</output>
+            <label class="timeline-control" for="timeline"><span class="sr-only">播放时间，单位为 100 毫秒</span><input id="timeline" type="range" min="0" max="119" value="0" step="1"></label>
+          </div>
+          <p class="motion-note" id="motion-note" hidden>系统已开启减少动态，预览保持暂停。可使用时间轴或逐刻查看。</p>
+        </fieldset>
+      </form>
+      <footer class="page-footer">
+        <span id="current-form-note">当前：原站鲸娘终阶 · 69 × 66 画布 · 每刻 100 毫秒</span>
+        <span>网页与终端共用动作、表情和时间轴。</span>
+        <nav class="source-links" aria-label="参考来源"><span>参考来源</span><a href="https://dshtui.com/pets/deepy-whale/" target="_blank" rel="noopener noreferrer">Deepy 小鲸</a><a href="https://dshtui.com/pets/whale-girl-emoji/" target="_blank" rel="noopener noreferrer">鲸娘桌宠</a><a href="/docs/design/rare-ai-companions.md" target="_blank" rel="noopener noreferrer">社区原型说明</a><a href="https://www.bilibili.com/opus/1233069202138464289" target="_blank" rel="noopener noreferrer">ZipZipPipe 原帖</a></nav>
+      </footer>
+    </main>
+  </body>
+</html>

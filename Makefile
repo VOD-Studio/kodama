@@ -8,7 +8,7 @@ SHELL_SCRIPTS := $(shell git ls-files '*.sh')
 
 .PHONY: help fmt fmt-check clippy check-arch lint-scripts lint-workflows check-versions deny lint \
 	test test-pg three-end schema schema-check sdk-test tty e2e e2e-pg consumers ci \
-	term preview dev-init dev token wasm cli-archive image image-smoke clean \
+	term preview companions-preview companions-terminal dev-init dev token wasm cli-archive image image-smoke clean \
 	docker-build docker-shell docker-dev docker-token docker-down docker-clean
 
 ##@ 日常开发
@@ -21,6 +21,12 @@ term: ## 在终端里养一只宠物
 
 preview: ## 在终端里预览像素画：ARGS="forms 3" 全部外形，"poses 3" 姿态，"outfits 3" 装扮，"individuals 3" 不同个体，"ascii" 字符画
 	cargo run -q -p kodama-term --example preview -- $(ARGS)
+
+companions-preview: wasm ## 构建并启动本地伙伴工作台服务(127.0.0.1:8841)
+	node scripts/dev/companions.mjs
+
+companions-terminal: wasm ## 在真实终端预览原站 DeepSeek，ARGS="baby work" 可选形态和动作；q 退出
+	node scripts/dev/companions-terminal.mjs $(ARGS)
 
 dev-init: ## 生成 .dev/ 里的开发密钥与环境(已存在则保留)
 	node scripts/dev/dev.mjs init
