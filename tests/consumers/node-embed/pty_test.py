@@ -3,7 +3,7 @@ import os, pty, sys, time, signal, select, fcntl, termios, struct, re
 def session(actions, rows=14, cols=60):
     pid, fd = pty.fork()
     if pid == 0:
-        os.execvp("node", ["node", "host.mjs"])
+        os.execvp("node", ["node", "host.mts"])
     fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
     before = termios.tcgetattr(fd)
     buf = b""

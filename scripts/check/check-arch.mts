@@ -1,5 +1,5 @@
 // 架构与目录守护，见 docs/architecture.md 的「目录结构」与「依赖规则」。
-//   node scripts/check/check-arch.mjs
+//   node scripts/check/check-arch.mts
 // 检查四件事：
 //   1. 根目录只有白名单里的文件与目录，新内容必须放进按用途划分的目录；
 //   2. 只能放子目录的位置（crates/、crates/<层>/、tests/、scripts/、packages/）没有散落的文件；
@@ -13,7 +13,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const problems = [];
+const problems: string[] = [];
 
 // ---------- 目录结构 ----------
 
@@ -27,7 +27,7 @@ const ROOT_ENTRIES = new Set([
 	"Makefile", "README.md", "README.zh-CN.md", "CONTRIBUTING.md", "CONTRIBUTING.zh-CN.md",
 	"CHANGELOG.md", "CONTEXT.md", "LICENSE",
 	// 仓库级配置
-	".editorconfig", ".gitattributes", ".gitignore", ".git-blame-ignore-revs",
+	".editorconfig", "tsconfig.json", ".gitattributes", ".gitignore", ".git-blame-ignore-revs",
 ]);
 // 这些目录下只允许子目录（分组），文件放进具体的分组里。
 const DIRS_ONLY = ["crates", "tests", "scripts", "packages"];
@@ -57,7 +57,11 @@ for (const layer of new Set(files.filter((f) => f.startsWith("crates/")).map((f)
 // ---------- crate 与依赖 ----------
 
 // 每个 crate 的层，以及允许依赖的 workspace crate。新增 crate 必须在这里登记，并同步架构文档。
-const CRATES = {
+interface CrateSpec {
+	layer: string;
+	deps: string[];
+}
+const CRATES: Record<string, CrateSpec> = {
 	"kodama-term": { layer: "core", deps: [] },
 	"kodama-core": { layer: "core", deps: ["kodama-term"] },
 	"kodama-store": { layer: "service", deps: ["kodama-core"] },
@@ -68,7 +72,7 @@ const CRATES = {
 	"kodama-schema": { layer: "tools", deps: ["kodama-core", "kodama-term"] },
 };
 // 层之间的方向：每层只能依赖自己与列出的层。核心不知道服务与运行入口的存在。
-const LAYER_DEPS = {
+const LAYER_DEPS: Record<string, string[]> = {
 	core: ["core"],
 	service: ["core", "service"],
 	runtimes: ["core"],
@@ -79,11 +83,21 @@ const LAYER_DEPS = {
 const CORE_EXTERNAL = ["sha2", "hmac", "ed25519-dalek", "serde", "serde_json", "schemars"];
 const CORE_ATTRS = ["#![no_std]", "#![forbid(unsafe_code)]"];
 
-const meta = JSON.parse(execFileSync("cargo", ["metadata", "--format-version", "1", "--no-deps", "--locked"], { cwd: root, encoding: "utf8" }));
-const members = new Map(meta.packages.map((p) => [p.name, p]));
+interface Dependency {
+	name: string;
+	kind: string | null;
+}
+interface CargoPackage {
+	name: string;
+	manifest_path: string;
+	dependencies: Dependency[];
+}
+
+const meta: { packages: CargoPackage[] } = JSON.parse(execFileSync("cargo", ["metadata", "--format-version", "1", "--no-deps", "--locked"], { cwd: root, encoding: "utf8" }));
+const members = new Map<string, CargoPackage>(meta.packages.map((p): [string, CargoPackage] => [p.name, p]));
 
 for (const name of members.keys()) {
-	if (!(name in CRATES)) problems.push(`${name}: 未在 scripts/check/check-arch.mjs 的 CRATES 中登记`);
+	if (!(name in CRATES)) problems.push(`${name}: 未在 scripts/check/check-arch.mts 的 CRATES 中登记`);
 }
 for (const name of Object.keys(CRATES)) {
 	if (!members.has(name)) problems.push(`${name}: 已登记但不在 workspace 中`);

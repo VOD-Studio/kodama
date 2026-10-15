@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // 先运行 make wasm；此入口只读提供已有文件，不触发构建或访问宠物数据。
 import { createServer } from "node:http";
+import type { ServerResponse } from "node:http";
+import { stripTypeScriptTypes } from "node:module";
 import { readFile, realpath, stat } from "node:fs/promises";
 import { dirname, extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,10 +10,11 @@ import { fileURLToPath } from "node:url";
 const root = await realpath(resolve(dirname(fileURLToPath(import.meta.url)), "../.."));
 const address = "127.0.0.1";
 const port = 8841;
-const types = {
+const types: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".ts": "text/javascript; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8",
   ".md": "text/plain; charset=utf-8",
   ".wasm": "application/wasm",
@@ -23,7 +26,7 @@ const types = {
   ".svg": "image/svg+xml",
 };
 
-function reply(response, status, message) {
+function reply(response: ServerResponse, status: number, message: string) {
   response.writeHead(status, { "Content-Type": "text/plain; charset=utf-8" });
   response.end(message);
 }
@@ -69,23 +72,25 @@ const server = createServer(async (request, response) => {
       reply(response, 404, "没有这个预览文件。");
       return;
     }
-    const body = await readFile(target);
+    // 浏览器只认 JavaScript：预览页的 TypeScript 在发送时去掉类型，磁盘上的源文件不变。
+    const body = extname(target) === ".ts" ? Buffer.from(stripTypeScriptTypes(await readFile(target, "utf8"))) : await readFile(target);
     response.writeHead(200, {
       "Content-Type": types[extname(target)] ?? "application/octet-stream",
       "Content-Length": body.length,
     });
     response.end(request.method === "HEAD" ? undefined : body);
   } catch (error) {
-    if (error.code === "ENOENT" || error.code === "ENOTDIR") {
+    const failure = error as NodeJS.ErrnoException;
+    if (failure.code === "ENOENT" || failure.code === "ENOTDIR") {
       reply(response, 404, "文件尚未生成；请先运行 make wasm，再重新载入预览。");
       return;
     }
-    console.error("读取预览文件失败：", error.message);
+    console.error("读取预览文件失败：", failure.message);
     reply(response, 500, "暂时无法读取预览文件。");
   }
 });
 
-server.on("error", (error) => {
+server.on("error", (error: Error) => {
   console.error(`无法启动伙伴预览：${error.message}`);
   process.exitCode = 1;
 });

@@ -45,7 +45,7 @@ make lint test       # 或：make docker-ci
 
 - **格式**使用 rustfmt 默认风格（`rustfmt.toml` 只设了稳定版选项）。一次性的全量格式化提交记录在 `.git-blame-ignore-revs` 里；执行 `git config blame.ignoreRevsFile .git-blame-ignore-revs` 后，`git blame` 会跳过它，GitHub 的 blame 视图已自动跳过。
 - **生成的文件**（`packages/kodama-sdk/schema/`、`src/types.d.ts`、`docs/capabilities.md`）随仓库提交。用 `make schema` 重新生成，不要手改。
-- **架构规则**由 `make check-arch` 检查。新增 crate 或 crate 之间的依赖时，在同一个 PR 里更新 `scripts/check/check-arch.mjs` 的表与 `docs/architecture.md`。
+- **架构规则**由 `make check-arch` 检查。新增 crate 或 crate 之间的依赖时，在同一个 PR 里更新 `scripts/check/check-arch.mts` 的表与 `docs/architecture.md`。
 
 ## 提交与 PR
 

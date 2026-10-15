@@ -65,7 +65,7 @@ The directory is the layer: every crate lives in `crates/<layer>/<crate>`, and t
 | `runtimes` | `kodama`, `kodama-wasm` | `core` |
 | `tools` | `kodama-schema` | `core` |
 
-`scripts/check/check-arch.mjs` (run by `make check-arch` and the CI Lint job) fails when:
+`scripts/check/check-arch.mts` (run by `make check-arch` and the CI Lint job) fails when:
 
 - a crate sits outside `crates/<its layer>/<its name>`, or a new crate is not registered;
 - a crate depends on another layer than the table allows, or on a workspace crate outside its own allowlist;
@@ -74,7 +74,7 @@ The directory is the layer: every crate lives in `crates/<layer>/<crate>`, and t
 
 The same target then compiles the core layer for `thumbv7em-none-eabihf`, a target with no standard library. A dependency that quietly pulls in `std` fails there, even though it would build fine for native targets and `wasm32-unknown-unknown`.
 
-To add a crate or an edge, change `scripts/check/check-arch.mjs` and this document in the same pull request.
+To add a crate or an edge, change `scripts/check/check-arch.mts` and this document in the same pull request.
 
 ### Inside the crates
 
@@ -118,8 +118,8 @@ kodama/
 │   ├── consumers/<name>/     installed artifacts outside the repository; each has run.sh
 │   └── bench/
 ├── scripts/
-│   ├── dev/                  local development: dev.mjs, with-postgres.sh
-│   ├── check/                repository checks: check-arch.mjs, version.mjs
+│   ├── dev/                  local development: dev.mts, with-postgres.sh
+│   ├── check/                repository checks: check-arch.mts, version.mts
 │   └── release/              packaging and publishing
 ├── docker/                   dev.Dockerfile, service.Dockerfile (each with its own .dockerignore), compose.yaml
 ├── docs/

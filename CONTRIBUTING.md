@@ -45,7 +45,7 @@ Run the narrower checks that match your change as well: `make three-end` for rul
 
 - **Formatting** is plain rustfmt (`rustfmt.toml` sets only stable options). The one-time reformatting commit is listed in `.git-blame-ignore-revs`; run `git config blame.ignoreRevsFile .git-blame-ignore-revs` so that `git blame` skips it. GitHub's blame view already does.
 - **Generated files** (`packages/kodama-sdk/schema/`, `src/types.d.ts`, `docs/capabilities.md`) are committed. Regenerate them with `make schema` and never edit them by hand.
-- **Architecture rules** are checked by `make check-arch`. To add a crate or a dependency between crates, update the table in `scripts/check/check-arch.mjs` and `docs/architecture.md` in the same pull request.
+- **Architecture rules** are checked by `make check-arch`. To add a crate or a dependency between crates, update the table in `scripts/check/check-arch.mts` and `docs/architecture.md` in the same pull request.
 
 ## Commits and pull requests
 

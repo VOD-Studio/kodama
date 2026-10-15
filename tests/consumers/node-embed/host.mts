@@ -21,7 +21,7 @@ const pet = mountTerminalPet({
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "host> " });
 let done = false;
-const finish = (code) => {
+const finish = (code: number): never | void => {
   if (done) return;
   done = true;
   pet.dispose();
@@ -29,7 +29,7 @@ const finish = (code) => {
   rl.close();
   process.exit(code);
 };
-rl.on("line", (l) => {
+rl.on("line", (l: string) => {
   if (l === "quit") return finish(0);
   console.log(`echo: ${l}`);
   rl.prompt();

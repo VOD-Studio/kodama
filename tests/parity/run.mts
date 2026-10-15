@@ -1,25 +1,25 @@
-// 用法: node run.mjs native|wasm  —— 输出完整转录,三端逐字节比较
+// 用法: node run.mts native|wasm  —— 输出完整转录,三端逐字节比较
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 const mode = process.argv[2];
-const steps = JSON.parse(fs.readFileSync(new URL("../fixtures/steps.json", import.meta.url)));
-let exec;
+const steps = JSON.parse(fs.readFileSync(new URL("../fixtures/steps.json", import.meta.url), "utf8"));
+let exec: (line: string) => string;
 if (mode === "native") {
-  exec = (line) => execFileSync("../../target/release/kodama", { input: line + "\n", cwd: new URL(".", import.meta.url).pathname }).toString().trim();
+  exec = (line: string) => execFileSync("../../target/release/kodama", { input: line + "\n", cwd: new URL(".", import.meta.url).pathname }).toString().trim();
 } else {
   const m = await import(process.argv[3]);
   exec = m.execute;
 }
 const birth = { op: "birth", world: "w1", request_id: "r1", server_seed: "aa".repeat(32), client_seed: "bb".repeat(32), born_at: "0" };
-const out = [];
+const out: string[] = [];
 let r = exec(JSON.stringify(birth)); out.push(r);
 let pet = JSON.parse(r).value.pet;
-for (const [, s] of steps) {
+for (const [, s] of steps as [unknown, Record<string, unknown>][]) {
   r = exec(JSON.stringify({ op: "act", pet, ...s })); out.push(r);
   const j = JSON.parse(r);
   if (j.ok) pet = j.value.pet;
 }
-const fx = JSON.parse(fs.readFileSync(new URL("../fixtures/cert.json", import.meta.url)));
+const fx = JSON.parse(fs.readFileSync(new URL("../fixtures/cert.json", import.meta.url), "utf8"));
 out.push(exec(JSON.stringify({ op: "verify_birth", ...fx })));
 const bad = structuredClone(fx); bad.certificate.rarity = (bad.certificate.rarity + 1) % 5;
 out.push(exec(JSON.stringify({ op: "verify_birth", ...bad })));
@@ -37,7 +37,7 @@ const evolved = exec(JSON.stringify({ op: "act", pet, action: { evolve: { branch
 out.push(evolved);
 // 装扮：升到 3 级解锁的物品可以穿；没有的、不适合身体的被拒绝；穿上后画面带上装扮
 pet = JSON.parse(evolved).value.pet;
-const wear = [[{ equip: { item: "round_glasses" } }, "o1"], [{ equip: { item: "hero_cape" } }, "o2"], [{ equip: { item: "knit_scarf" } }, "o3"], [{ unequip: { slot: "face" } }, "o4"]];
+const wear: [unknown, string][] = [[{ equip: { item: "round_glasses" } }, "o1"], [{ equip: { item: "hero_cape" } }, "o2"], [{ equip: { item: "knit_scarf" } }, "o3"], [{ unequip: { slot: "face" } }, "o4"]];
 wear.forEach(([action, request_id], i) => {
   const res = exec(JSON.stringify({ op: "act", pet, action, now: String(9000000000000000012n + BigInt(i)), request_id }));
   out.push(res);
@@ -46,7 +46,7 @@ wear.forEach(([action, request_id], i) => {
 // 探险：出发、未到时间领取被拒、到时间领取得到可复算的见闻、再出发后召回返还食物
 pet.energy = 90;
 pet.food = 6;
-const trip = [[{ depart: { topic: "rust", tier: "short" } }, "x1", 0n], [{ return: null }, "x2", 10n], [{ return: null }, "x3", 240n], [{ depart: { topic: "go", tier: "long" } }, "x4", 250n], [{ recall: null }, "x5", 260n]];
+const trip: [Record<string, unknown>, string, bigint][] = [[{ depart: { topic: "rust", tier: "short" } }, "x1", 0n], [{ return: null }, "x2", 10n], [{ return: null }, "x3", 240n], [{ depart: { topic: "go", tier: "long" } }, "x4", 250n], [{ recall: null }, "x5", 260n]];
 for (const [action, request_id, dt] of trip) {
   const res = exec(JSON.stringify({ op: "act", pet, action: Object.values(action)[0] === null ? Object.keys(action)[0] : action, now: String(9000000000000000100n + dt), request_id }));
   out.push(res);

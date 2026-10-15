@@ -1,6 +1,6 @@
 // 发版由 release-please 改版本号;本脚本只校验各处版本一致,防止漂移。
-//   node scripts/check/version.mjs get              打印各处版本
-//   node scripts/check/version.mjs check [v0.2.0]   各处版本必须一致;给出标签时也必须与标签一致
+//   node scripts/check/version.mts get              打印各处版本
+//   node scripts/check/version.mts check [v0.2.0]   各处版本必须一致;给出标签时也必须与标签一致
 // 另校验 wasm-bindgen:crate 锁定的版本必须与 CI、开发镜像（docker/dev.Dockerfile）安装的 wasm-bindgen-cli 相同,否则生成的绑定不可用。
 import fs from "node:fs";
 import path from "node:path";
@@ -17,8 +17,8 @@ function read() {
 }
 
 function wasmBindgen() {
-	const at = (f) => fs.readFileSync(path.join(root, f), "utf8");
-	const found = {
+	const at = (f: string) => fs.readFileSync(path.join(root, f), "utf8");
+	const found: Record<string, string | undefined> = {
 		"crates/runtimes/kodama-wasm/Cargo.toml": at("crates/runtimes/kodama-wasm/Cargo.toml").match(/^wasm-bindgen\s*=\s*"=([^"]+)"/m)?.[1],
 		"docker/dev.Dockerfile": at("docker/dev.Dockerfile").match(/^ARG WASM_BINDGEN_VERSION=(\S+)/m)?.[1],
 	};
@@ -34,7 +34,7 @@ const [cmd, tag] = process.argv.slice(2);
 const v = read();
 if (cmd === "get") {
 	console.log(`Cargo workspace: ${v.cargo}\n@violetjs/kodama: ${v.sdk}`);
-	for (const [f, ver] of Object.entries(wasmBindgen())) console.log(`wasm-bindgen ${ver.padEnd(8)} ${f}`);
+	for (const [f, ver] of Object.entries(wasmBindgen())) console.log(`wasm-bindgen ${(ver ?? "?").padEnd(8)} ${f}`);
 } else if (cmd === "check") {
 	const problems = [];
 	if (!v.cargo || !SEMVER.test(v.cargo)) problems.push(`Cargo workspace 版本无效: ${v.cargo}`);
@@ -48,6 +48,6 @@ if (cmd === "get") {
 	}
 	console.log(v.cargo);
 } else {
-	console.error("用法: version.mjs <get|check [tag]>");
+	console.error("用法: version.mts <get|check [tag]>");
 	process.exit(2);
 }

@@ -80,7 +80,7 @@ T=$(make -s token SUB=alice)   # or: make -s docker-token SUB=alice
 curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 ```
 
-No integrating site is needed: `scripts/dev/dev.mjs` generates keys in `.dev/` and plays the integrating site that issues identity assertions.
+No integrating site is needed: `scripts/dev/dev.mts` generates keys in `.dev/` and plays the integrating site that issues identity assertions.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the toolchain, the commit and pull request conventions, and how releases work.
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // 开发宿主负责终端会话；实际绘制与时钟完全复用 SDK。
 import { readFile } from "node:fs/promises";
+import type * as Core from "../../packages/kodama-sdk/dist/index.js";
+import type * as Terminal from "../../packages/kodama-sdk/dist/terminal.js";
 
 const usage = "用法：make companions-terminal [ARGS=\"baby|adult action\"]，默认 adult idle；q / Ctrl+C 退出。";
 const { stdin, stdout } = process;
@@ -9,11 +11,11 @@ const height = 33;
 const requiredRows = 37;
 const region = { row: 5, col: 1, width, height };
 
-function enoughRoom() {
+function enoughRoom(): boolean {
   return stdout.columns >= width && stdout.rows >= requiredRows;
 }
 
-function colorLabel(frame) {
+function colorLabel(frame: Core.Frame): string {
   const env = process.env;
   if (env.NO_COLOR !== undefined) return "无彩色字符画（NO_COLOR）";
   if (env.TERM === "dumb") return "字符画降级（TERM=dumb）";
@@ -41,26 +43,32 @@ async function main() {
   const [form = "adult", action = "idle"] = args;
   if (args.length > 2 || !["baby", "adult"].includes(form)) throw new Error(usage);
   const schema = JSON.parse(await readFile(new URL("../../packages/kodama-sdk/schema/kodama.schema.json", import.meta.url), "utf8"));
-  const actions = schema.$defs.CompanionAction.enum;
+  const actions: string[] = schema.$defs.CompanionAction.enum;
   if (!actions.includes(action)) throw new Error(`未知动作 ${action}。可选：${actions.join(", ")}。`);
 
   const [core, terminal] = await Promise.all([
-    import("../../packages/kodama-sdk/dist/index.js"),
-    import("../../packages/kodama-sdk/dist/terminal.js"),
+    import("../../packages/kodama-sdk/dist/index.js") as Promise<typeof Core>,
+    import("../../packages/kodama-sdk/dist/terminal.js") as Promise<typeof Terminal>,
   ]);
   await core.initPet(await readFile(new URL("../../packages/kodama-sdk/dist/kodama_wasm_bg.wasm", import.meta.url)));
-  const poses = schema.$defs.Pose.oneOf.flatMap((variant) => variant.enum ?? [variant.const]);
-  const pose = poses.includes(action) ? action : "observe";
-  const pet = { species: 0, genes: [37, 8, 21, 5, 17, 12, 6, 2], stage: form === "baby" ? 0 : 2, rarity: 2, companion: { character: "deepseek", action } };
+  const poses: string[] = schema.$defs.Pose.oneOf.flatMap((variant: { enum?: string[]; const?: string }) => variant.enum ?? [variant.const]);
+  const pose = (poses.includes(action) ? action : "observe") as Core.Pose;
+  const pet = {
+    species: 0,
+    genes: [37, 8, 21, 5, 17, 12, 6, 2] as Core.Birth["genes"],
+    stage: form === "baby" ? 0 : 2,
+    rarity: 2,
+    companion: { character: "deepseek", action: action as Core.CompanionAction } satisfies Core.CompanionAppearance,
+  };
   const frame = core.run({ op: "frame", ...pet, pose, charset: "blocks", w: width, h: height, t: "0" });
-  if (!frame.ok) throw new Error(`无法载入终端帧：${JSON.stringify(frame.error)}`);
+  if (!frame.ok) throw new Error(`无法载入终端帧：${(frame as Core.ErrorBody).message}`);
 
   const wasRaw = Boolean(stdin.isRaw);
-  let mounted;
+  let mounted: { dispose(): void } | undefined;
   let entered = false;
   let restored = false;
-  const listeners = [];
-  const listen = (target, event, handler) => {
+  const listeners: [NodeJS.EventEmitter, string, (...args: any[]) => void][] = [];
+  const listen = (target: NodeJS.EventEmitter, event: string, handler: (...args: any[]) => void) => {
     target.on(event, handler);
     listeners.push([target, event, handler]);
   };
@@ -76,10 +84,10 @@ async function main() {
       try { stdout.write("\x1b[0m\x1b[?25h\x1b[?1049l"); } catch { /* 输出流可能已关闭。 */ }
     }
   }
-  function finish(code = 0, error) {
+  function finish(code = 0, error?: unknown) {
     restore();
     process.exitCode = code;
-    if (error) console.error(`伙伴预览：${error.message ?? error}`);
+    if (error) console.error(`伙伴预览：${error instanceof Error ? error.message : error}`);
   }
 
   listen(process, "exit", restore);
@@ -87,14 +95,14 @@ async function main() {
   listen(process, "SIGTERM", () => finish(143));
   listen(process, "SIGHUP", () => finish(129));
   listen(process, "SIGQUIT", () => finish(131));
-  listen(process, "uncaughtException", (error) => finish(1, error));
+  listen(process, "uncaughtException", (error: Error) => finish(1, error));
   listen(process, "unhandledRejection", (error) => finish(1, error));
   listen(stdin, "error", (error) => finish(1, error));
   listen(stdin, "end", () => finish());
   listen(stdout, "resize", () => {
     if (!enoughRoom()) finish(1, new Error("终端缩小到 69 列 × 37 行以下，预览已退出。"));
   });
-  listen(stdin, "data", (data) => {
+  listen(stdin, "data", (data: Buffer) => {
     const keys = data.toString("utf8");
     if (keys.includes("\u0003")) finish(130);
     else if (/[qQ]/.test(keys)) finish();
@@ -106,14 +114,14 @@ async function main() {
     stdin.setRawMode(true);
     stdin.resume();
     const title = form === "baby" ? "DeepSeek · 原站 Deepy 小鲸" : "DeepSeek · 原站鲸娘终阶";
-    stdout.write(`\x1b[1;1H${title} · ${action}\x1b[2;1H${colorLabel(frame.value)} · 69 列 × 33 行\x1b[3;1Hq / Ctrl+C 退出 · 当前未通过质量验收`);
+    stdout.write(`\x1b[1;1H${title} · ${action}\x1b[2;1H${colorLabel((frame as Core.FrameResult).value)} · 69 列 × 33 行\x1b[3;1Hq / Ctrl+C 退出 · 当前未通过质量验收`);
     mounted = terminal.mountTerminalPet({ stream: stdout, region, pet, getPose: () => pose, charset: "blocks", colorMode: "auto" });
   } catch (error) {
     finish(1, error);
   }
 }
 
-main().catch((error) => {
+main().catch((error: NodeJS.ErrnoException) => {
   console.error(`伙伴预览：${error.code === "ERR_MODULE_NOT_FOUND" || error.code === "ENOENT" ? "缺少 SDK 构建，请先运行 make wasm。" : error.message}`);
   process.exitCode = 1;
 });

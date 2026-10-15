@@ -65,7 +65,7 @@ flowchart BT
 | `runtimes` | `kodama`、`kodama-wasm` | `core` |
 | `tools` | `kodama-schema` | `core` |
 
-`scripts/check/check-arch.mjs`（由 `make check-arch` 与 CI 的 Lint 作业运行）在以下情况失败：
+`scripts/check/check-arch.mts`（由 `make check-arch` 与 CI 的 Lint 作业运行）在以下情况失败：
 
 - crate 不在 `crates/<它的层>/<它的名字>`，或新增 crate 没有登记；
 - crate 依赖了上表不允许的层，或依赖了自己白名单之外的 workspace crate；
@@ -74,7 +74,7 @@ flowchart BT
 
 同一目标随后在 `thumbv7em-none-eabihf`（没有标准库的目标）上编译核心层。悄悄引入 `std` 的依赖在原生与 `wasm32-unknown-unknown` 上都能编译通过，在这里会失败。
 
-新增 crate 或依赖边时，在同一个 PR 里修改 `scripts/check/check-arch.mjs` 与本文。
+新增 crate 或依赖边时，在同一个 PR 里修改 `scripts/check/check-arch.mts` 与本文。
 
 ### crate 内部
 
@@ -118,8 +118,8 @@ kodama/
 │   ├── consumers/<名称>/     在仓库外使用安装后的产物；每个都有 run.sh
 │   └── bench/
 ├── scripts/
-│   ├── dev/                  本地开发：dev.mjs、with-postgres.sh
-│   ├── check/                仓库检查：check-arch.mjs、version.mjs
+│   ├── dev/                  本地开发：dev.mts、with-postgres.sh
+│   ├── check/                仓库检查：check-arch.mts、version.mts
 │   └── release/              打包与发布
 ├── docker/                   dev.Dockerfile、service.Dockerfile（各带自己的 .dockerignore）、compose.yaml
 ├── docs/

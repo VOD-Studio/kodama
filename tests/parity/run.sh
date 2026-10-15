@@ -7,8 +7,8 @@ cargo build --release -q -p kodama-wasm --target wasm32-unknown-unknown
 W=target/wasm32-unknown-unknown/release/kodama_wasm.wasm
 wasm-bindgen --target nodejs --out-dir target/pkg-node "$W"
 wasm-bindgen --target web --out-dir target/pkg-web "$W"
-node tests/parity/run.mjs native > target/out-native.txt
-node tests/parity/run.mjs wasm "$PWD/tests/parity/node-cjs.mjs" > target/out-node.txt 2>/dev/null
-node tests/parity/run.mjs wasm "$PWD/tests/parity/web-wasm.mjs" > target/out-web.txt 2>/dev/null
+node tests/parity/run.mts native > target/out-native.txt
+node tests/parity/run.mts wasm "$PWD/tests/parity/node-cjs.mts" > target/out-node.txt 2>/dev/null
+node tests/parity/run.mts wasm "$PWD/tests/parity/web-wasm.mts" > target/out-web.txt 2>/dev/null
 cmp target/out-native.txt target/out-node.txt && cmp target/out-native.txt target/out-web.txt
 echo "three-end OK: $(wc -l < target/out-native.txt) lines, sha256 $(shasum -a 256 target/out-native.txt | cut -c1-16)"

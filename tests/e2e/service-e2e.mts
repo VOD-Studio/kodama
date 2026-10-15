@@ -1,23 +1,24 @@
 // 端到端：真实的 kodama-service 二进制 + 真实 HTTP + 重启 + 用 WebAssembly 验证器核验证书。
 // 给出 kodama 时，再验收 CLI 经设备授权登录、读写同一只宠物、登出。
-// 用法: node service-e2e.mjs <服务二进制> <数据库(SQLite 路径或 Postgres 连接串)> [kodama 二进制]
+// 用法: node service-e2e.mts <服务二进制> <数据库(SQLite 路径或 Postgres 连接串)> [kodama 二进制]
 import crypto from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { mkdtempSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createRequire } from "node:module";
 import assert from "node:assert/strict";
 
-const [bin, db, cli] = process.argv.slice(2);
+const [bin, db, cli] = process.argv.slice(2) as [string, string, string | undefined];
 const { execute } = createRequire(import.meta.url)("../../target/pkg-node/kodama_wasm.js");
 
 // 扮演 Violet：持有断言签名密钥。
 const { publicKey, privateKey } = crypto.generateKeyPairSync("ed25519");
-const violetPub = Buffer.from(publicKey.export({ format: "jwk" }).x, "base64url").toString("hex");
-const b64 = (b) => Buffer.from(b).toString("base64url");
+const violetPub = Buffer.from(publicKey.export({ format: "jwk" }).x ?? "", "base64url").toString("hex");
+const b64 = (b: Uint8Array): string => Buffer.from(b).toString("base64url");
 let jti = 0;
-function assertion(sub, now = Math.floor(Date.now() / 1000)) {
+function assertion(sub: string, now = Math.floor(Date.now() / 1000)) {
   const payload = Buffer.from(JSON.stringify({ iss: "violet", sub, aud: "pet-e2e", kid: "v1", jti: `j${Date.now()}-${jti++}`, iat: now, exp: now + 120 }));
   const msg = Buffer.concat([Buffer.from("pet/assertion/v1\n"), payload]);
   return `v1.${b64(payload)}.${b64(crypto.sign(null, msg, privateKey))}`;
@@ -25,8 +26,8 @@ function assertion(sub, now = Math.floor(Date.now() / 1000)) {
 
 // 扮演接入方的活动连接器：持有事件签名密钥。
 const connector = crypto.generateKeyPairSync("ed25519");
-const connectorPub = Buffer.from(connector.publicKey.export({ format: "jwk" }).x, "base64url").toString("hex");
-function signedEvent(fields) {
+const connectorPub = Buffer.from(connector.publicKey.export({ format: "jwk" }).x ?? "", "base64url").toString("hex");
+function signedEvent(fields: Record<string, unknown>): string {
   const payload = Buffer.from(JSON.stringify({
     source: "site", kid: "c1", subject: "alice", action: "read", content_ref: { kind: "post", id: "p1" },
     occurred_at: new Date().toISOString(), topics: ["rust"], ...fields,
@@ -46,28 +47,32 @@ const env = {
   KODAMA_ACTIVITY_SOURCES: JSON.stringify([{ source: "site", iss: "violet", keys: [{ kid: "c1", public_key: connectorPub, not_before: "0" }] }]),
 };
 
-let child;
+let child: ChildProcess | undefined;
 async function start() {
-  child = spawn(bin, [], { env, stdio: ["ignore", "ignore", "pipe"] });
+
+  const started = (child = spawn(bin, [], { env, stdio: ["ignore", "ignore", "pipe"] }));
   let err = "";
-  child.stderr.on("data", (d) => (err += d));
+  started.stderr!.on("data", (d) => (err += d));
   for (let i = 0; i < 100; i++) {
     try { if ((await fetch(`${base}/healthz`)).ok) return; } catch {}
-    if (child.exitCode !== null) throw new Error(`service exited: ${err}`);
+    if (started.exitCode !== null) throw new Error(`service exited: ${err}`);
     await new Promise((r) => setTimeout(r, 100));
   }
   throw new Error(`service did not start: ${err}`);
 }
 async function stop() {
-  if (!child || child.exitCode !== null) return;
-  child.kill("SIGINT");
-  await new Promise((r) => child.once("exit", r));
+  const c = child;
+  if (!c || c.exitCode !== null) return;
+  c.kill("SIGINT");
+  await new Promise((r) => c.once("exit", r));
 }
-async function api(method, path, token, body) {
+// 响应体是线上 JSON，各用例按场景直接取字段
+type ApiResult = { status: number; body: any };
+async function api(method: string, path: string, token?: string | null, body?: unknown): Promise<ApiResult> {
   const r = await fetch(base + path, { method, headers: { ...(token ? { authorization: `Bearer ${token}` } : {}), "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
   return { status: r.status, body: await r.json().catch(() => null) };
 }
-const login = async (sub) => (await api("POST", "/v1/auth/exchange", null, { assertion: assertion(sub) })).body.value.access_token;
+const login = async (sub: string): Promise<string> => (await api("POST", "/v1/auth/exchange", null, { assertion: assertion(sub) })).body.value.access_token;
 
 try {
   await start();
@@ -90,7 +95,7 @@ try {
 
   // 证书由 WebAssembly 验证器核验——与服务端是两套独立的编译产物。
   const keys = (await api("GET", "/v1/issuer-keys")).body.value;
-  const verdict = (c) => JSON.parse(execute(JSON.stringify({ op: "verify_birth", certificate: c, issuer_keys: keys })));
+  const verdict = (c: unknown) => JSON.parse(execute(JSON.stringify({ op: "verify_birth", certificate: c, issuer_keys: keys })));
   assert.deepEqual(verdict(cert), { ok: true, value: "valid" });
   assert.equal(verdict({ ...cert, rarity: (cert.rarity + 1) % 5 }).value, "result_mismatch");
   assert.equal(verdict({ ...cert, client_seed: "00".repeat(32) }).value, "accept_signature");
@@ -133,28 +138,28 @@ try {
 }
 
 /** CLI 经设备授权登录，与网页读写同一只宠物，然后登出。 */
-async function cliAccount(web, cert) {
+async function cliAccount(web: string, cert: any) {
   const home = mkdtempSync(join(tmpdir(), "kodama-"));
   const cliEnv = { ...process.env, KODAMA_CONFIG_DIR: home, KODAMA_SERVICE: base, KODAMA_LOGIN_POLL_MS: "100" };
-  const run = (args, onStderr) =>
-    new Promise((resolve) => {
-      const p = spawn(cli, args, { env: cliEnv, stdio: ["ignore", "pipe", "pipe"] });
+  const run = (args: string[], onStderr?: (stderr: string) => void) =>
+    new Promise<{ code: number | null; err: string; json: any }>((resolve) => {
+      const p = spawn(cli!, args, { env: cliEnv, stdio: ["ignore", "pipe", "pipe"] });
       let out = "", err = "";
-      p.stdout.on("data", (d) => (out += d));
-      p.stderr.on("data", (d) => { err += d; onStderr?.(err); });
-      p.on("exit", (code) => resolve({ code, err, json: out.trim() ? JSON.parse(out.trim().split("\n").pop()) : null }));
+      p.stdout!.on("data", (d) => (out += d));
+      p.stderr!.on("data", (d) => { err += d; onStderr?.(err); });
+      p.on("exit", (code) => resolve({ code, err, json: out.trim() ? JSON.parse(out.trim().split("\n").pop()!) : null }));
     });
   try {
     let r = await run(["status"]);
     assert.deepEqual([r.code, r.json.code], [1, "not_logged_in"]);
 
     // 登录：CLI 打印用户码，网页上的用户确认
-    let approved;
+    let approved: Promise<ApiResult> | undefined;
     r = await run(["login"], (err) => {
       const code = err.match(/confirm the code ([A-Z]{4}-[A-Z]{4})/)?.[1];
       if (code && !approved) approved = api("POST", "/v1/device/approve", web, { user_code: code });
     });
-    assert.equal((await approved).status, 200);
+    assert.equal((await approved)?.status, 200);
     assert.equal(r.code, 0, r.err);
     assert.equal(r.json.value.service, base);
     assert.equal(statSync(join(home, "credentials.json")).mode & 0o077, 0, "credentials are private to the user");
@@ -178,7 +183,7 @@ async function cliAccount(web, cert) {
 
     // 真实 pty 里的 live --account：按 f 喂食由服务确认，q 退出并恢复终端
     const before = (await api("GET", "/v1/pets/me", web)).body.value.pet.food;
-    const tty = spawnSync("python3", ["tests/tty/account_live.py", cli], { env: cliEnv, encoding: "utf8" });
+    const tty = spawnSync("python3", ["tests/tty/account_live.py", cli!], { env: cliEnv, encoding: "utf8" });
     assert.equal(tty.status, 0, tty.stdout + tty.stderr);
     assert.equal((await api("GET", "/v1/pets/me", web)).body.value.pet.food, before - 1);
 

@@ -15,7 +15,7 @@ updates:
         applies-to: version-updates
         update-types: ["minor", "patch"]
     ignore:
-      # 必须与 CI、docker/dev.Dockerfile 安装的 wasm-bindgen-cli 同步升级（scripts/check/version.mjs 校验），手动处理
+      # 必须与 CI、docker/dev.Dockerfile 安装的 wasm-bindgen-cli 同步升级（scripts/check/version.mts 校验），手动处理
       - dependency-name: wasm-bindgen
 
   - package-ecosystem: npm

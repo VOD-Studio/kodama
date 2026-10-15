@@ -80,7 +80,7 @@ T=$(make -s token SUB=alice)   # 或：make -s docker-token SUB=alice
 curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 ```
 
-不需要任何接入方：`scripts/dev/dev.mjs` 在 `.dev/` 里生成密钥，并扮演接入方签发身份断言。要对着真实接入方调试，用 `KODAMA_DEV_TRUST_KEY=<对方公钥> node scripts/dev/dev.mjs init --force`；与 [Violet](https://github.com/VOD-Studio/violet) 联调的方式见 [docs/history/split-plan.md](docs/history/split-plan.md)。
+不需要任何接入方：`scripts/dev/dev.mts` 在 `.dev/` 里生成密钥，并扮演接入方签发身份断言。要对着真实接入方调试，用 `KODAMA_DEV_TRUST_KEY=<对方公钥> node scripts/dev/dev.mts init --force`；与 [Violet](https://github.com/VOD-Studio/violet) 联调的方式见 [docs/history/split-plan.md](docs/history/split-plan.md)。
 
 工具链、提交与 PR 约定、发版流程见 [CONTRIBUTING.zh-CN.md](CONTRIBUTING.zh-CN.md)。
 

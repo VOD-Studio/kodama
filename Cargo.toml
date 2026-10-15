@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-# 目录即分层：crates/<层>/<crate>，层的含义与依赖方向见 docs/architecture.md，由 scripts/check/check-arch.mjs 校验
+# 目录即分层：crates/<层>/<crate>，层的含义与依赖方向见 docs/architecture.md，由 scripts/check/check-arch.mts 校验
 members = ["crates/*/*"]
 
 [workspace.package]
