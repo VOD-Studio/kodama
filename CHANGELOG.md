@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/VOD-Studio/kodama/compare/v0.4.0...v0.5.0) (2026-10-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* 服务与 CLI 只读取 KODAMA_* 环境变量；npm 包、镜像与 CLI 归档改用新名称。
+
+### Code Refactoring
+
+* 包名统一改为 kodama，不再使用 pet-* 前缀 ([3b507ad](https://github.com/VOD-Studio/kodama/commit/3b507ad8d21090839a7334c5d1add72b786e93f3))
+
 ## [0.4.0](https://github.com/VOD-Studio/kodama/compare/v0.3.0...v0.4.0) (2026-10-15)
 
 
