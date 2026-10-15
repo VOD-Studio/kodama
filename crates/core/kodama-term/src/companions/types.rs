@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-/// AI 伙伴身份预留。当前仅 `deepseek` 有可用美术；其他身份经 `sprite`/`frame` 请求时返回 `bad_input`。
+/// AI 伙伴身份。`deepseek` 三阶段可用，`gpt` 仅成年可用；其余身份或阶段经 `sprite`/`frame` 请求时返回 `bad_input`。
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
@@ -25,8 +25,30 @@ impl Companion {
         Self::Gemini,
     ];
 
+    /// 是否已有任何可用美术；具体阶段见 `has_stage`。
     pub const fn is_available(self) -> bool {
-        matches!(self, Self::Deepseek)
+        matches!(self, Self::Deepseek | Self::Gpt)
+    }
+
+    /// 该阶段的美术是否已完成。GPT 目前只有成年。
+    pub const fn has_stage(self, stage: crate::form::Stage) -> bool {
+        match self {
+            Self::Deepseek => true,
+            Self::Gpt => matches!(stage, crate::form::Stage::Adult),
+            _ => false,
+        }
+    }
+
+    pub const fn display_name(self) -> &'static str {
+        match self {
+            Self::Deepseek => "DeepSeek",
+            Self::Gpt => "GPT",
+            Self::Claude => "Claude",
+            Self::Grok => "Grok",
+            Self::Glm => "GLM",
+            Self::Kimi => "Kimi",
+            Self::Gemini => "Gemini",
+        }
     }
 
     pub const fn name(self) -> &'static str {

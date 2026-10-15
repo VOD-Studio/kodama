@@ -2,6 +2,7 @@
 //! This module does not derive births or change any life/growth state.
 mod deepseek;
 mod deepy;
+mod gpt;
 #[cfg(test)]
 mod tests;
 mod types;
@@ -12,7 +13,8 @@ pub use types::{Companion, CompanionAction, CompanionAppearance, Expression};
 /// center; larger requests add transparent margins. Reserved characters are
 /// transparent here; the JSON protocol rejects them with `bad_input`.
 pub fn render(i: &crate::PixelInput, appearance: &CompanionAppearance) -> crate::Pixels {
-    if !appearance.character.is_available() {
+    let form = crate::Form::of(i.stage, &i.lineage);
+    if !appearance.character.has_stage(form.stage) {
         return empty(i.w, i.h);
     }
     let mut action = appearance
@@ -28,14 +30,22 @@ pub fn render(i: &crate::PixelInput, appearance: &CompanionAppearance) -> crate:
         action = CompanionAction::from_pose(i.pose);
         expression = None;
     }
-    let form = crate::Form::of(i.stage, &i.lineage);
-    if form.stage.index() < 2 {
-        return center_source(deepy::render(action, i.t), i.w, i.h);
+    match appearance.character {
+        Companion::Deepseek if form.stage.index() < 2 => {
+            center_source(deepy::render(action, i.t), i.w, i.h)
+        }
+        Companion::Deepseek => deepseek::render(action, expression, i.t)
+            .map_or_else(|| empty(i.w, i.h), |pixels| center_source(pixels, i.w, i.h)),
+        Companion::Gpt => center_source(gpt::render(action, expression, i.t), i.w, i.h),
+        _ => empty(i.w, i.h),
     }
-    if let Some(pixels) = deepseek::render(action, expression, i.t) {
-        return center_source(pixels, i.w, i.h);
-    }
-    empty(i.w, i.h)
+}
+
+/// 该外观在给定阶段是否有可渲染的美术。协议层据此对未完成的角色或阶段返回 `bad_input`。
+pub fn is_ready(appearance: &CompanionAppearance, stage: u8, lineage: &[crate::Branch]) -> bool {
+    appearance
+        .character
+        .has_stage(crate::Form::of(stage, lineage).stage)
 }
 
 fn empty(w: u16, h: u16) -> crate::Pixels {

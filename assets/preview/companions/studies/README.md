@@ -1,11 +1,9 @@
 # GPT 单角色造型研究
 
-这两张是内置 `image_gen` 生成的造型研究，不是通过验收的终端/网页精灵。不得接入主角色列表充当完成素材。
+这两张是内置 `image_gen` 生成的原创造型研究。`gpt-v3-grid-study.png` 是成年形态运行精灵的来源：`scripts/assets/import-gpt.py` 把它缩成 80×92 的原生像素网格（`make` 之外单独运行，需要 Pillow 与 numpy）。幼年和少年尚无研究图，对应阶段保持未开放。
 
-- `gpt-v2-style-study.png`：保留既定白龙娘身份，细化脸、成组发束、衣褶与饰物；独立复核判为高分辨率像素风插画，未达到原生像素网格、透明边缘或动画要求。
-- `gpt-v3-grid-study.png`：收紧翼尾与轮廓、尝试低分辨率像素簇；仍须通过实际目标尺寸与透明边缘复核，没有动作帧，不算动画交付。
-
-身份来源：[既定 GPT 娘参考](https://genderswapai.com/zh-CN/ai-gijinka/gpt)，[ZipZipPipe 原帖](https://www.bilibili.com/opus/1233069202138464289)。工艺参考：[用户指定的鲸娘桌宠](https://dshtui.com/pets/whale-girl-emoji/)。身份原型与生成改编的使用条件不因代码 MIT 许可而改变。
+- `gpt-v2-style-study.png`：细化脸、成组发束、衣褶与饰物的高分辨率像素风插画，仅作参考，不参与导入。
+- `gpt-v3-grid-study.png`：收紧翼尾与轮廓的低分辨率像素簇版本，是导入脚本的输入；改动它之后需重新运行脚本并提交生成的 `data.rs`。
 
 ## v3 实际生成提示词
 

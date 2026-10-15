@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Only DeepSeek source artwork is available. The other six identities are reserved and sprite/frame requests return bad_input (artwork not ready). Rejected geometric drafts are excluded from compilation. Does not add species or alter v1 birth outcomes. Asset sources and usage conditions are separate from MIT; see packages/kodama-sdk/ASSET_NOTICES.md.",
+  "note": "DeepSeek has artwork for all three stages; GPT has only its adult stage. The other identities and GPT's baby and young stages are reserved and sprite/frame requests return bad_input (artwork not ready). Rejected geometric drafts are excluded from compilation. Does not add species or alter v1 birth outcomes. Third-party asset sources and usage conditions are separate from MIT; see packages/kodama-sdk/ASSET_NOTICES.md.",
   "logical_canvas": {
     "w": 96,
     "h": 96
@@ -65,7 +65,12 @@
       "adaptation": "Original dshtui Deepy whale and whale-girl frames; no redesigned whale or generated face overlays. The young stage currently shares Deepy and is not separately designed.",
       "quality_status": "existing_reference_frames",
       "animal_reference": "https://dshtui.com/pets/deepy-whale/",
-      "available": true
+      "available": true,
+      "available_stages": [
+        "baby",
+        "young",
+        "adult"
+      ]
     },
     {
       "key": "gpt",
@@ -84,12 +89,14 @@
         "龙翼",
         "龙尾"
       ],
-      "renderer": "unavailable",
-      "character_reference": "https://genderswapai.com/zh-CN/ai-gijinka/gpt",
-      "source_post": "https://www.bilibili.com/opus/1233069202138464289",
-      "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
-      "quality_status": "rework_pending",
-      "available": false
+      "renderer": "source_frames",
+      "adaptation": "Original adult concept study reduced to an 80x92 native pixel grid by scripts/assets/import-gpt.py. Two key poses (eyes open, eyes closed); actions are routed onto them. Baby and young are not designed yet.",
+      "quality_status": "adult_concept_study",
+      "available": true,
+      "available_stages": [
+        "adult"
+      ],
+      "origin": "assets/preview/companions/studies/gpt-v3-grid-study.png"
     },
     {
       "key": "claude",
@@ -113,7 +120,8 @@
       "source_post": "https://www.bilibili.com/opus/1233069202138464289",
       "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
       "quality_status": "rework_pending",
-      "available": false
+      "available": false,
+      "available_stages": []
     },
     {
       "key": "grok",
@@ -138,7 +146,8 @@
       "source_post": "https://www.bilibili.com/opus/1233069202138464289",
       "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
       "quality_status": "rework_pending",
-      "available": false
+      "available": false,
+      "available_stages": []
     },
     {
       "key": "glm",
@@ -162,7 +171,8 @@
       "source_post": "https://www.bilibili.com/opus/1233069202138464289",
       "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
       "quality_status": "rework_pending",
-      "available": false
+      "available": false,
+      "available_stages": []
     },
     {
       "key": "kimi",
@@ -187,7 +197,8 @@
       "source_post": "https://www.bilibili.com/opus/1233069202138464289",
       "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
       "quality_status": "rework_pending",
-      "available": false
+      "available": false,
+      "available_stages": []
     },
     {
       "key": "gemini",
@@ -211,7 +222,8 @@
       "source_post": "https://www.bilibili.com/opus/1233069202138464289",
       "adaptation": "Artwork not ready. Rejected geometric drafts are excluded from compilation and public rendering.",
       "quality_status": "rework_pending",
-      "available": false
+      "available": false,
+      "available_stages": []
     }
   ],
   "quality_status": "not_approved"

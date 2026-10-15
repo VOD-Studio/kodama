@@ -527,7 +527,7 @@
       ]
     },
     "Companion": {
-      "description": "AI 伙伴身份预留。当前仅 `deepseek` 有可用美术；其他身份经 `sprite`/`frame` 请求时返回 `bad_input`。",
+      "description": "AI 伙伴身份。`deepseek` 三阶段可用，`gpt` 仅成年可用；其余身份或阶段经 `sprite`/`frame` 请求时返回 `bad_input`。",
       "enum": [
         "deepseek",
         "gpt",
@@ -1924,7 +1924,7 @@
         ],
         "mutates_state": false,
         "op": "frame",
-        "summary": "将姿态与呈现时钟合成为字符单元网格;可选 DeepSeek 伙伴外观、动作与表情，其他伙伴美术未就绪时返回 bad_input"
+        "summary": "将姿态与呈现时钟合成为字符单元网格;可选伙伴外观、动作与表情(DeepSeek 三阶段，GPT 仅成年)，其余角色或阶段美术未就绪时返回 bad_input"
       },
       {
         "errors": [
@@ -1932,7 +1932,7 @@
         ],
         "mutates_state": false,
         "op": "sprite",
-        "summary": "将姿态、成长阶段与呈现时钟合成为像素画调色板与网格;可选 DeepSeek 伙伴外观、动作与表情，其他伙伴美术未就绪时返回 bad_input"
+        "summary": "将姿态、成长阶段与呈现时钟合成为像素画调色板与网格;可选伙伴外观、动作与表情(DeepSeek 三阶段，GPT 仅成年)，其余角色或阶段美术未就绪时返回 bad_input"
       },
       {
         "errors": [

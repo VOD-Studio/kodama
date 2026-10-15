@@ -318,6 +318,8 @@ pub fn render(i: &FrameInput) -> Frame {
     }
 }
 
+use companions::is_ready;
+
 fn companion_label(i: &FrameInput, appearance: &companions::CompanionAppearance) -> Frame {
     let (w, h) = (i.w.max(1), i.h.max(1));
     let action = match i.pose {
@@ -329,8 +331,8 @@ fn companion_label(i: &FrameInput, appearance: &companions::CompanionAppearance)
             .unwrap_or_else(|| companions::CompanionAction::from_pose(i.pose)),
     };
     let mut rows: Vec<String> = (0..h).map(|_| " ".repeat(w as usize)).collect();
-    let labels = if appearance.character.is_available() {
-        ["DeepSeek", action.name()]
+    let labels = if is_ready(appearance, i.stage, &i.lineage) {
+        [appearance.character.display_name(), action.name()]
     } else {
         ["", ""]
     };

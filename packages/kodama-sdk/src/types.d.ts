@@ -179,7 +179,7 @@ export type CompanionAction =
   | "lift"
   | "praise";
 /**
- * AI 伙伴身份预留。当前仅 `deepseek` 有可用美术；其他身份经 `sprite`/`frame` 请求时返回 `bad_input`。
+ * AI 伙伴身份。`deepseek` 三阶段可用，`gpt` 仅成年可用；其余身份或阶段经 `sprite`/`frame` 请求时返回 `bad_input`。
  *
  * This interface was referenced by `PetWireProtocol`'s JSON-Schema
  * via the `definition` "Companion".

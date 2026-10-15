@@ -1,4 +1,4 @@
-use kodama_term::{render, render_pixels, Charset, FrameInput, PixelInput};
+use kodama_term::{render, render_pixels, Charset, FrameInput, PixelInput, Stage};
 use serde_json::{json, Value};
 
 #[test]
@@ -31,6 +31,13 @@ fn companion_catalog_matches_the_public_protocol_types() {
         assert_eq!(character["stages"], json!(["baby", "young", "adult"]));
         let identity: Companion = serde_json::from_value(character["key"].clone()).unwrap();
         assert_eq!(character["available"], identity.is_available());
+        let ready: Vec<&str> = ["baby", "young", "adult"]
+            .into_iter()
+            .zip([Stage::Baby, Stage::Young, Stage::Adult])
+            .filter(|(_, stage)| identity.has_stage(*stage))
+            .map(|(name, _)| name)
+            .collect();
+        assert_eq!(character["available_stages"], json!(ready));
         assert_eq!(
             character["renderer"],
             if identity.is_available() {
@@ -130,15 +137,26 @@ fn companion_glyph_fallback_is_safe_in_tiny_regions() {
 
 #[test]
 fn reserved_characters_have_no_direct_terminal_art_or_label() {
-    for character in ["gpt", "claude", "grok", "glm", "kimi", "gemini"] {
+    // Fully reserved identities at the adult stage, plus GPT's unfinished stages.
+    let cases = [
+        ("claude", 2),
+        ("grok", 2),
+        ("glm", 2),
+        ("kimi", 2),
+        ("gemini", 2),
+        ("gpt", 0),
+        ("gpt", 1),
+    ];
+    for (character, stage) in cases {
         for charset in ["ascii", "unicode", "blocks"] {
             let mut v = input();
             v["companion"]["character"] = json!(character);
             v["charset"] = json!(charset);
+            v["stage"] = json!(stage);
             let f: FrameInput = serde_json::from_value(v).unwrap();
             assert!(
                 render(&f).rows.iter().all(|row| row.trim().is_empty()),
-                "{character} {charset}"
+                "{character} stage{stage} {charset}"
             );
         }
     }

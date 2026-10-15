@@ -15,7 +15,7 @@ fn run(op: &str, character: &str, stage: u8, charset: &str) -> Value {
 
 #[test]
 fn unfinished_artwork_is_bad_input_for_every_public_rendering_path() {
-    for character in ["gpt", "claude", "grok", "glm", "kimi", "gemini"] {
+    for character in ["claude", "grok", "glm", "kimi", "gemini"] {
         for stage in 0..3 {
             for (op, charset) in [
                 ("sprite", "blocks"),
@@ -55,6 +55,25 @@ fn selected_deepseek_sources_are_available_in_all_three_stages() {
                 .unwrap()
                 .chars()
                 .any(|c| c != '.' && c != ' ')));
+        }
+    }
+}
+
+#[test]
+fn gpt_is_available_only_for_the_adult_stage() {
+    for stage in 0..3 {
+        for (op, charset) in [
+            ("sprite", "blocks"),
+            ("frame", "ascii"),
+            ("frame", "blocks"),
+        ] {
+            let result = run(op, "gpt", stage, charset);
+            if stage == 2 {
+                assert_eq!(result["ok"], true, "{op} {charset}");
+            } else {
+                assert_eq!(result["ok"], false, "{op} {charset} stage{stage}");
+                assert_eq!(result["message"], "gpt artwork not ready");
+            }
         }
     }
 }

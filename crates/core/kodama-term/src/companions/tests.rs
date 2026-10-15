@@ -44,7 +44,7 @@ fn reserved_characters_cannot_reach_any_draft_pixels() {
     assert!(Companion::Deepseek.is_available());
     for character in Companion::ALL
         .into_iter()
-        .filter(|c| *c != Companion::Deepseek)
+        .filter(|c| !matches!(c, Companion::Deepseek | Companion::Gpt))
     {
         assert!(!character.is_available());
         for stage in 0..3 {
@@ -150,4 +150,35 @@ fn selected_adult_whale_keeps_original_pixels_at_one_times_scale() {
         assert_eq!(&p.rows[y + 15][13..82], row);
     }
     assert_eq!(p.palette, source.palette);
+}
+
+#[test]
+fn gpt_adult_renders_two_key_poses_and_earlier_stages_stay_reserved() {
+    let look = |action| CompanionAppearance {
+        character: Companion::Gpt,
+        action: Some(action),
+        expression: None,
+    };
+    for stage in 0..2 {
+        assert!(!is_ready(&look(CompanionAction::Idle), stage, &[]));
+        let p = render(
+            &input(stage, 0, "idle", 80, 92),
+            &look(CompanionAction::Idle),
+        );
+        assert!(p.palette.is_empty(), "stage {stage} must not show artwork");
+    }
+    assert!(is_ready(&look(CompanionAction::Idle), 2, &[]));
+    let open = render(&input(2, 0, "idle", 80, 92), &look(CompanionAction::Idle));
+    let closed = render(&input(2, 0, "sleep", 80, 92), &look(CompanionAction::Sleep));
+    assert_eq!((open.w, open.h), (80, 92));
+    assert_ne!(open.rows, closed.rows);
+    for p in [&open, &closed] {
+        assert!(p.rows.iter().all(|r| r.len() == 80));
+        for key in p.rows.iter().flat_map(|r| r.chars()).filter(|c| *c != '.') {
+            assert!(p.palette.contains_key(&key.to_string()));
+        }
+    }
+    // A smaller host region crops around the centre instead of stretching.
+    let small = render(&input(2, 0, "idle", 69, 66), &look(CompanionAction::Idle));
+    assert_eq!((small.w, small.h), (69, 66));
 }
