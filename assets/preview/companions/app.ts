@@ -237,7 +237,6 @@ function selectCharacter(key: string) {
   byId("character-name").textContent = selected;
   byId("form-stage-label").textContent = state.stage === 0 ? "稀有系列 · 幼体" : "稀有系列 · 终阶";
   byId("web-form-caption").textContent = `${formName()}动画`;
-  byId("current-form-note").textContent = `当前：${formName()} · 69 × 66 画布 · 每刻 100 毫秒`;
   byId("expression-note").hidden = state.stage !== 0;
   byId("status").textContent = `${formName()}已载入`;
   const actionLabel = actions.find(([key]) => key === state.action)?.[1] ?? "待机";

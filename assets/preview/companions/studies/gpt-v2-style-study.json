@@ -1,0 +1,10 @@
+{
+  "character": "gpt",
+  "status": "style_study_not_runtime_sprite",
+  "tool": "built-in image_gen",
+  "image": "gpt-v2-style-study.png",
+  "identity_reference": "https://genderswapai.com/zh-CN/ai-gijinka/gpt",
+  "identity_source_post": "https://www.bilibili.com/opus/1233069202138464289",
+  "style_reference": "https://dshtui.com/pets/whale-girl-emoji/",
+  "prompt_summary": "Generate one transparent chibi GPT white dragon girl adapting the established silver-white and pale lavender community character: curved segmented horns, pointed ears, lavender eyes, small dragon wings, scaled curled tail, long layered silver hair and white Chinese-inspired dress with loose sleeves and silver knots/tassels. Use the selected dshtui whale-girl sprite only for compact seated chibi proportions, expressive face, dimensional hair and cloth detail. Preserve character identity. One full-body compact seated pose with hands gathered near chest. Premium detailed anime pixel-art direction, refined lavender outlines, sophisticated shade ramps, expressive irises and highlights, carefully layered hair and dress folds. Intended target approximately 80 logical pixels with an integer enlarged presentation; no text, no added objects or teal redesign, real transparent alpha. The generated result remains a high-resolution style study until native-size and animation validation passes."
+}
