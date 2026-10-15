@@ -169,3 +169,87 @@ test("importing the module touches no browser globals", async () => {
   assert.equal(typeof globalThis.window, "undefined");
   await import("../dist/web.js");
 });
+
+test("companions use a square default canvas and presentation setters leave the projection unchanged", () => {
+  const canvas = fakeCanvas();
+  const win = fakeWindow({ reduced: true });
+  const pet = Object.freeze({ ...PET, stage: 2, companion: Object.freeze({ character: "deepseek" }) });
+  const m = mountPet(canvas, { pet, pose: "observe", window: win });
+  assert.deepEqual([canvas.width, canvas.height], [384, 384]);
+  assert.ok(canvas.ctx.rects.length > 10);
+  const idle = snapshot(canvas.ctx);
+  m.setExpression("smug");
+  assert.notEqual(snapshot(canvas.ctx), idle, "observe forwards expressions to existing source clips");
+  m.setExpression();
+  assert.equal(snapshot(canvas.ctx), idle, "clearing an expression restores the source observe clip");
+  m.setAction("work");
+  assert.notEqual(snapshot(canvas.ctx), idle, "work has a distinct presentation");
+  const working = snapshot(canvas.ctx);
+  m.setExpression("smug");
+  assert.equal(snapshot(canvas.ctx), working, "task clips retain their authored face");
+  assert.deepEqual(pet.companion, { character: "deepseek" }, "the supplied projection is immutable");
+  m.setExpression();
+  assert.equal(snapshot(canvas.ctx), working, "clearing an expression restores the action's expression");
+  m.setAction();
+  assert.equal(snapshot(canvas.ctx), idle, "clearing an action restores the pose");
+  assert.equal(win.timers.size, 0, "reduced motion remains still");
+  m.setPet(PET);
+  assert.equal(canvas.height, 160);
+  m.setPet(pet);
+  assert.equal(canvas.height, 384);
+  m.dispose();
+  assert.deepEqual([canvas.width, canvas.height], [300, 150]);
+});
+
+test("companion presentation cannot override life poses and keeps explicit canvas sizes", () => {
+  for (const pose of ["sick", "evolve", "end", "sleep"]) {
+    const canvas = fakeCanvas();
+    const m = mountPet(canvas, {
+      pet: { ...PET, stage: 2, companion: { character: "deepseek" } },
+      pose,
+      height: 80,
+      window: fakeWindow({ reduced: true }),
+    });
+    const life = snapshot(canvas.ctx);
+    m.setAction("play");
+    m.setExpression("happy");
+    assert.equal(snapshot(canvas.ctx), life, `${pose} has priority over requested actions and expressions`);
+    m.setPet({ ...PET, companion: { character: "deepseek" } });
+    assert.equal(canvas.height, 320, "explicit height is retained");
+    m.dispose();
+  }
+});
+
+test("companion animation honors pause, visibility, accessibility and disposal", () => {
+  const canvas = fakeCanvas();
+  const win = fakeWindow();
+  const m = mountPet(canvas, { pet: { ...PET, companion: { character: "deepseek", action: "work" } }, label: "DeepSeek", onActivate() {}, window: win });
+  assert.equal(canvas.getAttribute("role"), "button");
+  assert.equal(canvas.getAttribute("aria-label"), "DeepSeek");
+  const before = canvas.ctx.clears;
+  m.pause();
+  win.tick();
+  assert.equal(canvas.ctx.clears, before);
+  m.resume();
+  win.document.visibilityState = "hidden";
+  win.tick();
+  assert.equal(canvas.ctx.clears, before);
+  win.document.visibilityState = "visible";
+  win.tick();
+  assert.equal(canvas.ctx.clears, before + 1);
+  m.dispose();
+  assert.equal(win.timers.size, 0);
+  assert.equal(canvas.listeners.size, 0);
+  assert.equal(canvas.getAttribute("aria-label"), "original");
+});
+
+test("unavailable companion artwork never paints a draft or retains the prior character", () => {
+  const canvas = fakeCanvas();
+  const m = mountPet(canvas, { pet: { ...PET, stage: 2, companion: { character: "gpt" } }, window: fakeWindow({ reduced: true }) });
+  assert.equal(canvas.ctx.rects.length, 0);
+  m.setPet({ ...PET, stage: 2, companion: { character: "deepseek" } });
+  assert.ok(canvas.ctx.rects.length > 0);
+  m.setPet({ ...PET, stage: 2, companion: { character: "claude" } });
+  assert.equal(canvas.ctx.rects.length, 0, "a rejected request cannot retain a misleading previous frame");
+  m.dispose();
+});

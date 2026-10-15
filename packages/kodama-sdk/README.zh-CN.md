@@ -108,7 +108,23 @@ pet.dispose();
 - 不读写任何存储：投影由调用方传入，用 `setPet()` 替换。`dispose()` 停止时钟、移除监听并恢复 canvas。
 - 导入没有副作用，SSR 期间安全；在客户端调用 `mountPet`。
 
-逻辑画布不小于 56×36 时任何外形都不会被裁切（缺省 96×40），多出的宽度用来走动。
+原有物种的逻辑画布不小于 56×36 时任何外形都不会被裁切（缺省 96×40），多出的宽度用来走动。
+
+传入可选的 `companion` 即可改为 AI 伙伴外观，缺省画布为 96×96。`setPet()` 在伙伴与原有物种之间切换时会调整缺省高度；显式设置的 `width`、`height` 会保留。
+
+```js
+const companion = mountPet(document.querySelector("canvas"), {
+  pet: { species: born.value.species, genes: born.value.genes, stage: 2, companion: { character: "deepseek" } },
+  label: "DeepSeek",
+});
+companion.setAction("think");
+companion.setAction(); // 恢复由 pose 决定的动作
+companion.setExpression("curious");
+companion.setExpression();
+companion.dispose();
+```
+
+当前只有 `deepseek` 美术可用：幼体和少年使用原版 Deepy 小鲸鱼，终阶使用选定的鲸娘原帧；少年目前与幼体共用 Deepy。其余六个枚举值（`gpt`、`claude`、`grok`、`glm`、`kimi`、`gemini`）仅预留角色身份，原始 `sprite`、`frame` 请求会返回 `{ ok: false, code: "bad_input", message: "<character> artwork not ready" }`。已否决草稿不参与编译和渲染。`setAction()` 与 `setExpression()` 只修改呈现，不改写传入的投影、出生身份、稀有度或养成状态。`sick`、`evolve`、`end`、`sleep` 姿态优先于伙伴动作。
 
 ## 本地模式
 
@@ -157,6 +173,8 @@ pet.dispose(); // 停止绘制并清空区域
 ```
 
 `charset: "blocks"`（并传入宠物的 `lineage`）时以半格像素画绘制进化后的外形，需要 256 色终端；`"ascii"` 与 `"unicode"` 绘制小尺寸的字符画。宠物只在 `region` 内绘制，只用保存/恢复光标与绝对定位；不读取 stdin、不进入备用屏、不隐藏光标、不修改终端模式，输出不是 TTY 时什么都不做。宿主负责让自己的输出避开该区域（例如设置滚动区域），并在退出前调用 `dispose()`。
+
+终端也接受 `pet.companion`，可以通过逐帧调用的 `getAction`、`getExpression` 覆盖动作与表情。`blocks` 与网页画布使用同一套伙伴像素，其他字符集降级为角色名称与当前动作的 ASCII 标签。
 
 需要独立运行的终端宠物时，请改用原生的 [`kodama`](https://github.com/VOD-Studio/kodama/blob/main/crates/runtimes/kodama/README.zh-CN.md)。
 

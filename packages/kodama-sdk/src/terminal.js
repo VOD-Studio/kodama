@@ -8,7 +8,7 @@ const FRAME_MS = 100;
  * 宿主负责让自己的输出避开该区域(例如设置滚动区域),并在退出前调用 dispose()。
  * charset 为 "blocks" 时以半格像素画绘制进化外形(需要 256 色),每个字符带前景与背景色,行尾复位颜色。
  */
-export function mountTerminalPet({ stream = process.stdout, region, pet, getPose = () => "idle", charset = "ascii" }) {
+export function mountTerminalPet({ stream = process.stdout, region, pet, getPose = () => "idle", getAction, getExpression, charset = "ascii" }) {
   if (!stream.isTTY) return { dispose() {} };
   let t = 0;
   let timer = null;
@@ -17,7 +17,12 @@ export function mountTerminalPet({ stream = process.stdout, region, pet, getPose
     const h = Math.min(region.height, Math.max(0, (stream.rows ?? 0) - region.row + 1));
     if (w < 1 || h < 1) return;
     const lineage = pet.lineage ?? [];
-    const r = run({ op: "frame", species: pet.species, genes: pet.genes, pose: getPose(), charset, w, h, t: String(t++), stage: pet.stage ?? lineage.length, lineage, outfit: pet.outfit ?? {}, rarity: pet.rarity ?? 0 });
+    const companion = pet.companion && {
+      ...pet.companion,
+      action: getAction ? getAction() : pet.companion.action,
+      expression: getExpression ? getExpression() : pet.companion.expression,
+    };
+    const r = run({ op: "frame", species: pet.species, genes: pet.genes, pose: getPose(), charset, w, h, t: String(t++), stage: pet.stage ?? lineage.length, lineage, outfit: pet.outfit ?? {}, rarity: pet.rarity ?? 0, companion });
     if (!r.ok) return;
     let out = "\x1b7";
     r.value.rows.forEach((row, y) => {

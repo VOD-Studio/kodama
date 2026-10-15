@@ -108,7 +108,23 @@ pet.dispose();
 - Never reads or writes storage: pass the projection in, and replace it with `setPet()`. `dispose()` stops the clock, removes listeners and restores the canvas.
 - The import has no side effects and is safe during SSR; call `mountPet` on the client.
 
-A canvas of at least 56×36 logical pixels (the default is 96×40) never clips a form; the extra width is room to walk.
+A canvas of at least 56×36 logical pixels (the default is 96×40) never clips an original species form; the extra width is room to walk.
+
+Pass an optional `companion` to render an AI companion instead. Its default canvas is 96×96; `setPet()` adjusts the default height when switching between companions and original species. An explicit `width` or `height` is retained.
+
+```js
+const companion = mountPet(document.querySelector("canvas"), {
+  pet: { species: born.value.species, genes: born.value.genes, stage: 2, companion: { character: "deepseek" } },
+  label: "DeepSeek",
+});
+companion.setAction("think");
+companion.setAction(); // restore the action selected by pose
+companion.setExpression("curious");
+companion.setExpression();
+companion.dispose();
+```
+
+Only `deepseek` artwork is currently available: the original Deepy whale for baby and young stages, and the selected whale-girl frames for the adult stage. The young stage currently shares Deepy. The other six enum values (`gpt`, `claude`, `grok`, `glm`, `kimi`, `gemini`) reserve identities for future artwork; raw `sprite` and `frame` requests return `{ ok: false, code: "bad_input", message: "<character> artwork not ready" }` for them. Rejected drafts are excluded from compilation and rendering. `setAction()` and `setExpression()` only change presentation; they do not change the supplied projection, birth identity, rarity or care state. The `sick`, `evolve`, `end` and `sleep` poses take precedence over companion actions.
 
 ## Local mode
 
@@ -157,6 +173,8 @@ pet.dispose(); // stops drawing and clears the region
 ```
 
 With `charset: "blocks"` (and the pet's `lineage`), the pet is drawn as half-block pixel art in its evolved form, which needs a 256-colour terminal; `"ascii"` and `"unicode"` draw small character art. The pet draws only inside `region`, using save and restore cursor plus absolute positioning. It never reads stdin, switches to the alternate screen, hides the cursor or changes terminal modes, and it does nothing when the stream is not a TTY. Your tool keeps its own output out of the region, for example with a scroll region, and calls `dispose()` before it exits.
+
+Terminal pets also accept `pet.companion`, with optional `getAction` and `getExpression` callbacks evaluated each frame. `blocks` uses the same companion pixels as the web canvas; the other charsets show the character name and current action as ASCII labels.
 
 For a standalone terminal pet, use the native [`kodama`](https://github.com/VOD-Studio/kodama/blob/main/crates/runtimes/kodama/README.md) instead.
 

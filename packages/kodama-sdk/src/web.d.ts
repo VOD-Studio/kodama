@@ -1,4 +1,4 @@
-import type { Branch, Outfit, Pose } from "./types";
+import type { Branch, CompanionAction, CompanionAppearance, Expression, Outfit, Pose } from "./types";
 
 export interface WebPet {
   species: number;
@@ -10,13 +10,15 @@ export interface WebPet {
   outfit?: Outfit;
   /** 出生稀有度 0–4：不凡起有闪光，史诗与传说描边变色，传说身边有光环。外形里的 `rarity` 原样传入即可。 */
   rarity?: number;
+  /** AI 伙伴的呈现外观，不修改出生记录或养成状态。 */
+  companion?: CompanionAppearance;
 }
 
 export interface MountPetOptions {
   pet: WebPet;
   /** 姿态，或每帧调用一次、返回姿态的函数。缺省为 "idle"。 */
   pose?: Pose | (() => Pose);
-  /** 逻辑像素画布，缺省 96×40；不小于 56×36 时任何外形都不会被裁切。 */
+  /** 逻辑像素画布，伙伴缺省 96×96，其他宠物缺省 96×40。 */
   width?: number;
   height?: number;
   /** 每个逻辑像素放大的倍数，缺省 4；高分屏另乘 devicePixelRatio。 */
@@ -35,6 +37,10 @@ export interface MountedPet {
   /** 替换投影（例如进化后），立即重画。 */
   setPet(pet: WebPet): void;
   setPose(pose: Pose | (() => Pose)): void;
+  /** 更新伙伴的呈现动作；省略时恢复由 pose 决定，不修改养成状态。 */
+  setAction(action?: CompanionAction): void;
+  /** 更新伙伴的表情；省略时恢复由动作决定，不修改养成状态。 */
+  setExpression(expression?: Expression): void;
   pause(): void;
   resume(): void;
   readonly paused: boolean;

@@ -18,7 +18,7 @@ export function mountPet(canvas, options) {
   const win = options.window ?? globalThis;
   const doc = win.document;
   const width = options.width ?? 96;
-  const height = options.height ?? 40;
+  let height = options.height ?? (options.pet.companion ? 96 : 40);
   const scale = options.scale ?? 4;
   const dpr = Math.max(1, Math.round(win.devicePixelRatio ?? 1));
   const ctx = canvas.getContext("2d");
@@ -42,13 +42,16 @@ export function mountPet(canvas, options) {
     styleHeight: canvas.style?.height ?? "",
   };
 
-  canvas.width = width * scale * dpr;
-  canvas.height = height * scale * dpr;
-  if (canvas.style) {
-    if (!saved.styleWidth) canvas.style.width = `${width * scale}px`;
-    if (!saved.styleHeight) canvas.style.height = `${height * scale}px`;
+  function resize() {
+    canvas.width = width * scale * dpr;
+    canvas.height = height * scale * dpr;
+    if (canvas.style) {
+      if (!saved.styleWidth) canvas.style.width = `${width * scale}px`;
+      if (!saved.styleHeight) canvas.style.height = `${height * scale}px`;
+    }
+    ctx.imageSmoothingEnabled = false;
   }
-  ctx.imageSmoothingEnabled = false;
+  resize();
 
   const interactive = typeof options.onActivate === "function";
   canvas.setAttribute?.("role", interactive ? "button" : "img");
@@ -87,11 +90,15 @@ export function mountPet(canvas, options) {
       lineage,
       outfit: pet.outfit ?? {},
       rarity: pet.rarity ?? 0,
+      companion: pet.companion,
       w: width,
       h: height,
       t: String(reduced ? 0 : t),
     });
-    if (!r.ok) return;
+    if (!r.ok) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
     const s = scale * dpr;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     r.value.rows.forEach((row, y) => {
@@ -123,6 +130,21 @@ export function mountPet(canvas, options) {
   return {
     setPet(next) {
       pet = next;
+      const nextHeight = options.height ?? (pet.companion ? 96 : 40);
+      if (nextHeight !== height) {
+        height = nextHeight;
+        resize();
+      }
+      draw();
+    },
+    setAction(action) {
+      if (!pet.companion) return;
+      pet = { ...pet, companion: { ...pet.companion, action } };
+      draw();
+    },
+    setExpression(expression) {
+      if (!pet.companion) return;
+      pet = { ...pet, companion: { ...pet.companion, expression } };
       draw();
     },
     setPose(next) {
