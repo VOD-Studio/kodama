@@ -734,7 +734,7 @@ dependencies = [
 
 [[package]]
 name = "kodama"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "crossterm",
  "kodama-core",
@@ -748,7 +748,7 @@ dependencies = [
 
 [[package]]
 name = "kodama-core"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "ed25519-dalek",
  "hmac",
@@ -761,7 +761,7 @@ dependencies = [
 
 [[package]]
 name = "kodama-issuer"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "ed25519-dalek",
  "kodama-core",
@@ -770,7 +770,7 @@ dependencies = [
 
 [[package]]
 name = "kodama-schema"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "kodama-core",
  "kodama-term",
@@ -780,7 +780,7 @@ dependencies = [
 
 [[package]]
 name = "kodama-service"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "axum",
  "base64 0.22.1",
@@ -801,7 +801,7 @@ dependencies = [
 
 [[package]]
 name = "kodama-store"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "kodama-core",
  "postgres",
@@ -813,7 +813,7 @@ dependencies = [
 
 [[package]]
 name = "kodama-term"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "schemars",
  "serde",
@@ -822,7 +822,7 @@ dependencies = [
 
 [[package]]
 name = "kodama-wasm"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "kodama-core",
  "wasm-bindgen",
