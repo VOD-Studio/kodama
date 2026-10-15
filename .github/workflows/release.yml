@@ -109,7 +109,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VERSION: ${{ needs.release-please.outputs.version }}
-        run: scripts/release/npm-publish.sh "pkgs/violetjs-pet-$VERSION.tgz" publish
+        run: scripts/release/npm-publish.sh "pkgs/violetjs-kodama-$VERSION.tgz" publish
 
   cli:
     name: CLI release assets

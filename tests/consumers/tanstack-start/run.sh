@@ -8,7 +8,7 @@ trap 'kill $SRV 2>/dev/null; rm -rf "$WORK"' EXIT
 (cd "$HERE/../../../packages/kodama-sdk" && pnpm pack --pack-destination "$WORK" >/dev/null)
 cp -R "$HERE"/. "$WORK/app" 2>/dev/null || { mkdir "$WORK/app" && cp -R "$HERE"/. "$WORK/app"; }
 cd "$WORK/app"
-pnpm add -s @tanstack/react-start@^1.168.56 @tanstack/react-router@^1.170.38 react@^19.2.0 react-dom@^19.2.0 vite@^8.0.0 @vitejs/plugin-react@^6.0.1 "$WORK"/violetjs-pet-*.tgz
+pnpm add -s @tanstack/react-start@^1.168.56 @tanstack/react-router@^1.170.38 react@^19.2.0 react-dom@^19.2.0 vite@^8.0.0 @vitejs/plugin-react@^6.0.1 "$WORK"/violetjs-kodama-*.tgz
 pnpm exec vite build >/dev/null
 node serve.mjs >/dev/null 2>&1 & SRV=$!
 i=0
