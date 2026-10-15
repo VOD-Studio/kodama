@@ -3,6 +3,7 @@
 //! - `bodies`：8 个物种 × 3 个阶段的身体模板；进化改变的是整副身体，不是加点缀。
 //! - `parts`：进化分支带来的特征（卷毛、绒毛、花纹、角、甲、翼、光环），按身体锚点定位。
 //! - `grid`：描边与明暗的统一规则。
+//! - `markings`：个体花纹（基因 3）与稀有度光效，同物种同外形的每一只也一眼能认出来。
 //! - `items`：装扮（帽子、眼镜、围巾、背包、披风与背景场景），同样按锚点定位。
 //! - `motion`：姿态的动作与效果（步态、眼神、嘴、食物、Z、汗滴、进化闪烁等）。
 //! - `palette`：颜色。
@@ -11,6 +12,7 @@
 mod bodies;
 mod grid;
 mod items;
+mod markings;
 mod motion;
 mod palette;
 mod parts;
@@ -47,6 +49,9 @@ pub struct PixelInput {
     /// 穿戴的装扮（即宠物的 `wardrobe.worn`）。不适合这个身体结构的物品不画。
     #[serde(default)]
     pub outfit: Outfit,
+    /// 出生稀有度 0–4（普通、不凡、稀有、史诗、传说）：不凡起有闪光，史诗与传说描边变色，传说身边有光环。
+    #[serde(default)]
+    pub rarity: u8,
 }
 
 /// 像素网格。`rows` 的每个字符是 `palette` 的键,`.` 表示透明。
@@ -87,7 +92,13 @@ pub(crate) struct Sprite {
 }
 
 /// 合成一个外形。`gait` 是步态帧：行走者抬起左脚（1）或右脚（3），扎根者向右（1）或向左（3）摇摆。
-pub(crate) fn compose(species: u8, form: Form, gait: u8, outfit: &Outfit) -> Sprite {
+pub(crate) fn compose(
+    species: u8,
+    form: Form,
+    gait: u8,
+    genes: &[u8; 8],
+    outfit: &Outfit,
+) -> Sprite {
     let art = &bodies::SPECIES_ART[(species % SPECIES_COUNT) as usize];
     let def = &art.forms[form.stage.index()];
     let bw = 2 * def.half.first().map_or(0, |r| r.len()) as i32;
@@ -110,6 +121,8 @@ pub(crate) fn compose(species: u8, form: Form, gait: u8, outfit: &Outfit) -> Spr
         }
     }
     let anchors = Anchors::measure(&body, x0, bw);
+    // 个体花纹画在身体模板上，随后与身体一起描边打光
+    markings::draw(markings::Marking::of(genes), &anchors, &mut body);
 
     let mut back = Grid::new(w, h);
     let mut front = Grid::new(w, h);
@@ -169,6 +182,6 @@ pub fn render_pixels(i: &PixelInput) -> Pixels {
         w,
         h,
         rows,
-        palette: palette::palette(art, &i.genes, form, i.pose),
+        palette: palette::palette(art, &i.genes, form, i.pose, i.rarity),
     }
 }

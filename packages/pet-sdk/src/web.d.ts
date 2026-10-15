@@ -8,6 +8,8 @@ export interface WebPet {
   stage?: number;
   /** 身上的装扮，即宠物的 `wardrobe.worn`。不适合这个身体结构的物品不画。 */
   outfit?: Outfit;
+  /** 出生稀有度 0–4：不凡起有闪光，史诗与传说描边变色，传说身边有光环。外形里的 `rarity` 原样传入即可。 */
+  rarity?: number;
 }
 
 export interface MountPetOptions {

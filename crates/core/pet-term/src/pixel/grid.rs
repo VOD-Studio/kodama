@@ -13,7 +13,7 @@ pub(crate) const CLEAR: u8 = b'.';
 const DETAIL: &[u8] = b"WZx*!jGzR";
 
 /// 可打光的填充键：(键, 亮部, 暗部)。
-const SHADE: [(u8, u8, u8); 10] = [
+const SHADE: [(u8, u8, u8); 11] = [
     (b'b', b'h', b's'),
     (b'a', b'c', b'A'),
     (b'p', b'r', b'q'),
@@ -25,6 +25,8 @@ const SHADE: [(u8, u8, u8); 10] = [
     (b'B', b'H', b'J'),
     (b'M', b'N', b'O'),
     (b'V', b'I', b'K'),
+    // 个体花纹
+    (b'1', b'2', b'3'),
 ];
 
 #[derive(Clone)]

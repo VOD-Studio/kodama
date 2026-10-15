@@ -8,7 +8,7 @@ ajv.addSchema(schema, "pet");
 const check = (name) => ajv.getSchema(`pet#/$defs/${name}`);
 
 const transcript = fs.readFileSync(new URL("../../../target/out-native.txt", import.meta.url), "utf8").trim().split("\n");
-const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url))).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", ...Array(4).fill("act"), ...Array(5).fill("act"), ...Array(3).fill("sprite"), "frame", "capabilities"];
+const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url))).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", ...Array(4).fill("act"), ...Array(5).fill("act"), ...Array(3).fill("sprite"), "frame", ...Array(6).fill("sprite"), "capabilities"];
 if (ops.length !== transcript.length) throw new Error(`op count ${ops.length} != transcript ${transcript.length}`);
 
 let n = 0;

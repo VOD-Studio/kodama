@@ -1,7 +1,7 @@
 //! 姿态：步态与位移、眼神与嘴、效果（食物、球、Z、感叹号、汗滴、闪光、光环、纪念台、影子），
 //! 以及进化动画。`t` 为呈现时钟的刻度；一帧动作 = 2 个刻度。
 use super::grid::{Grid, CLEAR};
-use super::{compose, items, PixelInput, Sprite};
+use super::{compose, items, markings, PixelInput, Sprite};
 use crate::form::{Branch, Form};
 use crate::outfit::Outfit;
 use crate::{body_of, Body, Pose};
@@ -17,9 +17,9 @@ pub(crate) fn render(species: u8, form: Form, i: &PixelInput) -> Grid {
         0
     };
     let (mut spr, silhouette) = if pose == Pose::Evolve {
-        evolve(species, form, t, outfit)
+        evolve(species, form, t, genes, outfit)
     } else {
-        (compose(species, form, gait, outfit), false)
+        (compose(species, form, gait, genes, outfit), false)
     };
     if !silhouette {
         face(&mut spr, pose, t, genes);
@@ -58,6 +58,9 @@ pub(crate) fn render(species: u8, form: Form, i: &PixelInput) -> Grid {
     }
     out.paste(&spr.g, x, y);
     effects(&mut out, &spr, x, y, pose, t, form, kind, silhouette);
+    if !silhouette && pose != Pose::End {
+        markings::glow(&mut out, &spr.g, x, y, i.rarity, t);
+    }
     out
 }
 
@@ -275,17 +278,17 @@ const FLICKER: [bool; 24] = [
 ];
 
 /// 进化动画：32 刻度一个循环。前 24 刻度前后外形以白色剪影交替闪烁，后 8 刻度显示新外形并伴随闪光。
-fn evolve(species: u8, form: Form, t: u64, outfit: &Outfit) -> (Sprite, bool) {
+fn evolve(species: u8, form: Form, t: u64, genes: &[u8; 8], outfit: &Outfit) -> (Sprite, bool) {
     let phase = (t % 32) as usize;
     if phase >= FLICKER.len() {
-        return (compose(species, form, 0, outfit), false);
+        return (compose(species, form, 0, genes, outfit), false);
     }
     let shown = if FLICKER[phase] {
         form
     } else {
         form.previous().unwrap_or(form)
     };
-    let mut s = compose(species, shown, 0, outfit);
+    let mut s = compose(species, shown, 0, genes, outfit);
     for c in s.g.cells.iter_mut() {
         if *c == b'o' {
             *c = b'g';

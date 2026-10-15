@@ -24,12 +24,14 @@ pub(crate) fn hsl(h: i32, s: i32, l: i32) -> String {
     format!("#{:02x}{:02x}{:02x}", ch(r), ch(g), ch(b))
 }
 
-/// 基因只改变颜色，不改变像素布局：基因 0 偏移主色相，基因 1 调整明暗，基因 2 偏移点缀色相。
+/// 基因 0 偏移主色相，基因 1 调整明暗，基因 2 偏移点缀色相，基因 3 选个体花纹的颜色（花纹的形状在 `markings`）；
+/// 出生稀有度决定描边颜色与光效。
 pub(crate) fn palette(
     art: &SpeciesArt,
     genes: &[u8; 8],
     form: Form,
     pose: Pose,
+    rarity: u8,
 ) -> BTreeMap<String, String> {
     let mut hue = art.hue as i32 + (genes[0] % 41) as i32 - 20;
     let mut sat = art.sat as i32;
@@ -64,7 +66,14 @@ pub(crate) fn palette(
     let mut put = |k: char, v: String| {
         p.insert(String::from(k), v);
     };
-    put('o', hsl(hue - 12, 45, 12));
+    // 描边：史诗泛紫、传说镀金（逝去的个体照常）
+    let outline = match (rarity, pose) {
+        (_, Pose::End) => hsl(hue - 12, 45, 12),
+        (3, _) => hsl(282, 60, 26),
+        (r, _) if r >= 4 => hsl(36, 85, 26),
+        _ => hsl(hue - 12, 45, 12),
+    };
+    put('o', outline);
     put('s', hsl(hue - 8, sat, 44 + lift));
     put('b', hsl(hue, sat, 60 + lift));
     put('h', hsl(hue + 8, (sat - 10).max(0), 76 + lift));
@@ -100,6 +109,19 @@ pub(crate) fn palette(
     put('x', hsl(30, 6, 64));
     put('X', hsl(30, 6, 46));
     put('y', hsl(30, 8, 80));
+    // 个体花纹：0 深色、1 点缀色、2 奶白、3 对比色（基因 3）
+    let (kh, ks, kl) = match (genes[3] / 6) % 4 {
+        // 与底色拉开明度或色相，同物种并排时一眼可分
+        0 => (hue - 10, (sat + 10).min(100), 26 + lift),
+        1 => (ah, (asat + 10).min(100), 46),
+        2 => (hue + 12, sat * 25 / 100, 94),
+        _ => (hue + 180, 55.min(sat + 15), 52),
+    };
+    put('1', hsl(kh, ks, kl));
+    put('2', hsl(kh + 6, ks, (kl + 14).min(96)));
+    put('3', hsl(kh - 6, ks, kl - 14));
+    // 传说个体身边的光点
+    put('4', hsl(48, 100, 78));
     // 装扮：材质颜色固定，不随基因变化；纪念形象一并去色
     let ds = if pose == Pose::End { 0 } else { 100 };
     let mut item = |k: char, h: i32, s: i32, l: i32| put(k, hsl(h, s * ds / 100, l));

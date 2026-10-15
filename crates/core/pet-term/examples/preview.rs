@@ -4,6 +4,7 @@
 //!   make preview ARGS="forms 3"      一个物种的全部 16 种外形（幼体、3 种少年、12 种成年）
 //!   make preview ARGS="poses 3"      一个物种成年形态的全部姿态
 //!   make preview ARGS="outfits 3"    一个物种穿上每件装扮与两套搭配
+//!   make preview ARGS="individuals 3" 一个物种 12 只不同基因的成年个体：花纹各不相同，稀有度依次是普通到传说
 //!   make preview ARGS="ascii"        字符画：终端不支持 UTF-8 或 256 色时看到的样子
 //!
 //! 需要支持 256 色与 UTF-8 的终端；按 `COLUMNS` 换行（缺省 160 列）。
@@ -22,8 +23,22 @@ struct Cell {
 }
 
 fn draw(label: String, species: u8, lineage: &[&str], pose: &str, t: u64, outfit: Value) -> Cell {
+    draw_one(label, species, GENES, 0, lineage, pose, t, outfit)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn draw_one(
+    label: String,
+    species: u8,
+    genes: [u8; 8],
+    rarity: u8,
+    lineage: &[&str],
+    pose: &str,
+    t: u64,
+    outfit: Value,
+) -> Cell {
     let input: FrameInput = serde_json::from_value(json!({
-        "species": species, "genes": GENES, "pose": pose, "charset": "blocks",
+        "species": species, "genes": genes, "pose": pose, "charset": "blocks", "rarity": rarity,
         "w": 56, "h": 20, "t": t.to_string(), "stage": lineage.len(), "lineage": lineage, "outfit": outfit,
     }))
     .expect("valid frame input");
@@ -207,6 +222,42 @@ fn outfits(s: u8) {
     );
 }
 
+/// 同一物种的 12 只个体：基因不同，花纹与颜色各不相同；稀有度依次是 0 普通到 4 传说。
+fn individuals(s: u8) {
+    println!(
+        "== 物种 {s}（{:?}）的 12 只个体（r0 普通 r1 不凡 r2 稀有 r3 史诗 r4 传说）",
+        body_of(s)
+    );
+    print(
+        (0..12u32)
+            .map(|n| {
+                let g = |k: u32| {
+                    ((n * 97 + k * 31 + s as u32 * 7).wrapping_mul(2_654_435_761) >> 24) as u8
+                };
+                let mut genes = [0u8; 8];
+                for (k, v) in genes.iter_mut().enumerate() {
+                    *v = if k == 3 {
+                        (n * 37 + s as u32 * 11) as u8
+                    } else {
+                        g(k as u32)
+                    };
+                }
+                let rarity = (n % 5) as u8;
+                draw_one(
+                    format!("#{n} r{rarity}"),
+                    s,
+                    genes,
+                    rarity,
+                    &["curious", "sage"],
+                    "observe",
+                    6,
+                    json!({}),
+                )
+            })
+            .collect(),
+    );
+}
+
 /// 字符画：每个物种的全部姿态。
 fn ascii() {
     for s in 0..SPECIES_COUNT {
@@ -249,9 +300,10 @@ fn main() {
         Some("forms") => forms(species_arg(&args)),
         Some("poses") => poses(species_arg(&args)),
         Some("outfits") => outfits(species_arg(&args)),
+        Some("individuals") => individuals(species_arg(&args)),
         Some("ascii") => ascii(),
         Some(other) => {
-            eprintln!("unknown preview: {other}; use stages, forms N, poses N, outfits N or ascii");
+            eprintln!("unknown preview: {other}; use stages, forms N, poses N, outfits N, individuals N or ascii");
             std::process::exit(2);
         }
     }

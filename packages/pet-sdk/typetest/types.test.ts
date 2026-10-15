@@ -48,6 +48,7 @@ mountPet(canvas, { pet: { species: 0, genes: [], lineage: ["dragon"] } });
 mountPet(canvas, { pet: { species: 0, genes: [] }, pose: "fly" });
 // 装扮：槽位与物品是线上协议里的取值
 mountPet(canvas, { pet: { species: 0, genes: [], outfit: { head: "star_hat", background: "night_sky" } } });
+mountPet(canvas, { pet: { species: 0, genes: [], rarity: 4 } });
 // @ts-expect-error 未知的物品
 mountPet(canvas, { pet: { species: 0, genes: [], outfit: { head: "golden_crown" } } });
 void run({ op: "act", pet, action: { equip: { item: "knit_scarf" } }, now: "1", request_id: "r" });

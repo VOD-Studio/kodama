@@ -812,6 +812,14 @@
         "pose": {
           "$ref": "#/$defs/Pose"
         },
+        "rarity": {
+          "default": 0,
+          "description": "出生稀有度 0–4；只有 `blocks` 画风画出光效。",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
         "species": {
           "format": "uint8",
           "maximum": 255,
@@ -1320,6 +1328,14 @@
         },
         "pose": {
           "$ref": "#/$defs/Pose"
+        },
+        "rarity": {
+          "default": 0,
+          "description": "出生稀有度 0–4（普通、不凡、稀有、史诗、传说）：不凡起有闪光，史诗与传说描边变色，传说身边有光环。",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
         },
         "species": {
           "format": "uint8",

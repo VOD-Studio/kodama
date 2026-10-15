@@ -20,6 +20,7 @@ pub(crate) fn render(i: &FrameInput) -> Frame {
         h: h.saturating_mul(2),
         t: i.t,
         outfit: i.outfit.clone(),
+        rarity: i.rarity,
     });
     let colour = |k: Option<char>| -> u8 {
         match k {
