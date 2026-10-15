@@ -67,7 +67,7 @@ pub enum Charset {
     Ascii,
     Unicode,
     /// 半格像素画：每个字符格显示上下两个像素（上半格前景色、下半格背景色），与 `sprite` 是同一套外形与动作。
-    /// 需要 UTF-8 与 256 色；高度不小于 10 行时完整显示幼体，约 20 行显示带翅膀的成年形态。
+    /// UTF-8 真彩色终端保留原 RGB；256 色终端按同一网格降色。区域不足时按 `sprite` 同样的规则裁切。
     Blocks,
 }
 
@@ -111,6 +111,13 @@ pub struct Frame {
     pub colors: Vec<Vec<u8>>,
     /// 与 rows 逐字符对应的背景 256 色索引；0 表示不设背景。只有 `blocks` 画风使用。
     pub bg: Vec<Vec<u8>>,
+    /// `blocks` 每格前景的原始 RGB，null 表示透明/默认色；真彩色输出应优先使用此网格。
+    /// 字符画省略此字段，旧消费方仍可使用 `colors`。
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub fg_rgb: Vec<Vec<Option<[u8; 3]>>>,
+    /// `blocks` 每格背景的原始 RGB，null 表示透明/默认色；字符画省略。
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub bg_rgb: Vec<Vec<Option<[u8; 3]>>>,
 }
 
 mod u64_string {
@@ -306,6 +313,8 @@ pub fn render(i: &FrameInput) -> Frame {
             .iter()
             .map(|r| r.iter().map(|_| 0).collect())
             .collect(),
+        fg_rgb: Vec::new(),
+        bg_rgb: Vec::new(),
     }
 }
 
@@ -336,5 +345,7 @@ fn companion_label(i: &FrameInput, appearance: &companions::CompanionAppearance)
         rows,
         colors: (0..h).map(|_| alloc::vec![0; w as usize]).collect(),
         bg: (0..h).map(|_| alloc::vec![0; w as usize]).collect(),
+        fg_rgb: Vec::new(),
+        bg_rgb: Vec::new(),
     }
 }

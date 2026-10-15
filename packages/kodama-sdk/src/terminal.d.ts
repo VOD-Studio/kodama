@@ -18,6 +18,10 @@ export interface MountOptions {
   getAction?: () => CompanionAction | undefined;
   getExpression?: () => Expression | undefined;
   charset?: Charset;
+  /** auto 检测 COLORTERM/TERM；truecolor 保留原 RGB，256 明确降色，16/none 将 blocks 回退为字符画。NO_COLOR 始终优先。 */
+  colorMode?: "auto" | "truecolor" | "256" | "16" | "none";
+  /** 嵌入宿主可传入能力检测环境；缺省 process.env。 */
+  env?: Record<string, string | undefined>;
 }
 
 export function mountTerminalPet(options: MountOptions): { dispose(): void };

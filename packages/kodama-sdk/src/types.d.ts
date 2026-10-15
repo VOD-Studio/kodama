@@ -709,9 +709,18 @@ export interface Frame {
    */
   bg: number[][];
   /**
+   * `blocks` 每格背景的原始 RGB，null 表示透明/默认色；字符画省略。
+   */
+  bg_rgb?: ([number, number, number] | null)[][];
+  /**
    * 与 rows 逐字符对应的 256 色索引;0 表示不着色。
    */
   colors: number[][];
+  /**
+   * `blocks` 每格前景的原始 RGB，null 表示透明/默认色；真彩色输出应优先使用此网格。
+   * 字符画省略此字段，旧消费方仍可使用 `colors`。
+   */
+  fg_rgb?: ([number, number, number] | null)[][];
   h: number;
   rows: string[];
   w: number;

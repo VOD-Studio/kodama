@@ -66,7 +66,8 @@ ok(b"\x1b[?1049h" in buf and b"\x1b[?1049l" in buf, "alt screen entered and left
 ok(b"\x1b[?25l" in buf and buf.rstrip().endswith(b"\x1b[?25h") or b"\x1b[?25h" in buf[-40:], "cursor hidden then shown at exit")
 ok(a is not None and a[3] == b[3], "termios lflag restored after exit")
 ok(mid > 200, f"animation produced frames ({mid} bytes in 1s)")
-ok(b"38;5;" in buf, "256-colour SGR used")
+ok(b"38;2;" in buf[:mid] and b"38;5;" not in buf[:mid], "truecolor pixel frames keep 24-bit RGB SGR before resize")
+ok("\u25cf".encode() in buf[mid:], "short resized region explicitly falls back to Unicode glyph art")
 def head_cols(b):
     cols = set()
     for fr in b.split(b"\x1b[1;1H")[1:]:
@@ -82,7 +83,7 @@ def head_cols(b):
         if first is not None: cols.add(first)
     return cols
 ok(len(head_cols(buf)) > 2, f"pet position changes across frames ({sorted(head_cols(buf))[:6]})")
-ok("\u2580".encode() in buf and b"48;5;" in buf, "UTF-8 + 256 colours draws half-block pixel art with backgrounds")
+ok("\u2580".encode() in buf and b"48;2;" in buf, "UTF-8 + truecolor draws RGB half-blocks with backgrounds")
 
 # 2. q
 buf, _, st, b, a = run(full, 12, 40, lambda p, fd: os.write(fd, b"q"))
@@ -96,7 +97,7 @@ ok(a is not None and a[3] == b[3], "SIGTERM restores termios")
 
 # 4. NO_COLOR / ASCII
 buf, _, st, b, a = run({"TERM": "xterm", "NO_COLOR": "1", "LANG": "C"}, 12, 40, lambda p, fd: os.write(fd, b"q"))
-ok(b"38;5;" not in buf and b"[3" not in re.sub(rb"\x1b\[\?|\x1b\[\d+;\d+H", b"", buf).replace(b"\x1b[0m", b"") or b"38;5;" not in buf, "NO_COLOR emits no colour SGR")
+ok(re.search(rb"\x1b\[(?:38|48);", buf) is None, "NO_COLOR emits no colour SGR")
 ok(all(c < 0x80 or True for c in buf) and "●".encode() not in buf, "non-UTF8 locale stays ASCII")
 
 # 5. 16 colours
@@ -106,6 +107,11 @@ ok(b"38;5;" in buf and re.search(rb"38;5;[1-6]m", buf) is not None, "16-colour f
 # 5b. UTF-8 但只有 16 色：退回字符画，眼睛用 Unicode
 buf, _, st, b, a = run({"TERM": "xterm", "LANG": "en_US.UTF-8"}, 12, 40, lambda p, fd: os.write(fd, b"q"))
 ok("\u25cf".encode() in buf and "\u2580".encode() not in buf, "UTF-8 with 16 colours uses unicode glyph eyes, not blocks")
+
+# 5c. 只有 256 色时明确降级，同一半格像素网格仍保留。
+buf, _, st, b, a = run({"TERM": "xterm-256color", "LANG": "en_US.UTF-8"}, 12, 40, lambda p, fd: os.write(fd, b"q"))
+ok(b"38;5;" in buf and b"48;5;" in buf and b"38;2;" not in buf, "256-colour fallback uses indexed half-blocks")
+ok(b"256-color fallback" in buf, "256-colour degradation is labelled")
 
 # 6. tiny terminal
 buf, _, st, b, a = run(full, 2, 5, lambda p, fd: os.write(fd, b"\x03"))

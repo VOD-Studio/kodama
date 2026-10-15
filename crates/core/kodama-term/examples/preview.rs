@@ -1,4 +1,4 @@
-//! 终端预览：用半格像素画（256 色）在终端里打印宠物，与网页、`kodama live` 是同一套外形与动作。
+//! 终端预览：真彩色半格像素画保留网页的原始 RGB；256 色终端明确降级。
 //!
 //!   make preview                     8 个物种各自的三个阶段：幼体、少年、成年
 //!   make preview ARGS="forms 3"      一个物种的全部 16 种外形（幼体、3 种少年、12 种成年）
@@ -7,7 +7,7 @@
 //!   make preview ARGS="individuals 3" 一个物种 12 只不同基因的成年个体：花纹各不相同，稀有度依次是普通到传说
 //!   make preview ARGS="ascii"        字符画：终端不支持 UTF-8 或 256 色时看到的样子
 //!
-//! 需要支持 256 色与 UTF-8 的终端；按 `COLUMNS` 换行（缺省 160 列）。
+//! 需要支持真彩色或 256 色与 UTF-8 的终端；按 `COLUMNS` 换行（缺省 160 列）。
 use kodama_term::*;
 use serde_json::{json, Value};
 
@@ -19,7 +19,52 @@ const GENES: [u8; 8] = [40, 3, 3, 0, 0, 0, 0, 0];
 /// 一格画面：裁到有内容的范围，每个字符格带前景与背景色。标签只用 ASCII，中文在终端里占两列会错位。
 struct Cell {
     label: String,
-    rows: Vec<Vec<(char, u8, u8)>>,
+    rows: Vec<Vec<PixelCell>>,
+}
+
+#[derive(Clone, Copy)]
+struct PixelCell {
+    ch: char,
+    fg: u8,
+    bg: u8,
+    fg_rgb: Option<[u8; 3]>,
+    bg_rgb: Option<[u8; 3]>,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum Colors {
+    Rgb,
+    Ansi256,
+    Glyphs,
+}
+
+fn colors() -> Colors {
+    let term = std::env::var("TERM")
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    let colorterm = std::env::var("COLORTERM")
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    let locale = ["LC_ALL", "LC_CTYPE", "LANG"]
+        .iter()
+        .find_map(|k| std::env::var(k).ok().filter(|v| !v.is_empty()))
+        .unwrap_or_default();
+    if std::env::var_os("NO_COLOR").is_some()
+        || term == "dumb"
+        || !locale.to_uppercase().contains("UTF")
+    {
+        Colors::Glyphs
+    } else if colorterm.contains("truecolor")
+        || colorterm.contains("24bit")
+        || term.contains("direct")
+        || term.contains("truecolor")
+    {
+        Colors::Rgb
+    } else if term.contains("256color") {
+        Colors::Ansi256
+    } else {
+        Colors::Glyphs
+    }
 }
 
 fn draw(label: String, species: u8, lineage: &[&str], pose: &str, t: u64, outfit: Value) -> Cell {
@@ -43,18 +88,24 @@ fn draw_one(
     }))
     .expect("valid frame input");
     let f = render(&input);
-    let grid: Vec<Vec<(char, u8, u8)>> = f
+    let grid: Vec<Vec<PixelCell>> = f
         .rows
         .iter()
         .enumerate()
         .map(|(y, r)| {
             r.chars()
                 .enumerate()
-                .map(|(x, c)| (c, f.colors[y][x], f.bg[y][x]))
+                .map(|(x, ch)| PixelCell {
+                    ch,
+                    fg: f.colors[y][x],
+                    bg: f.bg[y][x],
+                    fg_rgb: f.fg_rgb[y][x],
+                    bg_rgb: f.bg_rgb[y][x],
+                })
                 .collect()
         })
         .collect();
-    let used = |c: &(char, u8, u8)| c.0 != ' ' || c.2 != 0;
+    let used = |c: &PixelCell| c.ch != ' ' || c.bg_rgb.is_some();
     let top = grid.iter().position(|r| r.iter().any(used)).unwrap_or(0);
     let bottom = grid.iter().rposition(|r| r.iter().any(used)).unwrap_or(0);
     let left = grid
@@ -101,6 +152,7 @@ fn print(cells: Vec<Cell>) {
 }
 
 fn print_line(cells: Vec<Cell>) {
+    let mode = colors();
     let widths: Vec<usize> = cells
         .iter()
         .map(|c| {
@@ -121,14 +173,23 @@ fn print_line(cells: Vec<Cell>) {
             let pad = height - c.rows.len();
             let row = if y >= pad { c.rows.get(y - pad) } else { None };
             let n = row.map_or(0, Vec::len);
-            for &(ch, fg, bg) in row.into_iter().flatten() {
-                if fg != 0 {
-                    out.push_str(&format!("\x1b[38;5;{fg}m"));
+            for c in row.into_iter().flatten() {
+                if mode == Colors::Rgb {
+                    if let Some([r, g, b]) = c.fg_rgb {
+                        out.push_str(&format!("\x1b[38;2;{r};{g};{b}m"));
+                    }
+                    if let Some([r, g, b]) = c.bg_rgb {
+                        out.push_str(&format!("\x1b[48;2;{r};{g};{b}m"));
+                    }
+                } else {
+                    if c.fg != 0 {
+                        out.push_str(&format!("\x1b[38;5;{}m", c.fg));
+                    }
+                    if c.bg != 0 {
+                        out.push_str(&format!("\x1b[48;5;{}m", c.bg));
+                    }
                 }
-                if bg != 0 {
-                    out.push_str(&format!("\x1b[48;5;{bg}m"));
-                }
-                out.push(ch);
+                out.push(c.ch);
                 out.push_str("\x1b[0m");
             }
             out.push_str(&" ".repeat(w - n + 3));
@@ -295,6 +356,17 @@ fn ascii() {
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().map(String::as_str) != Some("ascii") {
+        match colors() {
+            Colors::Rgb => eprintln!("RGB pixels: original sprite colours"),
+            Colors::Ansi256 => eprintln!("256-colour fallback: same pixel grid, quantized colours"),
+            Colors::Glyphs => {
+                eprintln!("Glyph fallback: terminal colour or UTF-8 support is insufficient");
+                ascii();
+                return;
+            }
+        }
+    }
     match args.first().map(String::as_str) {
         None | Some("stages") => stages(),
         Some("forms") => forms(species_arg(&args)),

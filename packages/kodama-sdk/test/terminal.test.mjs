@@ -50,6 +50,35 @@ test("non-TTY terminal rendering never invokes companion callbacks", () => {
   mounted.dispose();
 });
 
+// Decode the emitted terminal glyphs and SGR into the same two-pixels-per-cell
+// raster used by canvas. This validates output bytes, not just Frame metadata.
+function decodeRgb(output, width, height) {
+  let fg = null;
+  let bg = null;
+  const cells = [];
+  for (const token of output.matchAll(/\x1b\[([0-9;]*)m|([▀▄█ ])/gu)) {
+    if (token[1] !== undefined) {
+      const p = token[1].split(";").map(Number);
+      if (p[0] === 0) fg = bg = null;
+      else if (p[0] === 39) fg = null;
+      else if (p[0] === 49) bg = null;
+      else if (p[0] === 38 && p[1] === 2) fg = p.slice(2, 5);
+      else if (p[0] === 48 && p[1] === 2) bg = p.slice(2, 5);
+      else assert.fail(`unexpected non-RGB color in truecolor output: ${p}`);
+    } else {
+      cells.push(token[2] === "▀" ? [fg, bg] : token[2] === "▄" ? [bg, fg] : token[2] === "█" ? [fg, fg] : [null, null]);
+    }
+  }
+  assert.equal(cells.length, width * height);
+  const rows = Array.from({ length: height * 2 }, () => []);
+  cells.forEach(([top, bottom], index) => {
+    const y = Math.floor(index / width) * 2;
+    rows[y].push(top);
+    rows[y + 1].push(bottom);
+  });
+  return rows;
+}
+
 const whale = { species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], stage: 2, companion: { character: "deepseek" } };
 const pixelRegion = { row: 1, col: 1, width: 69, height: 33 };
 
@@ -70,10 +99,52 @@ test("terminal never draws a reserved character as a successful draft frame", (t
   const mounted = mountTerminalPet({
     stream: { isTTY: true, columns: 69, rows: 34, write: (s) => output.push(s) },
     region: pixelRegion, pet: { ...whale, companion: { character: "gpt" } }, charset: "blocks",
+    env: { TERM: "xterm-256color", COLORTERM: "truecolor" },
   });
   t.mock.timers.tick(100);
   assert.equal(output.length, 0, "initial and subsequent unavailable frames are not drawn");
   mounted.dispose();
   assert.equal(output.length, 1, "disposal still clears the borrowed rectangle");
   assert.ok(!/[▀▄█]/u.test(output[0]));
+});
+
+test("truecolor terminal output decodes pixel-for-pixel to the web sprite at the same tick", (t) => {
+  t.mock.timers.enable({ apis: ["setInterval"] });
+  for (const stage of [0, 1, 2]) {
+    const individual = { ...whale, stage };
+    const output = [];
+    const mounted = mountTerminalPet({
+      stream: { isTTY: true, columns: 69, rows: 34, write: (s) => output.push(s) },
+      region: pixelRegion, pet: individual, charset: "blocks",
+      env: { TERM: "xterm-256color", COLORTERM: "truecolor" },
+    });
+    t.mock.timers.tick(700);
+    for (const tick of [0, 7]) {
+      const sprite = run({ op: "sprite", ...individual, pose: "idle", w: 69, h: 66, t: String(tick) });
+      assert.equal(sprite.ok, true);
+      const colors = Object.fromEntries(Object.entries(sprite.value.palette).map(([key, hex]) => [key, [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16))]));
+      const expected = sprite.value.rows.map((row) => [...row].map((key) => key === "." ? null : colors[key]));
+      assert.deepEqual(decodeRgb(output[tick], 69, 33), expected);
+    }
+    assert.ok(output[0].includes("\x1b[38;2;") && output[0].includes("\x1b[48;2;"));
+    assert.ok(!output[0].includes(";5;"));
+    mounted.dispose();
+  }
+});
+
+test("256 color is an explicit fallback and NO_COLOR or 16 colors use glyphs", (t) => {
+  t.mock.timers.enable({ apis: ["setInterval"] });
+  for (const [colorMode, env, pixels] of [
+    ["256", { TERM: "xterm-256color", COLORTERM: "truecolor" }, true],
+    ["auto", { TERM: "xterm-256color" }, true],
+    ["truecolor", { TERM: "xterm-256color", NO_COLOR: "" }, false],
+    ["auto", { TERM: "xterm" }, false],
+  ]) {
+    const output = [];
+    const mounted = mountTerminalPet({ stream: { isTTY: true, columns: 69, rows: 34, write: (s) => output.push(s) }, region: pixelRegion, pet: whale, charset: "blocks", colorMode, env });
+    assert.equal(output[0].includes("\x1b[38;5;"), pixels);
+    assert.ok(!output[0].includes("\x1b[38;2;"));
+    if (!pixels) assert.ok(output[0].includes("DeepSeek") && !/[▀▄█]/u.test(output[0]));
+    mounted.dispose();
+  }
 });

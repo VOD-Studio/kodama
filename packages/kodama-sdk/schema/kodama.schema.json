@@ -370,7 +370,7 @@
         },
         {
           "const": "blocks",
-          "description": "半格像素画：每个字符格显示上下两个像素（上半格前景色、下半格背景色），与 `sprite` 是同一套外形与动作。\n需要 UTF-8 与 256 色；高度不小于 10 行时完整显示幼体，约 20 行显示带翅膀的成年形态。",
+          "description": "半格像素画：每个字符格显示上下两个像素（上半格前景色、下半格背景色），与 `sprite` 是同一套外形与动作。\nUTF-8 真彩色终端保留原 RGB；256 色终端按同一网格降色。区域不足时按 `sprite` 同样的规则裁切。",
           "type": "string"
         }
       ]
@@ -821,6 +821,27 @@
           },
           "type": "array"
         },
+        "bg_rgb": {
+          "description": "`blocks` 每格背景的原始 RGB，null 表示透明/默认色；字符画省略。",
+          "items": {
+            "items": {
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxItems": 3,
+              "minItems": 3,
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
         "colors": {
           "description": "与 rows 逐字符对应的 256 色索引;0 表示不着色。",
           "items": {
@@ -829,6 +850,27 @@
               "maximum": 255,
               "minimum": 0,
               "type": "integer"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "fg_rgb": {
+          "description": "`blocks` 每格前景的原始 RGB，null 表示透明/默认色；真彩色输出应优先使用此网格。\n字符画省略此字段，旧消费方仍可使用 `colors`。",
+          "items": {
+            "items": {
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxItems": 3,
+              "minItems": 3,
+              "type": [
+                "array",
+                "null"
+              ]
             },
             "type": "array"
           },

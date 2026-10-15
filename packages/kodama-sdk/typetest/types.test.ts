@@ -1,4 +1,4 @@
-import type { BirthResult, Command, OutcomeResult, Pet, ErrorBody, ResultOf } from "../src/index";
+import type { BirthResult, Command, OutcomeResult, Pet, ErrorBody, ResultOf, Frame } from "../src/index";
 import { run } from "../src/index";
 
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
@@ -62,6 +62,15 @@ mounted.setAction("teleport");
 mounted.setExpression("angry");
 import { mountTerminalPet } from "../src/terminal";
 mountTerminalPet({ region: { row: 1, col: 1, width: 40, height: 12 }, pet: { species: 0, genes: [], companion: { character: "deepseek" } }, getAction: () => "think", getExpression: () => "curious" });
+mountTerminalPet({ region: { row: 1, col: 1, width: 69, height: 33 }, pet: { species: 0, genes: [] }, charset: "blocks", colorMode: "truecolor", env: { COLORTERM: "truecolor" } });
+const glyphFrame: Frame = { w: 1, h: 1, rows: [" "], colors: [[0]], bg: [[0]] };
+const rgbFrame: Frame = { ...glyphFrame, fg_rgb: [[[128, 128, 128]]], bg_rgb: [[null]] };
+void rgbFrame;
+// @ts-expect-error RGB requires exactly three channels
+const invalidRgb: Frame = { ...glyphFrame, fg_rgb: [[[128, 128]]] };
+void invalidRgb;
+// @ts-expect-error terminal colour modes are a closed union
+mountTerminalPet({ region: { row: 1, col: 1, width: 40, height: 12 }, pet: { species: 0, genes: [] }, colorMode: "rgb-ish" });
 // @ts-expect-error 非法的终端伙伴动作
 mountTerminalPet({ region: { row: 1, col: 1, width: 40, height: 12 }, pet: { species: 0, genes: [] }, getAction: () => "teleport" });
 // @ts-expect-error 未知的物品

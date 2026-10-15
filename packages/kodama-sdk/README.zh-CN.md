@@ -172,9 +172,9 @@ const pet = mountTerminalPet({
 pet.dispose(); // 停止绘制并清空区域
 ```
 
-`charset: "blocks"`（并传入宠物的 `lineage`）时以半格像素画绘制进化后的外形，需要 256 色终端；`"ascii"` 与 `"unicode"` 绘制小尺寸的字符画。宠物只在 `region` 内绘制，只用保存/恢复光标与绝对定位；不读取 stdin、不进入备用屏、不隐藏光标、不修改终端模式，输出不是 TTY 时什么都不做。宿主负责让自己的输出避开该区域（例如设置滚动区域），并在退出前调用 `dispose()`。
+`charset: "blocks"`（并传入宠物的 `lineage`）时以半格像素画绘制外形。真彩色终端输出素材原始的 24 位 RGB；256 色是在相同像素网格上的降色回退。`colorMode` 默认 `"auto"`，根据 `TERM`/`COLORTERM` 判断，也可指定 `"truecolor"`、`"256"`、`"16"` 或 `"none"`；`NO_COLOR` 始终优先关闭颜色。仅 16 色或无颜色时，`blocks` 降级为字符画。宠物只在 `region` 内绘制，只用保存/恢复光标与绝对定位；不读取 stdin、不进入备用屏、不隐藏光标、不修改终端模式，输出不是 TTY 时什么都不做。宿主负责让自己的输出避开该区域（例如设置滚动区域），并在退出前调用 `dispose()`。
 
-终端也接受 `pet.companion`，可以通过逐帧调用的 `getAction`、`getExpression` 覆盖动作与表情。`blocks` 与网页画布使用同一套伙伴像素，其他字符集降级为角色名称与当前动作的 ASCII 标签。
+终端也接受 `pet.companion`，可以通过逐帧调用的 `getAction`、`getExpression` 覆盖动作与表情。`blocks` 与网页画布使用同一套伙伴像素，其他字符集降级为角色名称与当前动作的 ASCII 标签。同一时刻的 `w` 列 × `h` 行半格帧对应 `w` × `2h` 的原始像素网格；`fg_rgb`/`bg_rgb` 保存原始 RGB（`null` 为透明/默认色），`colors`/`bg` 保留兼容的 256 色索引。69 列 × 33 行可按一倍尺寸展示 69×66 素材；更小区域按同一套像素规则裁剪，不放大角色。源素材的透明度由共享像素渲染器提前处理，终端与画布取得相同的可见采样。
 
 需要独立运行的终端宠物时，请改用原生的 [`kodama`](https://github.com/VOD-Studio/kodama/blob/main/crates/runtimes/kodama/README.zh-CN.md)。
 

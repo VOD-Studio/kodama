@@ -71,5 +71,13 @@ for (const character of ["gpt", "claude", "grok", "glm", "kimi", "gemini"]) {
   if (error.ok !== false || error.code !== "bad_input" || error.message !== `${character} artwork not ready`) throw new Error(`${character} exposed unavailable artwork`);
   out.push(result);
 }
+// 原尺寸鲸娘与 Deepy：原 RGB 半格帧、共享 alpha 采样也必须三端相同。
+for (const stage of [0, 1, 2]) {
+  for (const t of ["0", "7"]) {
+    const look = { species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], pose: "idle", stage, w: 69, t, companion: { character: "deepseek" } };
+    out.push(exec(JSON.stringify({ op: "sprite", ...look, h: 66 })));
+    out.push(exec(JSON.stringify({ op: "frame", ...look, h: 33, charset: "blocks" })));
+  }
+}
 out.push(exec(JSON.stringify({ op: "capabilities" })));
 console.log(out.join("\n"));

@@ -8,7 +8,7 @@ ajv.addSchema(schema, "pet");
 const check = (name) => ajv.getSchema(`pet#/$defs/${name}`);
 
 const transcript = fs.readFileSync(new URL("../../../target/out-native.txt", import.meta.url), "utf8").trim().split("\n");
-const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url))).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", ...Array(4).fill("act"), ...Array(5).fill("act"), ...Array(3).fill("sprite"), "frame", ...Array(6).fill("sprite"), ...Array(21).fill("sprite"), ...Array(8).fill("frame"), "capabilities"];
+const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url))).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", ...Array(4).fill("act"), ...Array(5).fill("act"), ...Array(3).fill("sprite"), "frame", ...Array(6).fill("sprite"), ...Array(21).fill("sprite"), ...Array(8).fill("frame"), ...Array.from({ length: 6 }, () => ["sprite", "frame"]).flat(), "capabilities"];
 if (ops.length !== transcript.length) throw new Error(`op count ${ops.length} != transcript ${transcript.length}`);
 
 let n = 0;
@@ -48,4 +48,9 @@ const badCompanion = { ...inputs.at(-1), companion: { character: "dragon" } };
 if (cmd(badCompanion)) throw new Error("Command schema accepted an unknown companion");
 const badCompanionAction = { ...inputs.at(-1), companion: { character: "gpt", action: "teleport" } };
 if (cmd(badCompanionAction)) throw new Error("Command schema accepted an unknown companion action");
+const frame = check("Frame");
+const glyph = { w: 1, h: 1, rows: [" "], colors: [[0]], bg: [[0]] };
+if (!frame(glyph)) throw new Error("Frame schema rejected a legacy glyph frame without optional RGB grids");
+if (frame({ ...glyph, fg_rgb: [[[128, 128]]] })) throw new Error("Frame schema accepted an RGB value with two channels");
+if (frame({ ...glyph, fg_rgb: [[[256, 0, 0]]] })) throw new Error("Frame schema accepted an RGB channel above 255");
 console.log(`schema OK: ${n} responses and ${inputs.length} inputs validated; invalid input rejected`);
