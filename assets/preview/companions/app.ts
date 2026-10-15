@@ -44,7 +44,7 @@ const characters: Character[] = [
   {
     key: "gpt", label: "GPT", name: "GPT",
     stages: [{ value: 2, label: "白龙娘 · 成年", series: "稀有系列 · 成年" }],
-    canvas: { w: 80, h: 92, scale: 5 },
+    canvas: { w: 69, h: 66, scale: 6 },
     expressions: () => true,
     note: "幼年与少年尚未设计。",
   },
@@ -488,10 +488,23 @@ try {
   document.querySelectorAll<HTMLButtonElement>(".character-button").forEach((button) => { button.disabled = !available(characters.find((character) => character.key === button.dataset.character)!); });
   const requested = characters.find((character) => character.key === new URLSearchParams(window.location.search).get("character"));
   if (requested && available(requested)) state.character = requested.key;
+  const query = new URLSearchParams(window.location.search);
+  const action = query.get("action");
+  if (action && actions.some(([key]) => key === action)) {
+    state.action = action;
+    byId<HTMLSelectElement>("action").value = action;
+  }
   mountPreviews();
   fillStages(current());
   applyCanvas();
   selectCharacter(state.character, true);
+  const tick = Number(query.get("tick"));
+  if (query.has("tick") && Number.isInteger(tick) && tick >= 0 && tick < tickCount) {
+    state.playing = false;
+    state.tick = tick;
+    synchronizePlayback();
+    render();
+  }
   if (!failed) {
     document.querySelectorAll<HTMLElement>(".loading-label").forEach((label) => { label.hidden = true; });
     byId("status").textContent = `${formName()}已载入`;

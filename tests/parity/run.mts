@@ -72,10 +72,12 @@ for (const [character, stage] of [["gpt", 0], ["gpt", 1], ["claude", 2], ["grok"
   if (error.ok !== false || error.code !== "bad_input" || error.message !== `${character} artwork not ready`) throw new Error(`${character} exposed unavailable artwork`);
   out.push(result);
 }
-// GPT 成年的两个关键姿态（睁眼、闭眼）：原尺寸精灵与半格帧三端一致。
-for (const [pose, action] of [["idle", "idle"], ["sleep", "sleep"]])
-  for (const op of ["sprite", "frame"])
-    out.push(exec(JSON.stringify({ op, species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], pose, stage: 2, w: 80, h: op === "frame" ? 46 : 92, charset: "blocks", t: "0", companion: { character: "gpt", action } })));
+// GPT 成年：逐动作的片段、符号与表情，原尺寸精灵与半格帧三端一致。
+for (const action of ["idle", "sleep", "startled", "complete", "work", "praise", "poke_left"])
+  for (const t of ["0", "13"])
+    for (const op of ["sprite", "frame"])
+      out.push(exec(JSON.stringify({ op, species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], pose: "observe", stage: 2, w: 69, h: op === "frame" ? 33 : 66, charset: "blocks", t, companion: { character: "gpt", action } })));
+out.push(exec(JSON.stringify({ op: "sprite", species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], pose: "idle", stage: 2, w: 69, h: 66, t: "5", companion: { character: "gpt", action: "idle", expression: "shy" } })));
 // 原尺寸鲸娘与 Deepy：原 RGB 半格帧、共享 alpha 采样也必须三端相同。
 for (const stage of [0, 1, 2]) {
   for (const t of ["0", "7"]) {

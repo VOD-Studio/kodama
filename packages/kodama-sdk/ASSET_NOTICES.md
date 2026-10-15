@@ -71,13 +71,13 @@ community assets have been cleared for commercial distribution.
 
 ### GPT adult (original)
 
-The GPT white dragon girl is an original design made for this project: a concept
-image produced with an image generation tool, then reduced to an 80×92 native pixel
-grid by `scripts/assets/import-gpt.py`. The source image is
-`assets/preview/companions/studies/gpt-v3-grid-study.png`. It does not use any
-third-party artwork or the community character designs listed above. Only the adult
-stage exists; baby and young are not designed yet. The sprite has two key poses
-(eyes open, eyes closed); actions are routed onto them rather than separately animated.
+The GPT white dragon girl is an original design made for this project. The concept
+image `assets/preview/companions/studies/gpt-v3-grid-study.png` (produced with an image
+generation tool) is the design reference; the runtime frames are redrawn at the original
+companion's spec (69×66 canvas, 49×48 half-body figure) by the generator in
+`scripts/assets/gpt/` and encoded by `scripts/assets/import-gpt.py`. No third-party
+artwork or community character design is used. Only the adult stage exists; baby and
+young are not designed yet.
 
 The DeepSeek characters above are fan interpretations. No affiliation with or endorsement by
 the referenced AI vendors or original artists is claimed.

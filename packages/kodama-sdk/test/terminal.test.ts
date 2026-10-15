@@ -114,13 +114,16 @@ test("terminal never draws a reserved character as a successful draft frame", (t
   assert.ok(!/[▀▄█]/u.test(output[0]!));
 });
 
-test("GPT adult is available and its closed-eye pose differs from the open one", () => {
-  const input = { op: "sprite", ...whale, stage: 2, w: 80, h: 92, t: "0", companion: { character: "gpt" } } as Command;
-  const open = run({ ...input, pose: "idle" } as Command);
-  const closed = run({ ...input, pose: "sleep", companion: { character: "gpt", action: "sleep" } } as Command);
-  assert.equal(open.ok, true);
-  assert.equal(closed.ok, true);
-  assert.notDeepEqual((open as { value: unknown }).value, (closed as { value: unknown }).value);
+test("GPT adult is available and each action plays its own clip", () => {
+  const input = { op: "sprite", ...whale, stage: 2, w: 69, h: 66, t: "0", pose: "observe" } as Command;
+  const picture = (action: string, t = "0") => {
+    const result = run({ ...input, t, companion: { character: "gpt", action } } as Command);
+    assert.equal(result.ok, true, action);
+    return JSON.stringify((result as { value: unknown }).value);
+  };
+  assert.notEqual(picture("idle"), picture("sleep"));
+  assert.notEqual(picture("work"), picture("complete"));
+  assert.notEqual(picture("think", "0"), picture("think", "9"), "a clip changes over time");
 });
 
 test("truecolor terminal output decodes pixel-for-pixel to the web sprite at the same tick", (t) => {

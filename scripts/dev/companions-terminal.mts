@@ -6,8 +6,8 @@ import type * as Terminal from "../../packages/kodama-sdk/dist/terminal.js";
 
 const usage = "用法：make companions-terminal [ARGS=\"[deepseek|gpt] [baby|adult] [action]\"]，默认 deepseek adult idle（gpt 只有 adult）；q / Ctrl+C 退出。";
 const { stdin, stdout } = process;
-// 画布与源素材一致：DeepSeek 69 × 66 像素，GPT 80 × 92 像素；半块字符使行数减半。
-const canvases = { deepseek: { width: 69, height: 33, name: ["DeepSeek · 原站 Deepy 小鲸", "DeepSeek · 原站鲸娘终阶"] }, gpt: { width: 80, height: 46, name: ["", "GPT · 白龙娘 · 成年"] } } as const;
+// 画布与源素材一致：两个角色共用 69 × 66 像素；半块字符使行数减半。
+const canvases = { deepseek: { width: 69, height: 33, name: ["DeepSeek · 原站 Deepy 小鲸", "DeepSeek · 原站鲸娘终阶"] }, gpt: { width: 69, height: 33, name: ["", "GPT · 白龙娘 · 成年"] } } as const;
 type Character = keyof typeof canvases;
 const isCharacter = (value: string | undefined): value is Character => value !== undefined && value in canvases;
 
@@ -34,7 +34,7 @@ async function main() {
     return;
   }
   if (!stdin.isTTY || !stdout.isTTY || typeof stdin.setRawMode !== "function") {
-    console.log("伙伴预览需要交互终端（DeepSeek 至少 69 列 × 37 行，GPT 至少 80 列 × 50 行）；请在本机终端运行 make companions-terminal。");
+    console.log("伙伴预览需要交互终端（至少 69 列 × 37 行）；请在本机终端运行 make companions-terminal。");
     process.exitCode = 1;
     return;
   }

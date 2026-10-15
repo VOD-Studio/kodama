@@ -1,9 +1,9 @@
 # GPT 单角色造型研究
 
-这两张是内置 `image_gen` 生成的原创造型研究。`gpt-v3-grid-study.png` 是成年形态运行精灵的来源：`scripts/assets/import-gpt.py` 把它缩成 80×92 的原生像素网格（`make` 之外单独运行，需要 Pillow 与 numpy）。幼年和少年尚无研究图，对应阶段保持未开放。
+这两张是内置 `image_gen` 生成的原创造型研究，只作为设计参考。运行用的帧由 `scripts/assets/gpt/` 的生成器按 DeepSeek 的规格（69×66 画布、49×48 半身像）重新绘制，再由 `scripts/assets/import-gpt.py` 编码。幼年和少年尚无设计，对应阶段保持未开放。
 
 - `gpt-v2-style-study.png`：细化脸、成组发束、衣褶与饰物的高分辨率像素风插画，仅作参考，不参与导入。
-- `gpt-v3-grid-study.png`：收紧翼尾与轮廓的低分辨率像素簇版本，是导入脚本的输入；改动它之后需重新运行脚本并提交生成的 `data.rs`。
+- `gpt-v3-grid-study.png`：收紧翼尾与轮廓的低分辨率像素簇版本，是成年形态的主要造型参考。
 
 ## v3 实际生成提示词
 
