@@ -7,9 +7,9 @@ PORT=${2:-18787}
 NAME=pet-svc-smoke-$$
 hex() { od -An -tx1 -N32 /dev/urandom | tr -d ' \n'; }
 docker run -d --name "$NAME" -p "127.0.0.1:$PORT:8787" \
-  -e PET_DB=/data/pet.db -e PET_WORLD=smoke -e PET_AUDIENCE=smoke -e PET_ISSUER_NAME=smoke -e PET_KID=p1 \
-  -e PET_SIGNING_SEED="$(hex)" -e PET_TOKEN_SECRET="$(hex)" -e PET_ELIGIBILITY_SECRET="$(hex)" \
-  -e PET_TRUSTED_ISSUERS='[]' "$IMAGE" >/dev/null
+  -e KODAMA_DB=/data/pet.db -e KODAMA_WORLD=smoke -e KODAMA_AUDIENCE=smoke -e KODAMA_ISSUER_NAME=smoke -e KODAMA_KID=p1 \
+  -e KODAMA_SIGNING_SEED="$(hex)" -e KODAMA_TOKEN_SECRET="$(hex)" -e KODAMA_ELIGIBILITY_SECRET="$(hex)" \
+  -e KODAMA_TRUSTED_ISSUERS='[]' "$IMAGE" >/dev/null
 ok=0
 cleanup() {
   [ "$ok" = 1 ] || docker logs "$NAME" 2>&1 | tail -20

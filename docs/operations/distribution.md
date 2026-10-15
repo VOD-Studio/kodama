@@ -6,17 +6,17 @@
 
 | 产物 | 渠道与名称 | 状态 |
 |---|---|---|
-| Web / Node SDK | npm `@violetjs/pet`，终端嵌入在子路径 `@violetjs/pet/terminal`，schema 在 `@violetjs/pet/schema.json` | 已发布；tarball 外部消费已验证 |
-| 命令行 `pet-cli` | 本仓库 GitHub Release 的附件 `pet-cli-<target>.tar.gz`，带 `SHA256SUMS` 与构建来源证明 | 已验证（每个归档在构建它的平台上验收） |
-| 服务 `pet-service` | 镜像 `ghcr.io/vod-studio/pet-service`，多架构（amd64、arm64），带构建来源证明 | 已验证（CI 构建并冒烟测试 amd64；发版时两个架构都在原生 runner 上测试） |
-| Rust crate | 发布时使用 `violet-pet-*` 前缀（如 `violet-pet-core`），不用泛化的 `pet-*` | 计划；2026-10-13 核对 `pet-core`、`violet-pet-core` 均未被占用，发布前须再核对 |
+| Web / Node SDK | npm `@violetjs/kodama`，终端嵌入在子路径 `@violetjs/kodama/terminal`，schema 在 `@violetjs/kodama/schema.json` | 0.4.0 及以前以 `@violetjs/pet` 发布；新名随下一次发版首发，之后旧包标记 deprecated；tarball 外部消费已验证 |
+| 命令行 `kodama` | 本仓库 GitHub Release 的附件 `kodama-<target>.tar.gz`，带 `SHA256SUMS` 与构建来源证明 | 已验证（每个归档在构建它的平台上验收） |
+| 服务 `kodama-service` | 镜像 `ghcr.io/vod-studio/kodama-service`，多架构（amd64、arm64），带构建来源证明 | 已验证（CI 构建并冒烟测试 amd64；发版时两个架构都在原生 runner 上测试） |
+| Rust crate | 目录与包名为 `kodama-*`，CLI 为 `kodama`（0.4.0 及以前为 `pet-*`，2026-10-15 改名）；workspace 设 `publish = false`，暂不发布到 crates.io | 计划；发布前须核对 crates.io 上的名称是否被占用 |
 
 沿用 `@violetjs/<功能名>` 惯例，不带 `-sdk` 后缀。
 
 **CLI 不再经 npm 分发**（2026-10-14 决定）。0.1.1 曾以 `@violetjs/pet-cli` 加三个平台包（`@violetjs/pet-cli-<os>-<arch>`，由主包的可选依赖按 `os`/`cpu` 拉取）发布到 npm，之后停止发布：CLI 是本仓库的构建产物，GitHub Release 是它的唯一渠道。理由：
 
 - npm 渠道每多一个平台就多一个包，且所有平台包必须与主包同时、同版本发布；
-- Node 宿主要嵌入宠物时用的是 SDK 的 `@violetjs/pet/terminal`，不需要 CLI，npm 版 CLI 只服务「`npx` 一行试用」；
+- Node 宿主要嵌入宠物时用的是 SDK 的 `@violetjs/kodama/terminal`，不需要 CLI，npm 版 CLI 只服务「`npx` 一行试用」；
 - PRD 前提 7 只约定「经 npm 分发时」采用按平台可选依赖，不要求经 npm 分发。
 
 已发布的 npm CLI 包标记为 deprecated，指向 GitHub Release。
@@ -34,7 +34,7 @@
 
 ## 版本
 
-- SDK、CLI 归档、服务镜像与 crates **共用一个版本号**（lockstep），由同一个标签 `vX.Y.Z` 发布；`pet-cli --version` 输出该版本与规则版本。
+- SDK、CLI 归档、服务镜像与 crates **共用一个版本号**（lockstep），由同一个标签 `vX.Y.Z` 发布；`kodama --version` 输出该版本与规则版本。
 - `rules_version` 独立于包版本（见 `versioning.md`）。包的主版本变化不改变既有个体；提升 `rules_version` 是不兼容规则变更，需要保留旧派生并发布迁移说明。
 - 线上协议以 schema 为准；新增命令与字段是次版本，删除或改变语义是主版本，由 `check-schema.sh` 把生成物差异暴露在 PR 里。
 
@@ -48,7 +48,7 @@
 | 服务镜像 `linux/amd64`、`linux/arm64` | 已验证：各在原生 runner 上构建并冒烟测试 |
 | darwin-x64、win32-x64 | 计划，没有验证。Windows 的终端处理（备用屏、信号、resize）与 Unix 不同，需要单独实现；darwin-x64 的官方 runner 在退役，需另选 |
 
-不支持的平台可以 `cargo install --locked --git https://github.com/VOD-Studio/kodama pet-cli` 从源码构建。
+不支持的平台可以 `cargo install --locked --git https://github.com/VOD-Studio/kodama kodama` 从源码构建。
 
 ## 发布形态
 
@@ -62,14 +62,14 @@
 
 ## 发版与发布
 
-版本号由 [release-please](https://github.com/googleapis/release-please) 从 Conventional Commits 推导。`.github/release-please/manifest.json` 是基线，`.github/release-please/config.json` 指明同步改哪些文件（Cargo workspace 版本、`@violetjs/pet` 的 `package.json`）；`Cargo.lock` 里各 crate 的版本由 `release.yml` 在发版 PR 上另行同步。所有产物共用一个版本号。
+版本号由 [release-please](https://github.com/googleapis/release-please) 从 Conventional Commits 推导。`.github/release-please/manifest.json` 是基线，`.github/release-please/config.json` 指明同步改哪些文件（Cargo workspace 版本、`@violetjs/kodama` 的 `package.json`）；`Cargo.lock` 里各 crate 的版本由 `release.yml` 在发版 PR 上另行同步。所有产物共用一个版本号。
 
 ```
 合并到 main ──► release.yml：release-please 开/更新「发版 PR」（版本号 + CHANGELOG）
                     └─ 对该分支补跑 CI 与提交信息检查（GITHUB_TOKEN 建的 PR 不会自动触发）
 合并发版 PR ──► release.yml：打标签 vX.Y.Z、建 GitHub Release，然后并行：
                     ├─ package.yml 构建并验收 SDK 与各平台 CLI 归档（无凭据）
-                    │     ├─ npm：发布 @violetjs/pet（npm 环境，人工批准）
+                    │     ├─ npm：发布 @violetjs/kodama（npm 环境，人工批准）
                     │     └─ cli：SHA256SUMS、构建来源证明，上传为 Release 附件
                     └─ image-build（amd64、arm64 各在原生 runner）构建、冒烟测试、按摘要推送
                           └─ image：合成多架构清单，打 X.Y.Z、X.Y、latest 标签，构建来源证明
@@ -88,10 +88,10 @@
 | `npm` 环境 | 仓库 Settings → Environments，名称 `npm` | 部署分支只允许 `main`；开启 Required reviewers，每次发布前需要人工批准（npm 的版本一旦发布不能重发） |
 | `NPM_TOKEN` | 上述 `npm` 环境的 Environment secrets | 只有声明了该环境的作业能读到，PR 与构建作业读不到。Granular access token，对 `@violetjs` 内的包授予 Read and write，并允许在 CI 中绕过 2FA |
 | `@violetjs` 组织 | npmjs.com | 令牌所属账号必须是该组织成员且有发布权限 |
-| GHCR 包可见性 | 组织 Packages → `pet-service` → Package settings | 首次发布后包默认可能是私有的，改为 Public；镜像的 `org.opencontainers.image.source` 标签已把它关联到本仓库 |
+| GHCR 包可见性 | 组织 Packages → `kodama-service` → Package settings | 首次发布后包默认可能是私有的，改为 Public；镜像的 `org.opencontainers.image.source` 标签已把它关联到本仓库 |
 | 合并方式 | 仓库 Settings → General → Pull Requests | 只勾选 Allow rebase merging |
 | 分支保护 | 仓库 Settings → Branches → `main` | 要求通过 PR 合并；必需检查：`Lint`、`Core, storage and schema`、`External consumption`、`Platform (…)`、`Commit messages` |
 
 缺少令牌时 npm 作业会失败并提示，其余作业不受影响；配好后重跑即可，已发布的包会跳过。
 
-npm 发布使用 `--provenance`（需要 `id-token: write`，已在工作流里声明）。之后是否改用 npm 的 Trusted Publishing（免令牌）尚未验证：需要 npm CLI 11.5.1 以上，并在 npmjs.com 为 `@violetjs/pet` 登记本仓库的 `release.yml`。
+npm 发布使用 `--provenance`（需要 `id-token: write`，已在工作流里声明）。之后是否改用 npm 的 Trusted Publishing（免令牌）尚未验证：需要 npm CLI 11.5.1 以上，并在 npmjs.com 为 `@violetjs/kodama` 登记本仓库的 `release.yml`。

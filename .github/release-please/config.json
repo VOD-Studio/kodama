@@ -16,7 +16,7 @@
         },
         {
           "type": "json",
-          "path": "packages/pet-sdk/package.json",
+          "path": "packages/kodama-sdk/package.json",
           "jsonpath": "$.version"
         }
       ],

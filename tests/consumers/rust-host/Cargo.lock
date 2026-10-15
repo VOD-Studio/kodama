@@ -164,19 +164,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
-name = "pet-core"
+name = "kodama-core"
 version = "0.2.0"
 dependencies = [
  "ed25519-dalek",
  "hmac",
- "pet-term",
+ "kodama-term",
  "serde",
  "serde_json",
  "sha2",
 ]
 
 [[package]]
-name = "pet-term"
+name = "kodama-term"
 version = "0.2.0"
 dependencies = [
  "serde",
@@ -215,8 +215,8 @@ dependencies = [
 name = "rust-host-consumer"
 version = "0.0.0"
 dependencies = [
- "pet-core",
- "pet-term",
+ "kodama-core",
+ "kodama-term",
  "serde_json",
 ]
 

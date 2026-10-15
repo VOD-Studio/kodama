@@ -104,13 +104,13 @@ jobs:
           node-version: 22
       - name: Tests (SQLite and Postgres contract)
         env:
-          PET_TEST_PG_URL: host=127.0.0.1 port=${{ job.services.postgres.ports['5432'] }} user=postgres password=pet dbname=pet
+          KODAMA_TEST_PG_URL: host=127.0.0.1 port=${{ job.services.postgres.ports['5432'] }} user=postgres password=pet dbname=pet
         run: cargo test --workspace -- --include-ignored
       - name: Native, Node and web WebAssembly agree
         run: make three-end
       - name: Service end to end (SQLite and Postgres)
         env:
-          PET_TEST_PG_URL: host=127.0.0.1 port=${{ job.services.postgres.ports['5432'] }} user=postgres password=pet dbname=pet
+          KODAMA_TEST_PG_URL: host=127.0.0.1 port=${{ job.services.postgres.ports['5432'] }} user=postgres password=pet dbname=pet
         run: make e2e-pg
       - name: Service image builds and answers
         run: make image-smoke
@@ -144,7 +144,7 @@ jobs:
         with:
           node-version: 22
       - run: pnpm install --frozen-lockfile
-        working-directory: packages/pet-sdk
+        working-directory: packages/kodama-sdk
       - name: Chrome
         id: chrome
         uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0

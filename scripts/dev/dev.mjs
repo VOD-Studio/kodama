@@ -19,19 +19,19 @@ function init({ force = false } = {}) {
   const { publicKey, privateKey } = crypto.generateKeyPairSync("ed25519");
   fs.writeFileSync(files.key, privateKey.export({ format: "pem", type: "pkcs8" }), { mode: 0o600 });
   const pub = Buffer.from(publicKey.export({ format: "jwk" }).x, "base64url").toString("hex");
-  // PET_DEV_TRUST_KEY:信任真实接入方(如本机 Violet)的公钥,而不是本脚本生成的模拟发行者。
-  const trusted = process.env.PET_DEV_TRUST_KEY || pub;
+  // KODAMA_DEV_TRUST_KEY:信任真实接入方(如本机 Violet)的公钥,而不是本脚本生成的模拟发行者。
+  const trusted = process.env.KODAMA_DEV_TRUST_KEY || pub;
   const env = {
-    PET_LISTEN: "127.0.0.1:8787",
-    PET_DB: path.join(dir, "pet.db"),
-    PET_WORLD: "dev",
-    PET_AUDIENCE: "pet-dev",
-    PET_ISSUER_NAME: "pet-dev",
-    PET_KID: "dev1",
-    PET_SIGNING_SEED: hex(),
-    PET_TOKEN_SECRET: hex(),
-    PET_ELIGIBILITY_SECRET: hex(),
-    PET_TRUSTED_ISSUERS: JSON.stringify([{ iss: "violet", keys: [{ kid: "v1", public_key: trusted, not_before: "0" }] }]),
+    KODAMA_LISTEN: "127.0.0.1:8787",
+    KODAMA_DB: path.join(dir, "pet.db"),
+    KODAMA_WORLD: "dev",
+    KODAMA_AUDIENCE: "pet-dev",
+    KODAMA_ISSUER_NAME: "pet-dev",
+    KODAMA_KID: "dev1",
+    KODAMA_SIGNING_SEED: hex(),
+    KODAMA_TOKEN_SECRET: hex(),
+    KODAMA_ELIGIBILITY_SECRET: hex(),
+    KODAMA_TRUSTED_ISSUERS: JSON.stringify([{ iss: "violet", keys: [{ kid: "v1", public_key: trusted, not_before: "0" }] }]),
   };
   fs.writeFileSync(files.env, JSON.stringify(env, null, 2));
   return env;
@@ -41,7 +41,7 @@ function assertion(sub) {
   if (!fs.existsSync(files.key)) throw new Error("先运行 `node scripts/dev/dev.mjs init`");
   const env = init();
   const now = Math.floor(Date.now() / 1000);
-  const payload = Buffer.from(JSON.stringify({ iss: "violet", sub, aud: env.PET_AUDIENCE, kid: "v1", jti: crypto.randomUUID(), iat: now, exp: now + 120 }));
+  const payload = Buffer.from(JSON.stringify({ iss: "violet", sub, aud: env.KODAMA_AUDIENCE, kid: "v1", jti: crypto.randomUUID(), iat: now, exp: now + 120 }));
   const msg = Buffer.concat([Buffer.from("pet/assertion/v1\n"), payload]);
   const key = crypto.createPrivateKey(fs.readFileSync(files.key));
   return `v1.${b64(payload)}.${b64(crypto.sign(null, msg, key))}`;
@@ -51,13 +51,13 @@ const [cmd, arg] = process.argv.slice(2);
 switch (cmd) {
   case "init": {
     const env = init({ force: arg === "--force" });
-    console.log(`已写入 ${path.relative(root, dir)}/(监听 ${env.PET_LISTEN},世界 ${env.PET_WORLD},受众 ${env.PET_AUDIENCE})`);
+    console.log(`已写入 ${path.relative(root, dir)}/(监听 ${env.KODAMA_LISTEN},世界 ${env.KODAMA_WORLD},受众 ${env.KODAMA_AUDIENCE})`);
     break;
   }
   case "serve": {
-    // PET_LISTEN 可由环境覆盖:容器里须监听 0.0.0.0 才能被宿主访问(make docker-dev)
-    const env = { ...init(), ...(process.env.PET_LISTEN && { PET_LISTEN: process.env.PET_LISTEN }) };
-    const child = spawn("cargo", ["run", "-q", "-p", "pet-service"], { cwd: root, env: { ...process.env, ...env }, stdio: "inherit" });
+    // KODAMA_LISTEN 可由环境覆盖:容器里须监听 0.0.0.0 才能被宿主访问(make docker-dev)
+    const env = { ...init(), ...(process.env.KODAMA_LISTEN && { KODAMA_LISTEN: process.env.KODAMA_LISTEN }) };
+    const child = spawn("cargo", ["run", "-q", "-p", "kodama-service"], { cwd: root, env: { ...process.env, ...env }, stdio: "inherit" });
     child.on("exit", (code) => process.exit(code ?? 0));
     for (const s of ["SIGINT", "SIGTERM"]) process.on(s, () => child.kill(s));
     break;
@@ -67,7 +67,7 @@ switch (cmd) {
     break;
   case "token": {
     const env = init();
-    const res = await fetch(`http://${env.PET_LISTEN}/v1/auth/exchange`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ assertion: assertion(arg || "alice") }) });
+    const res = await fetch(`http://${env.KODAMA_LISTEN}/v1/auth/exchange`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ assertion: assertion(arg || "alice") }) });
     const body = await res.json();
     if (!body.ok) { console.error(JSON.stringify(body)); process.exit(1); }
     console.log(body.value.access_token);

@@ -4,8 +4,8 @@ set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=$(mktemp -d)
 trap 'kill $SRV 2>/dev/null; rm -rf "$WORK"' EXIT
-"$HERE/../../../packages/pet-sdk/build.sh"
-(cd "$HERE/../../../packages/pet-sdk" && pnpm pack --pack-destination "$WORK" >/dev/null)
+"$HERE/../../../packages/kodama-sdk/build.sh"
+(cd "$HERE/../../../packages/kodama-sdk" && pnpm pack --pack-destination "$WORK" >/dev/null)
 cp -R "$HERE"/. "$WORK/app" 2>/dev/null || { mkdir "$WORK/app" && cp -R "$HERE"/. "$WORK/app"; }
 cd "$WORK/app"
 pnpm add -s @tanstack/react-start@^1.168.56 @tanstack/react-router@^1.170.38 react@^19.2.0 react-dom@^19.2.0 vite@^8.0.0 @vitejs/plugin-react@^6.0.1 "$WORK"/violetjs-pet-*.tgz
@@ -19,7 +19,7 @@ until curl -sf localhost:4174/ >/dev/null 2>&1; do
 done
 SSR=$(curl -s localhost:4174/)
 echo "$SSR" | grep -q '<p id="probe">not-initialised</p>' || { echo "FAIL: SSR rendered after init"; exit 1; }
-echo "$SSR" | grep -q 'pet_wasm' && { echo "FAIL: SSR HTML references wasm"; exit 1; }
+echo "$SSR" | grep -q 'kodama_wasm' && { echo "FAIL: SSR HTML references wasm"; exit 1; }
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 # CHROME_FLAGS 供 CI 注入（例如 --no-sandbox）；本机默认为空，由 browser.mjs 读取。
 # 两次打开共用一个浏览器档案：本地模式的存档必须在第二次打开时还在。等页面报告本地模式的结果后取 DOM。

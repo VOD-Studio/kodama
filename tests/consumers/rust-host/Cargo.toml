@@ -8,6 +8,6 @@ publish = false
 [workspace]
 
 [dependencies]
-pet-core = { path = "../../../crates/core/pet-core" }
-pet-term = { path = "../../../crates/core/pet-term" }
+kodama-core = { path = "../../../crates/core/kodama-core" }
+kodama-term = { path = "../../../crates/core/kodama-term" }
 serde_json = "1"

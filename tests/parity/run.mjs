@@ -5,7 +5,7 @@ const mode = process.argv[2];
 const steps = JSON.parse(fs.readFileSync(new URL("../fixtures/steps.json", import.meta.url)));
 let exec;
 if (mode === "native") {
-  exec = (line) => execFileSync("../../target/release/pet-cli", { input: line + "\n", cwd: new URL(".", import.meta.url).pathname }).toString().trim();
+  exec = (line) => execFileSync("../../target/release/kodama", { input: line + "\n", cwd: new URL(".", import.meta.url).pathname }).toString().trim();
 } else {
   const m = await import(process.argv[3]);
   exec = m.execute;

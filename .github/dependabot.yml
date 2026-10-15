@@ -19,7 +19,7 @@ updates:
       - dependency-name: wasm-bindgen
 
   - package-ecosystem: npm
-    directory: /packages/pet-sdk
+    directory: /packages/kodama-sdk
     schedule:
       interval: monthly
     commit-message:

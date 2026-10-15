@@ -40,8 +40,8 @@
 
 ## 客户端
 
-- 动作经 `act`（规则核心）、`POST /v1/pets/me/actions`（账号模式）与 `@violetjs/pet/local` 的 `act`（本地模式）执行，不需要新接口。
-- `pet-cli act depart TOPIC short|medium|long`、`act return`、`act recall`；`live --account` 的状态行显示探险的主题与还有多久回来。
+- 动作经 `act`（规则核心）、`POST /v1/pets/me/actions`（账号模式）与 `@violetjs/kodama/local` 的 `act`（本地模式）执行，不需要新接口。
+- `kodama act depart TOPIC short|medium|long`、`act return`、`act recall`；`live --account` 的状态行显示探险的主题与还有多久回来。
 
 ## 校验
 

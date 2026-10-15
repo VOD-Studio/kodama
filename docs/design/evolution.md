@@ -134,11 +134,11 @@
 - `sprite` 命令新增可选字段 `lineage`（进化记录），给出时以它决定阶段与外形；不给时按 `stage`（0、1、2）显示不带分支特征的基础身体，旧调用方不受影响。
 - 进化记录与阶段对不上（例如少年阶段写了成年分支）时，退回按阶段显示，画面永远可以渲染，合法性由规则核心负责。
 - 画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；待机会在画布里走动，需要更宽的画布，例如 96×40。
-- 阶段与分支的类型从规则核心移到 `pet-term`（`pet_term::form`），由 `pet-core` 再导出，线上名称不变。
+- 阶段与分支的类型从规则核心移到 `kodama-term`（`kodama_term::form`），由 `kodama-core` 再导出，线上名称不变。
 
 ## 校验
 
-`crates/core/pet-term/tests/pixel.rs` 的 13 项检查，「不看颜色」指只比较像素键位：
+`crates/core/kodama-term/tests/pixel.rs` 的 13 项检查，「不看颜色」指只比较像素键位：
 
 | 检查 | 含义 |
 |---|---|
@@ -158,16 +158,16 @@
 ## 预览
 
 ```sh
-cargo run -p pet-term --example sprites -- observe 0   # 写出 target/sprites.html：8 物种 × 16 外形
-cargo run -p pet-term --example sprites -- evolve 9    # 进化动画中的一刻
-cargo run -p pet-term --example sprites -- individuals # 写出 target/individuals.html：每个物种 12 只不同的个体
+cargo run -p kodama-term --example sprites -- observe 0   # 写出 target/sprites.html：8 物种 × 16 外形
+cargo run -p kodama-term --example sprites -- evolve 9    # 进化动画中的一刻
+cargo run -p kodama-term --example sprites -- individuals # 写出 target/individuals.html：每个物种 12 只不同的个体
 make preview ARGS="individuals 3"                      # 在终端里看同一物种的 12 只个体
 ```
 
-改动身体模板或部件后，用它目视检查，并跑 `cargo test -p pet-term`。
+改动身体模板或部件后，用它目视检查，并跑 `cargo test -p kodama-term`。
 
 ## 后续
 
-- **终端**：已完成。`frame` 的 `blocks` 字符集把像素画以半格字符画进终端（上半格前景色、下半格背景色，量化到 256 色），所以终端与网页是同一套外形与动作，不维护第二份美术；`pet-cli live` 在 UTF-8、256 色且足够高时使用，按 g 切换外形。只有 ASCII 或 16 色的终端仍显示不分阶段的字符画。
+- **终端**：已完成。`frame` 的 `blocks` 字符集把像素画以半格字符画进终端（上半格前景色、下半格背景色，量化到 256 色），所以终端与网页是同一套外形与动作，不维护第二份美术；`kodama live` 在 UTF-8、256 色且足够高时使用，按 g 切换外形。只有 ASCII 或 16 色的终端仍显示不分阶段的字符画。
 - **精细画风**（#14）：沿用同一套外形体系与锚点，换成矢量或高分辨率位图。
 - **物种特有的进化条件**：目前进化条件对所有物种相同，形态因物种而异；条件差异属于规则调整，需要评审与新的 `rules_version`。

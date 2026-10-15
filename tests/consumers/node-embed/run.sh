@@ -3,8 +3,8 @@
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=$(mktemp -d); trap 'rm -rf "$WORK"' EXIT
-"$HERE/../../../packages/pet-sdk/build.sh"
-(cd "$HERE/../../../packages/pet-sdk" && pnpm pack --pack-destination "$WORK" >/dev/null)
+"$HERE/../../../packages/kodama-sdk/build.sh"
+(cd "$HERE/../../../packages/kodama-sdk" && pnpm pack --pack-destination "$WORK" >/dev/null)
 mkdir "$WORK/app" && cp "$HERE/host.mjs" "$WORK/app/" && cd "$WORK/app"
 echo '{"name":"host","private":true,"type":"module"}' > package.json
 CLEAN=$(echo "$PATH" | tr ':' '\n' | grep -v cargo | paste -sd: -)

@@ -1,5 +1,5 @@
 //! 一个“宿主”终端工具如何嵌入宠物:只在宿主划定的矩形里绘制,不接管终端。
-//! 规则核心给出出生与状态,pet-term 合成字符帧,宿主自己决定如何输出。
+//! 规则核心给出出生与状态,kodama-term 合成字符帧,宿主自己决定如何输出。
 use std::fmt::Write as _;
 
 struct Region {
@@ -10,7 +10,7 @@ struct Region {
 }
 
 /// 把一帧写进宿主的输出缓冲:保存光标、绝对定位逐行绘制、恢复光标。
-fn draw(out: &mut String, region: &Region, frame: &pet_term::Frame) {
+fn draw(out: &mut String, region: &Region, frame: &kodama_term::Frame) {
     out.push_str("\x1b7");
     for (y, row) in frame.rows.iter().enumerate() {
         write!(out, "\x1b[{};{}H{}", region.row + y as u16, region.col, row).unwrap();
@@ -33,18 +33,18 @@ fn clear(out: &mut String, region: &Region) {
     out.push_str("\x1b8");
 }
 
-fn frame_for(species: u8, genes: [u8; 8], t: u64, region: &Region) -> pet_term::Frame {
-    let input: pet_term::FrameInput = serde_json::from_value(serde_json::json!({
+fn frame_for(species: u8, genes: [u8; 8], t: u64, region: &Region) -> kodama_term::Frame {
+    let input: kodama_term::FrameInput = serde_json::from_value(serde_json::json!({
         "species": species, "genes": genes, "pose": "idle", "charset": "ascii",
         "w": region.width, "h": region.height, "t": t.to_string(),
     }))
     .unwrap();
-    pet_term::render(&input)
+    kodama_term::render(&input)
 }
 
 fn main() {
     // 出生:通过核心的统一 JSON 入口,和 Web、Node 完全一致。
-    let birth: serde_json::Value = serde_json::from_str(&pet_core::execute(
+    let birth: serde_json::Value = serde_json::from_str(&kodama_core::execute(
         &serde_json::json!({"op":"birth","world":"w1","request_id":"r1","server_seed":"aa".repeat(32),"client_seed":"bb".repeat(32),"born_at":"0"}).to_string(),
     ))
     .unwrap();

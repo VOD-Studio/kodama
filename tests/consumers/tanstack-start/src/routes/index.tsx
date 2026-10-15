@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { initPet, execute } from "@violetjs/pet";
-import { mountPet } from "@violetjs/pet/web";
-import { createLocalPet, openIndexedDbStore } from "@violetjs/pet/local";
+import { initPet, execute } from "@violetjs/kodama";
+import { mountPet } from "@violetjs/kodama/web";
+import { createLocalPet, openIndexedDbStore } from "@violetjs/kodama/local";
 import { useEffect, useRef, useState } from "react";
 
 const birth = JSON.stringify({ op: "birth", world: "w1", request_id: "r1", server_seed: "aa".repeat(32), client_seed: "bb".repeat(32), born_at: "0" });

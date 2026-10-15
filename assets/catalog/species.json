@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "note": "素材清单。结构、动作覆盖与许可由 crates/core/pet-term/tests/catalog.rs 校验；声明为 ready 的画风必须真有实现。forms 为每个阶段与进化分支的外形名称：成年外形由成年分支决定，少年时的分支作为次要特征保留。",
+  "note": "素材清单。结构、动作覆盖与许可由 crates/core/kodama-term/tests/catalog.rs 校验；声明为 ready 的画风必须真有实现。forms 为每个阶段与进化分支的外形名称：成年外形由成年分支决定，少年时的分支作为次要特征保留。",
   "required_actions": [
     "idle",
     "blink",

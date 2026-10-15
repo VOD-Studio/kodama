@@ -1,7 +1,7 @@
 import fs from "node:fs";
 const t0 = performance.now();
-const { initSync, execute } = await import("../../target/pkg-web/pet_wasm.js");
-initSync({ module: fs.readFileSync(new URL("../../target/pkg-web/pet_wasm_bg.wasm", import.meta.url)) });
+const { initSync, execute } = await import("../../target/pkg-web/kodama_wasm.js");
+initSync({ module: fs.readFileSync(new URL("../../target/pkg-web/kodama_wasm_bg.wasm", import.meta.url)) });
 const t1 = performance.now();
 const birth = JSON.stringify({ op: "birth", world: "w1", request_id: "r1", server_seed: "aa".repeat(32), client_seed: "bb".repeat(32), born_at: "0" });
 const pet = JSON.parse(execute(birth)).value.pet;

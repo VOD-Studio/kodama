@@ -1,6 +1,6 @@
 name: Package
 
-# 构建并验收发布产物，以 artifact 交出：npm 的 @violetjs/pet（SDK）与各平台的 pet-cli 归档。
+# 构建并验收发布产物，以 artifact 交出：npm 的 @violetjs/kodama（SDK）与各平台的 kodama 归档。
 # 这里的作业接触不到任何发布凭据；发布由 release.yml 完成（npm 环境、GitHub Release、GHCR）。
 # PR 上只做 dry-run 与验收；发版时由 release.yml 调用并传入版本。
 on:
@@ -9,10 +9,10 @@ on:
       - "Cargo.toml"
       - "Cargo.lock"
       - "LICENSE"
-      - "crates/core/pet-core/**"
-      - "crates/core/pet-term/**"
-      - "crates/runtimes/pet-wasm/**"
-      - "crates/runtimes/pet-cli/**"
+      - "crates/core/kodama-core/**"
+      - "crates/core/kodama-term/**"
+      - "crates/runtimes/kodama-wasm/**"
+      - "crates/runtimes/kodama/**"
       - "packages/**"
       - "scripts/release/**"
       - "scripts/check/version.mjs"
@@ -39,7 +39,7 @@ env:
 
 jobs:
   sdk:
-    name: "@violetjs/pet"
+    name: "@violetjs/kodama"
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -60,11 +60,11 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22
-      - run: packages/pet-sdk/build.sh
+      - run: packages/kodama-sdk/build.sh
       - name: Pack and dry-run
         run: |
           mkdir -p "$RUNNER_TEMP/tgz"
-          npm pack ./packages/pet-sdk --pack-destination "$RUNNER_TEMP/tgz"
+          npm pack ./packages/kodama-sdk --pack-destination "$RUNNER_TEMP/tgz"
           scripts/release/npm-publish.sh "$RUNNER_TEMP"/tgz/*.tgz dry-run
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
@@ -107,9 +107,9 @@ jobs:
       - name: Archive runs outside the repository
         env:
           TARGET: ${{ matrix.target }}
-          # 发版时核对 pet-cli --version 与标签一致
+          # 发版时核对 kodama --version 与标签一致
           VERSION: ${{ inputs.version }}
-        run: sh tests/consumers/cli-archive/run.sh "$RUNNER_TEMP/dist/pet-cli-$TARGET.tar.gz"
+        run: sh tests/consumers/cli-archive/run.sh "$RUNNER_TEMP/dist/kodama-$TARGET.tar.gz"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: cli-${{ matrix.target }}

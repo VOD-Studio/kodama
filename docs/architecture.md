@@ -16,15 +16,15 @@ This document describes how kodama is put together: the layers, which way depend
 
 ```mermaid
 flowchart BT
-  term["pet-term<br/>frames and pixel art<br/><i>no_std</i>"]
-  core["pet-core<br/>rules, birth, proof, protocol<br/><i>no_std</i>"]
-  issuer["pet-issuer<br/>signs birth certificates"]
-  store["pet-store<br/>storage contract,<br/>SQLite and Postgres"]
-  service["pet-service<br/>HTTP service"]
-  wasm["pet-wasm<br/>wasm-bindgen wrapper"]
-  cli["pet-cli<br/>native CLI"]
-  schema["pet-schema<br/>schema generator"]
-  sdk["@violetjs/pet<br/>TypeScript SDK"]
+  term["kodama-term<br/>frames and pixel art<br/><i>no_std</i>"]
+  core["kodama-core<br/>rules, birth, proof, protocol<br/><i>no_std</i>"]
+  issuer["kodama-issuer<br/>signs birth certificates"]
+  store["kodama-store<br/>storage contract,<br/>SQLite and Postgres"]
+  service["kodama-service<br/>HTTP service"]
+  wasm["kodama-wasm<br/>wasm-bindgen wrapper"]
+  cli["kodama<br/>native CLI"]
+  schema["kodama-schema<br/>schema generator"]
+  sdk["@violetjs/kodama<br/>TypeScript SDK"]
 
   core --> term
   issuer --> core
@@ -40,37 +40,37 @@ flowchart BT
   sdk -. "loads the .wasm" .-> wasm
 ```
 
-An arrow means "depends on". Every edge points toward the pure core at the top, and none of the crates `pet-service` builds on knows about HTTP, accounts or worlds.
+An arrow means "depends on". Every edge points toward the pure core at the top, and none of the crates `kodama-service` builds on knows about HTTP, accounts or worlds.
 
 | Crate / package | Owns | Does not own |
 |---|---|---|
-| `pet-term` | Character-cell frames (`frame`) and pixel art (`sprite`) for every species and pose; each species' body structure, which tests keep in sync with `assets/catalog/species.json` | Rules, state, terminals (it only returns grids) |
-| `pet-core` | Birth derivation, life and illness, growth and evolution, rewards, birth-certificate verification, error codes, the capability catalog, and the single JSON entry point `execute` | Clocks, randomness, storage, networking, signing keys |
-| `pet-issuer` | Signing commitments and birth certificates with Ed25519 keys | Verification (that stays in the core so anyone can run it) |
-| `pet-store` | The `Store` trait and its SQLite and Postgres implementations; `run_act`, which turns a core decision into one atomic commit | Rules, HTTP |
-| `pet-service` | Accounts and worlds, identity-assertion exchange, access tokens, the commit-reveal birth flow, HTTP endpoints | Any data owned by an integrating site |
-| `pet-wasm` | Exposing `execute` through wasm-bindgen | Anything else; it is seven lines long |
-| `pet-cli` | `exec` (JSON lines), `live` (an animated pet in the terminal), `capabilities`, `version` | Account state; `live` is a local preview |
-| `pet-schema` | Printing the JSON Schema of the wire protocol | Runtime behavior; it is a build-time tool |
-| `@violetjs/pet` | Explicit async initialization, typed `run`, canvas and terminal rendering, and local mode (an IndexedDB store with the same contract as `pet-store`) | Rules; it only calls the WebAssembly |
+| `kodama-term` | Character-cell frames (`frame`) and pixel art (`sprite`) for every species and pose; each species' body structure, which tests keep in sync with `assets/catalog/species.json` | Rules, state, terminals (it only returns grids) |
+| `kodama-core` | Birth derivation, life and illness, growth and evolution, rewards, birth-certificate verification, error codes, the capability catalog, and the single JSON entry point `execute` | Clocks, randomness, storage, networking, signing keys |
+| `kodama-issuer` | Signing commitments and birth certificates with Ed25519 keys | Verification (that stays in the core so anyone can run it) |
+| `kodama-store` | The `Store` trait and its SQLite and Postgres implementations; `run_act`, which turns a core decision into one atomic commit | Rules, HTTP |
+| `kodama-service` | Accounts and worlds, identity-assertion exchange, access tokens, the commit-reveal birth flow, HTTP endpoints | Any data owned by an integrating site |
+| `kodama-wasm` | Exposing `execute` through wasm-bindgen | Anything else; it is seven lines long |
+| `kodama` | `exec` (JSON lines), `live` (an animated pet in the terminal), `capabilities`, `version` | Account state; `live` is a local preview |
+| `kodama-schema` | Printing the JSON Schema of the wire protocol | Runtime behavior; it is a build-time tool |
+| `@violetjs/kodama` | Explicit async initialization, typed `run`, canvas and terminal rendering, and local mode (an IndexedDB store with the same contract as `kodama-store`) | Rules; it only calls the WebAssembly |
 
 ### Dependency rules
 
-The directory is the layer: every crate lives in `crates/<layer>/<crate>`, and the workspace includes `crates/*/*`. Paths between crates are declared once, in `[workspace.dependencies]` of the root `Cargo.toml`; members write `pet-core = { workspace = true }`.
+The directory is the layer: every crate lives in `crates/<layer>/<crate>`, and the workspace includes `crates/*/*`. Paths between crates are declared once, in `[workspace.dependencies]` of the root `Cargo.toml`; members write `kodama-core = { workspace = true }`.
 
 | Layer | Crates | May depend on |
 |---|---|---|
-| `core` | `pet-core`, `pet-term` | `core` only. `no_std`, no clock, no randomness, no I/O |
-| `service` | `pet-store`, `pet-issuer`, `pet-service` | `core`, `service` |
-| `runtimes` | `pet-cli`, `pet-wasm` | `core` |
-| `tools` | `pet-schema` | `core` |
+| `core` | `kodama-core`, `kodama-term` | `core` only. `no_std`, no clock, no randomness, no I/O |
+| `service` | `kodama-store`, `kodama-issuer`, `kodama-service` | `core`, `service` |
+| `runtimes` | `kodama`, `kodama-wasm` | `core` |
+| `tools` | `kodama-schema` | `core` |
 
 `scripts/check/check-arch.mjs` (run by `make check-arch` and the CI Lint job) fails when:
 
 - a crate sits outside `crates/<its layer>/<its name>`, or a new crate is not registered;
 - a crate depends on another layer than the table allows, or on a workspace crate outside its own allowlist;
-- `pet-core` or `pet-term` gains a normal dependency outside the core allowlist: digests (`sha2`, `hmac`), signature verification (`ed25519-dalek`), serialization (`serde`, `serde_json`) and schema derivation (`schemars`, optional);
-- `pet-core` or `pet-term` loses `#![no_std]` or `#![forbid(unsafe_code)]`.
+- `kodama-core` or `kodama-term` gains a normal dependency outside the core allowlist: digests (`sha2`, `hmac`), signature verification (`ed25519-dalek`), serialization (`serde`, `serde_json`) and schema derivation (`schemars`, optional);
+- `kodama-core` or `kodama-term` loses `#![no_std]` or `#![forbid(unsafe_code)]`.
 
 The same target then compiles the core layer for `thumbv7em-none-eabihf`, a target with no standard library. A dependency that quietly pulls in `std` fails there, even though it would build fine for native targets and `wasm32-unknown-unknown`.
 
@@ -78,16 +78,16 @@ To add a crate or an edge, change `scripts/check/check-arch.mjs` and this docume
 
 ### Inside the crates
 
-`pet-core` and `pet-service` are split by responsibility, so each new feature has a fixed place instead of growing one file:
+`kodama-core` and `kodama-service` are split by responsibility, so each new feature has a fixed place instead of growing one file:
 
 ```
-crates/core/pet-core/src/
+crates/core/kodama-core/src/
 ├── protocol/   execute, Command, codec, capability catalog. The boundary of a future protocol crate
 ├── birth/      birth derivation; proof.rs verifies certificates
 ├── rules/      life.rs (needs, illness, death), growth.rs (level, personality, evolution), wardrobe.rs (outfits), expedition.rs (expeditions)
 └── rng.rs      HKDF channels; every feature draws from its own labelled channel
 
-crates/service/pet-service/src/
+crates/service/kodama-service/src/
 ├── lib.rs      the route table: the one list of every endpoint
 ├── state.rs    Config, AppState
 ├── error.rs    the {ok, value} / {ok:false, code, message} envelope
@@ -101,19 +101,19 @@ crates/service/pet-service/src/
 └── routes/     one file per resource: meta, auth, births, pets, sessions, device, activity, memorials, friends
 ```
 
-Public paths do not depend on the internal layout: `pet_core` re-exports everything other crates use.
+Public paths do not depend on the internal layout: `kodama_core` re-exports everything other crates use.
 
 ## Directory structure
 
 ```
 kodama/
 ├── crates/<layer>/<crate>/   Rust, grouped by layer (see above)
-├── packages/<package>/       npm packages: pet-sdk is @violetjs/pet
+├── packages/<package>/       npm packages: kodama-sdk is @violetjs/kodama
 ├── assets/                   art and its records: catalog/species.json today
 ├── tests/                    cross-component acceptance, by kind
 │   ├── fixtures/             golden births, scenario steps, certificates and their generator
 │   ├── parity/               native, Node and web output must be byte-identical
-│   ├── tty/                  real-terminal behavior of pet-cli live
+│   ├── tty/                  real-terminal behavior of kodama live
 │   ├── e2e/                  the service binary over real HTTP, SQLite and Postgres
 │   ├── consumers/<name>/     installed artifacts outside the repository; each has run.sh
 │   └── bench/
@@ -140,8 +140,8 @@ The root holds only what tools require there (`Cargo.toml`, `Cargo.lock`, `rustf
 ```mermaid
 sequenceDiagram
   participant App as Web app / Node host / script
-  participant Entry as @violetjs/pet · pet-cli exec
-  participant Core as pet-core::execute
+  participant Entry as @violetjs/kodama · kodama exec
+  participant Core as kodama-core::execute
   App->>Entry: {"op":"act","pet":…,"action":"feed","now":"60","request_id":"r1"}
   Entry->>Core: JSON string
   Core->>Core: parse Command → act(pet, action, now, request_id)
@@ -157,14 +157,14 @@ sequenceDiagram
 sequenceDiagram
   participant Site as Integrating site
   participant Client as Web / CLI client
-  participant Svc as pet-service
+  participant Svc as kodama-service
   participant Store as Store (SQLite / Postgres)
   Site->>Client: short-lived identity assertion (Ed25519, ≤ 300 s)
   Client->>Svc: POST /v1/auth/exchange
   Svc-->>Client: access token (1 h)
   Client->>Svc: POST /v1/pets/me/actions {action, request_id}
   Svc->>Store: load(scope) → state, version
-  Svc->>Svc: pet_core::act(state, action, server time)
+  Svc->>Svc: kodama_core::act(state, action, server time)
   Svc->>Store: commit(scope, version, request_id, changeset)
   Store-->>Svc: Committed | Replayed | Conflict | RequestIdReused
   Svc-->>Client: {ok, value}
@@ -173,17 +173,17 @@ sequenceDiagram
 - **Scope** is `(world, owner)`. One service instance serves one world, so different sites never see each other's pets.
 - **Time comes from the server.** Clients cannot choose a logical time in account mode.
 - **Commits are atomic and idempotent.** State, inventory and the command result are written together. Replaying a `request_id` returns the stored result, and reusing it with different parameters is rejected. On a version conflict `run_act` reloads and retries, up to 16 times.
-- **Births use commit-reveal.** The service commits to `server_seed` before the client adds its seed. The certificate, signed by `pet-issuer`, can be checked by `verify_birth` in any runtime against the keys published at `/v1/issuer-keys`.
+- **Births use commit-reveal.** The service commits to `server_seed` before the client adds its seed. The certificate, signed by `kodama-issuer`, can be checked by `verify_birth` in any runtime against the keys published at `/v1/issuer-keys`.
 
 The service never reads an integrating site's database or API; sites talk to it only through identity assertions, activity events and the SDK (ADR-0021).
 
 ## The wire protocol and generated files
 
 ```
-Rust types (pet-core, pet-term) ──schemars──► pet-schema ──► schema/pet.schema.json
+Rust types (kodama-core, kodama-term) ──schemars──► kodama-schema ──► schema/kodama.schema.json
                                                                ├─► src/types.d.ts      (json-schema-to-typescript)
-CAPABILITIES (pet-core::caps) ─────────────────────────────────┴─► docs/capabilities.md
-                             └─► pet-cli help, the `capabilities` command, GET /v1/capabilities
+CAPABILITIES (kodama-core::caps) ─────────────────────────────────┴─► docs/capabilities.md
+                             └─► kodama help, the `capabilities` command, GET /v1/capabilities
 ```
 
 Generated files are committed. `make schema` regenerates them, and `make schema-check` (CI Core job) fails if they are stale, validates real responses against the schema, and compiles positive and negative type tests. A new command has to be registered in `CAPABILITIES`, or the tests fail.
@@ -224,16 +224,16 @@ Package versions and `rules_version` are separate: see [versioning](design/versi
 
 | Artifact | Channel |
 |---|---|
-| `@violetjs/pet` | npm |
-| `pet-cli` | GitHub Release archives for Linux x64 and arm64 (static musl) and macOS arm64, with checksums and build provenance |
-| `pet-service` | `ghcr.io/vod-studio/pet-service`, amd64 and arm64 |
+| `@violetjs/kodama` | npm |
+| `kodama` | GitHub Release archives for Linux x64 and arm64 (static musl) and macOS arm64, with checksums and build provenance |
+| `kodama-service` | `ghcr.io/vod-studio/kodama-service`, amd64 and arm64 |
 | Crates | Not published yet (`publish = false`) |
 
 All artifacts share one version and are released from one tag by `release.yml`. Details are in [distribution](operations/distribution.md).
 
 ## Known coupling and planned changes
 
-**`pet-core` depends on `pet-term`.** The protocol entry `execute` and the `Command` enum live in `pet-core` (now its own `protocol` module), and two commands (`frame`, `sprite`) dispatch to the renderer. The rules themselves do not use `pet-term`. Moving `protocol/` into its own crate is deferred on purpose: today it would change no behavior, since the crates are not published, unused code is already stripped from the `.wasm`, and output is unchanged. It would also break the crate API twice, because the crates will be renamed to `violet-pet-*` before publishing. Both changes will happen together when crates are first published. Until then, the module boundary and `check-arch` keep the edge from spreading.
+**`kodama-core` depends on `kodama-term`.** The protocol entry `execute` and the `Command` enum live in `kodama-core` (now its own `protocol` module), and two commands (`frame`, `sprite`) dispatch to the renderer. The rules themselves do not use `kodama-term`. Moving `protocol/` into its own crate is deferred on purpose: today it would change no behavior, since the crates are not published, unused code is already stripped from the `.wasm`, and output is unchanged. It would also break the crate API twice, because the crates will be renamed to `violet-pet-*` before publishing. Both changes will happen together when crates are first published. Until then, the module boundary and `check-arch` keep the edge from spreading.
 
 Other open items are tracked in the PRD and in [service](operations/service.md) ("Known limitations"): token revocation, shared replay protection for multi-instance deployments, encryption of `server_seed` at rest, connection pooling, and rate limiting.
 
@@ -241,21 +241,21 @@ Other open items are tracked in the PRD and in [service](operations/service.md) 
 
 Each open issue already has a place in this layout. A feature adds modules where the table says, and registers its commands in the capability catalog only once it is implemented.
 
-| Issue | Rules (`pet-core`) | Art (`pet-term`, `assets/`) | Service (`pet-service`, `pet-store`) | Clients |
+| Issue | Rules (`kodama-core`) | Art (`kodama-term`, `assets/`) | Service (`kodama-service`, `kodama-store`) | Clients |
 |---|---|---|---|---|
-| Evolution forms and refined art (#6, #11, #14) | `rules/growth.rs`: conditions (unchanged); `Stage` and `Branch` live in `pet_term::form` | **Pixel art done** ([design](design/evolution.md)): a body per stage, branch features, 16 forms per species, names in `assets/catalog/`; terminals draw the same art with half blocks (`charset: "blocks"`) | `GET /v1/pets/me/evolution` stays the entry | SDK passes `lineage` to `sprite` |
-| #5 Rule-version migration | `rules/migrate.rs`: explicit `migrate(pet, from, to)` with invariant tests | — | Migrates on load and persists; schema changes as numbered migrations in `pet-store` | — |
+| Evolution forms and refined art (#6, #11, #14) | `rules/growth.rs`: conditions (unchanged); `Stage` and `Branch` live in `kodama_term::form` | **Pixel art done** ([design](design/evolution.md)): a body per stage, branch features, 16 forms per species, names in `assets/catalog/`; terminals draw the same art with half blocks (`charset: "blocks"`) | `GET /v1/pets/me/evolution` stays the entry | SDK passes `lineage` to `sprite` |
+| #5 Rule-version migration | `rules/migrate.rs`: explicit `migrate(pet, from, to)` with invariant tests | — | Migrates on load and persists; schema changes as numbered migrations in `kodama-store` | — |
 | #10 Account service | — | — | **Login sessions done**: `session.rs` (rotating refresh tokens, reuse revokes), `record.rs` (small records on the storage contract); connection pool done; to do: rate limits, freezing the storage contract signatures | — |
-| #12 Activity and rewards | `grant` (exists) | — | **Done**: `activity.rs` (signatures, reward table, daily ledger) and `routes/activity.rs` (receive, reserve, grant; deduplicated by eligibility); `run_grant` in `pet-store` | Integrator connectors send signed events |
-| #13 Browser local mode | Unchanged | — | The contract vectors (`tests/fixtures/store-contract.json`) also run against SQLite and Postgres | **Done** ([design](design/local-mode.md)): `@violetjs/pet/local` and `/store`, an IndexedDB store, a daily ration and activity rewards, multiple tabs |
-| #15 CLI accounts | — | — | **Done**: device authorization in `device.rs` and `routes/device.rs` ([details](operations/service.md)); projections carry the appearance | **Done**: `pet-cli`'s `account/` (login, credentials, automatic refresh, `live --account`), talking HTTP; no service crate linked |
-| #16 Skill | Capability catalog (exists) | — | — | `packages/pet-sdk/skill/`, generated parts from the catalog |
-| #17 Outfits and home | **Done**: `rules/wardrobe.rs` (level unlocks, wearing, body checks), `Pet.species` | **Done**: `outfit.rs` and `pixel/items.rs` in `pet-term`, `assets/catalog/items.json` ([design](design/outfits.md)) | Through `POST /v1/pets/me/actions`; no new endpoint | `sprite`, `frame`, `mountPet` and terminal embedding take an `outfit` |
-| #18 Expeditions | **Done**: `rules/expedition.rs` (depart, return, recall; its own RNG channel `expedition/v1`; two a day) | Souvenir catalog `assets/catalog/souvenirs.json` ([design](design/expeditions.md)) | Through `POST /v1/pets/me/actions`; no new endpoint | `pet-cli act depart/return/recall` |
+| #12 Activity and rewards | `grant` (exists) | — | **Done**: `activity.rs` (signatures, reward table, daily ledger) and `routes/activity.rs` (receive, reserve, grant; deduplicated by eligibility); `run_grant` in `kodama-store` | Integrator connectors send signed events |
+| #13 Browser local mode | Unchanged | — | The contract vectors (`tests/fixtures/store-contract.json`) also run against SQLite and Postgres | **Done** ([design](design/local-mode.md)): `@violetjs/kodama/local` and `/store`, an IndexedDB store, a daily ration and activity rewards, multiple tabs |
+| #15 CLI accounts | — | — | **Done**: device authorization in `device.rs` and `routes/device.rs` ([details](operations/service.md)); projections carry the appearance | **Done**: `kodama`'s `account/` (login, credentials, automatic refresh, `live --account`), talking HTTP; no service crate linked |
+| #16 Skill | Capability catalog (exists) | — | — | `packages/kodama-sdk/skill/`, generated parts from the catalog |
+| #17 Outfits and home | **Done**: `rules/wardrobe.rs` (level unlocks, wearing, body checks), `Pet.species` | **Done**: `outfit.rs` and `pixel/items.rs` in `kodama-term`, `assets/catalog/items.json` ([design](design/outfits.md)) | Through `POST /v1/pets/me/actions`; no new endpoint | `sprite`, `frame`, `mountPet` and terminal embedding take an `outfit` |
+| #18 Expeditions | **Done**: `rules/expedition.rs` (depart, return, recall; its own RNG channel `expedition/v1`; two a day) | Souvenir catalog `assets/catalog/souvenirs.json` ([design](design/expeditions.md)) | Through `POST /v1/pets/me/actions`; no new endpoint | `kodama act depart/return/recall` |
 | #19 Friends | Unchanged: joint expeditions reuse the expedition rules | — | **Done**: `friends.rs` and `routes/friends.rs` (invite codes, records on both sides, public projection, visits, joint expeditions), stored through the storage contract with no new tables | — |
 | #20 Breeding and lineage | `birth/inherit.rs`: inheritance and mutation on its own channel; lineage in the certificate context | Inherited traits in the forms | `routes/breeding.rs`: two-step consent, incubator, retirement | — |
 | #21 AI conversation | Capability whitelist from the catalog | — | `routes/chat.rs`; model providers behind a trait in a new `service`-layer crate, so their HTTP clients stay optional | — |
-| #7 Identity and activity protocol | — | — | JSON Schema of the HTTP API generated by `pet-schema`, like the command protocol | Connectors in the integrating site's repository |
+| #7 Identity and activity protocol | — | — | JSON Schema of the HTTP API generated by `kodama-schema`, like the command protocol | Connectors in the integrating site's repository |
 
 New top-level folders, such as `apps/` for a web demo (#14), are added to the `check-arch` allowlist in the pull request that introduces them.
 
@@ -263,10 +263,10 @@ New top-level folders, such as `apps/` for a web demo (#14), are added to the `c
 
 | Change | Touch |
 |---|---|
-| A rule (growth, illness, rewards) | `crates/core/pet-core/src/rules/` and the tests in `crates/core/pet-core/tests/`; keep `make three-end` green; a change to existing results needs a new `rules_version` |
-| A new command | `Command` and `execute` in `crates/core/pet-core/src/protocol/mod.rs`, register it in `protocol/caps.rs`, then `make schema` |
-| Art for a species or pose | `crates/core/pet-term`, `assets/catalog/species.json`; preview with `make preview` |
-| A storage backend | Implement `Store` in `pet-store` and run the shared contract tests against it |
-| An HTTP endpoint | A handler in `crates/service/pet-service/src/routes/`, a line in the route table in `lib.rs`, tests in `tests/api.rs`; document it in [service](operations/service.md) |
+| A rule (growth, illness, rewards) | `crates/core/kodama-core/src/rules/` and the tests in `crates/core/kodama-core/tests/`; keep `make three-end` green; a change to existing results needs a new `rules_version` |
+| A new command | `Command` and `execute` in `crates/core/kodama-core/src/protocol/mod.rs`, register it in `protocol/caps.rs`, then `make schema` |
+| Art for a species or pose | `crates/core/kodama-term`, `assets/catalog/species.json`; preview with `make preview` |
+| A storage backend | Implement `Store` in `kodama-store` and run the shared contract tests against it |
+| An HTTP endpoint | A handler in `crates/service/kodama-service/src/routes/`, a line in the route table in `lib.rs`, tests in `tests/api.rs`; document it in [service](operations/service.md) |
 | A cross-component check | A folder under `tests/` with a `run.sh`, a `make` target, and a CI step |
 | A supported CLI platform | The `cli` matrix in `.github/workflows/package.yml`, the CLI README tables, and [distribution](operations/distribution.md) |

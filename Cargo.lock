@@ -733,6 +733,102 @@ dependencies = [
 ]
 
 [[package]]
+name = "kodama"
+version = "0.4.0"
+dependencies = [
+ "crossterm",
+ "kodama-core",
+ "kodama-term",
+ "rustls",
+ "serde",
+ "serde_json",
+ "signal-hook",
+ "ureq",
+]
+
+[[package]]
+name = "kodama-core"
+version = "0.4.0"
+dependencies = [
+ "ed25519-dalek",
+ "hmac",
+ "kodama-term",
+ "schemars",
+ "serde",
+ "serde_json",
+ "sha2 0.11.1",
+]
+
+[[package]]
+name = "kodama-issuer"
+version = "0.4.0"
+dependencies = [
+ "ed25519-dalek",
+ "kodama-core",
+ "serde_json",
+]
+
+[[package]]
+name = "kodama-schema"
+version = "0.4.0"
+dependencies = [
+ "kodama-core",
+ "kodama-term",
+ "schemars",
+ "serde_json",
+]
+
+[[package]]
+name = "kodama-service"
+version = "0.4.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "ed25519-dalek",
+ "getrandom 0.3.4",
+ "hmac",
+ "http-body-util",
+ "kodama-core",
+ "kodama-issuer",
+ "kodama-store",
+ "serde",
+ "serde_json",
+ "sha2 0.11.1",
+ "tempfile",
+ "tokio",
+ "tower",
+]
+
+[[package]]
+name = "kodama-store"
+version = "0.4.0"
+dependencies = [
+ "kodama-core",
+ "postgres",
+ "rusqlite",
+ "serde_json",
+ "sha2 0.11.1",
+ "tempfile",
+]
+
+[[package]]
+name = "kodama-term"
+version = "0.4.0"
+dependencies = [
+ "schemars",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "kodama-wasm"
+version = "0.4.0"
+dependencies = [
+ "kodama-core",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -883,102 +979,6 @@ name = "percent-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
-
-[[package]]
-name = "pet-cli"
-version = "0.4.0"
-dependencies = [
- "crossterm",
- "pet-core",
- "pet-term",
- "rustls",
- "serde",
- "serde_json",
- "signal-hook",
- "ureq",
-]
-
-[[package]]
-name = "pet-core"
-version = "0.4.0"
-dependencies = [
- "ed25519-dalek",
- "hmac",
- "pet-term",
- "schemars",
- "serde",
- "serde_json",
- "sha2 0.11.1",
-]
-
-[[package]]
-name = "pet-issuer"
-version = "0.4.0"
-dependencies = [
- "ed25519-dalek",
- "pet-core",
- "serde_json",
-]
-
-[[package]]
-name = "pet-schema"
-version = "0.4.0"
-dependencies = [
- "pet-core",
- "pet-term",
- "schemars",
- "serde_json",
-]
-
-[[package]]
-name = "pet-service"
-version = "0.4.0"
-dependencies = [
- "axum",
- "base64 0.22.1",
- "ed25519-dalek",
- "getrandom 0.3.4",
- "hmac",
- "http-body-util",
- "pet-core",
- "pet-issuer",
- "pet-store",
- "serde",
- "serde_json",
- "sha2 0.11.1",
- "tempfile",
- "tokio",
- "tower",
-]
-
-[[package]]
-name = "pet-store"
-version = "0.4.0"
-dependencies = [
- "pet-core",
- "postgres",
- "rusqlite",
- "serde_json",
- "sha2 0.11.1",
- "tempfile",
-]
-
-[[package]]
-name = "pet-term"
-version = "0.4.0"
-dependencies = [
- "schemars",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "pet-wasm"
-version = "0.4.0"
-dependencies = [
- "pet-core",
- "wasm-bindgen",
-]
 
 [[package]]
 name = "phf"

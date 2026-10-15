@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/VOD-Studio/kodama/actions/workflows/ci.yml/badge.svg)](https://github.com/VOD-Studio/kodama/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/VOD-Studio/kodama)](https://github.com/VOD-Studio/kodama/releases)
-[![npm](https://img.shields.io/npm/v/@violetjs/pet)](https://www.npmjs.com/package/@violetjs/pet)
+[![npm](https://img.shields.io/npm/v/@violetjs/kodama)](https://www.npmjs.com/package/@violetjs/kodama)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 住在站点里的电子宠物。宠物会出生、需要照料、成长、进化，也会死亡。规则核心用 Rust 写成，同一份代码编译为原生、浏览器 WebAssembly 与 Node WebAssembly，三端输出逐字节一致。
@@ -29,26 +29,26 @@
 
 | 想要 | 使用 |
 |---|---|
-| 在网页里展示、养成宠物，或嵌入 Node 终端工具 | npm 上的 [`@violetjs/pet`](packages/pet-sdk/README.zh-CN.md) |
-| 在终端里养一只，或从脚本、agent 调用规则 | [GitHub Releases](https://github.com/VOD-Studio/kodama/releases) 里的 [`pet-cli`](crates/runtimes/pet-cli/README.zh-CN.md) |
-| 同一账号在网页与 CLI 共享一只宠物 | 宠物服务镜像 `ghcr.io/vod-studio/pet-service`（[说明](docs/operations/service.md)） |
+| 在网页里展示、养成宠物，或嵌入 Node 终端工具 | npm 上的 [`@violetjs/kodama`](packages/kodama-sdk/README.zh-CN.md) |
+| 在终端里养一只，或从脚本、agent 调用规则 | [GitHub Releases](https://github.com/VOD-Studio/kodama/releases) 里的 [`kodama`](crates/runtimes/kodama/README.zh-CN.md) |
+| 同一账号在网页与 CLI 共享一只宠物 | 宠物服务镜像 `ghcr.io/vod-studio/kodama-service`（[说明](docs/operations/service.md)） |
 
 ```sh
-npm install @violetjs/pet
+npm install @violetjs/kodama
 ```
 
 ## 有什么
 
 | 部分 | 位置 | 说明 |
 |---|---|---|
-| 规则核心 | `crates/core/pet-core` | 只用整数，不读系统时钟（时间由调用方传入）；出生、生命、成长、进化、奖励、装扮、探险；单一 JSON 入口 `execute` |
-| 素材 | `crates/core/pet-term`、`assets/catalog/` | 8 个物种 × 16 种外形、装扮与场景；像素画、终端半格画与字符画 |
-| 存储 | `crates/service/pet-store` | SQLite 与 Postgres 共用一份存储契约与一套契约测试 |
-| 服务 | `crates/service/pet-service` | 持有账号宠物的唯一权威状态：领取、CLI 的设备登录、活动奖励、纪念、好友 |
-| 证书 | `crates/service/pet-issuer` | 签发出生证书；核验留在核心里 |
-| CLI | `crates/runtimes/pet-cli` | `pet-cli live`、`exec`、`capabilities`；账号宠物的 `login`、`status`、`act` 与 `live --account` |
-| WebAssembly | `crates/runtimes/pet-wasm` | SDK 加载的 wasm-bindgen 包装 |
-| SDK | `packages/pet-sdk` | `@violetjs/pet`：WebAssembly、类型、schema、画布呈现、终端嵌入、离线的本地模式 |
+| 规则核心 | `crates/core/kodama-core` | 只用整数，不读系统时钟（时间由调用方传入）；出生、生命、成长、进化、奖励、装扮、探险；单一 JSON 入口 `execute` |
+| 素材 | `crates/core/kodama-term`、`assets/catalog/` | 8 个物种 × 16 种外形、装扮与场景；像素画、终端半格画与字符画 |
+| 存储 | `crates/service/kodama-store` | SQLite 与 Postgres 共用一份存储契约与一套契约测试 |
+| 服务 | `crates/service/kodama-service` | 持有账号宠物的唯一权威状态：领取、CLI 的设备登录、活动奖励、纪念、好友 |
+| 证书 | `crates/service/kodama-issuer` | 签发出生证书；核验留在核心里 |
+| CLI | `crates/runtimes/kodama` | `kodama live`、`exec`、`capabilities`；账号宠物的 `login`、`status`、`act` 与 `live --account` |
+| WebAssembly | `crates/runtimes/kodama-wasm` | SDK 加载的 wasm-bindgen 包装 |
+| SDK | `packages/kodama-sdk` | `@violetjs/kodama`：WebAssembly、类型、schema、画布呈现、终端嵌入、离线的本地模式 |
 
 分层、依赖规则、命令如何流经系统以及每项保证如何检查，见 [docs/architecture.zh-CN.md](docs/architecture.zh-CN.md)。
 
@@ -80,7 +80,7 @@ T=$(make -s token SUB=alice)   # 或：make -s docker-token SUB=alice
 curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 ```
 
-不需要任何接入方：`scripts/dev/dev.mjs` 在 `.dev/` 里生成密钥，并扮演接入方签发身份断言。要对着真实接入方调试，用 `PET_DEV_TRUST_KEY=<对方公钥> node scripts/dev/dev.mjs init --force`；与 [Violet](https://github.com/VOD-Studio/violet) 联调的方式见 [docs/history/split-plan.md](docs/history/split-plan.md)。
+不需要任何接入方：`scripts/dev/dev.mjs` 在 `.dev/` 里生成密钥，并扮演接入方签发身份断言。要对着真实接入方调试，用 `KODAMA_DEV_TRUST_KEY=<对方公钥> node scripts/dev/dev.mjs init --force`；与 [Violet](https://github.com/VOD-Studio/violet) 联调的方式见 [docs/history/split-plan.md](docs/history/split-plan.md)。
 
 工具链、提交与 PR 约定、发版流程见 [CONTRIBUTING.zh-CN.md](CONTRIBUTING.zh-CN.md)。
 
@@ -91,7 +91,7 @@ curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 | [架构](docs/architecture.zh-CN.md) | 分层、依赖规则、数据流、验证 |
 | [分发](docs/operations/distribution.md) | 包名、渠道、平台、发版流程 |
 | [服务](docs/operations/service.md) | 运行、接口、身份、已知限制 |
-| [能力目录](packages/pet-sdk/docs/capabilities.md) | 全部命令、结果类型与错误码（生成） |
+| [能力目录](packages/kodama-sdk/docs/capabilities.md) | 全部命令、结果类型与错误码（生成） |
 | [PRD-0036](docs/prd/0036-独立电子宠物.md)、[ADR-0021](docs/adr/0021-pet-service-identity-and-activity-contract.md)、[CONTEXT.md](CONTEXT.md) | 产品需求、与接入方的契约、领域术语 |
 | [docs/](docs/) | 参数、成长规则、版本策略、出生协议、素材基线、扩展玩法 |
 

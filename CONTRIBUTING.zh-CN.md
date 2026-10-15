@@ -9,7 +9,7 @@
 **本机。** 需要安装：
 
 - Rust stable，含 `rustfmt`、`clippy`，以及 `wasm32-unknown-unknown`、`thumbv7em-none-eabihf` 两个目标
-- `wasm-bindgen-cli` 0.2.129，必须与 `crates/runtimes/pet-wasm` 锁定的版本一致（`make check-versions` 校验）
+- `wasm-bindgen-cli` 0.2.129，必须与 `crates/runtimes/kodama-wasm` 锁定的版本一致（`make check-versions` 校验）
 - Node 22 及以上、pnpm 10
 - Python 3（真实 TTY 测试用）
 - Docker：只有 `test-pg`、`e2e-pg` 与 `image` 在没有现成 Postgres 时需要
@@ -44,7 +44,7 @@ make lint test       # 或：make docker-ci
 另外运行与改动相关的检查：改规则跑 `make three-end`，改线上协议跑 `make schema` 与 `make schema-check`，改服务跑 `make e2e`，改 CLI 跑 `make tty`。[docs/architecture.zh-CN.md](docs/architecture.zh-CN.md) 里有验证对照表，以及常见改动该动哪些文件。
 
 - **格式**使用 rustfmt 默认风格（`rustfmt.toml` 只设了稳定版选项）。一次性的全量格式化提交记录在 `.git-blame-ignore-revs` 里；执行 `git config blame.ignoreRevsFile .git-blame-ignore-revs` 后，`git blame` 会跳过它，GitHub 的 blame 视图已自动跳过。
-- **生成的文件**（`packages/pet-sdk/schema/`、`src/types.d.ts`、`docs/capabilities.md`）随仓库提交。用 `make schema` 重新生成，不要手改。
+- **生成的文件**（`packages/kodama-sdk/schema/`、`src/types.d.ts`、`docs/capabilities.md`）随仓库提交。用 `make schema` 重新生成，不要手改。
 - **架构规则**由 `make check-arch` 检查。新增 crate 或 crate 之间的依赖时，在同一个 PR 里更新 `scripts/check/check-arch.mjs` 的表与 `docs/architecture.md`。
 
 ## 提交与 PR
@@ -86,15 +86,15 @@ Closes #19
 
 列表项以 `- ` 开头，续行缩进两格；`Closes #1`、`Refs #1`、`BREAKING CHANGE: …` 可以单独成行。必需检查 **Commit messages** 校验每个提交的标题与正文，以及 PR 标题（squash 时它会成为提交标题）；需要修改时用 `git rebase -i` 改写后强推分支。PR 内不允许出现从 `main` 合并进来的 merge commit，请改为 rebase 到 `main`。
 
-Dependabot 每月开分组的依赖更新 PR。cargo 依赖编译进所有产物，提交前缀为 `fix(deps)`，合并后随补丁版本发布；npm 开发工具、Actions 与镜像的更新前缀为 `chore(deps)` 或 `ci`，不触发发版。`wasm-bindgen` 不在 Dependabot 范围内：需要手动在 `crates/runtimes/pet-wasm/Cargo.toml`、各工作流与 `docker/dev.Dockerfile` 中同时升级，版本不一致时 `make check-versions` 会报错。
+Dependabot 每月开分组的依赖更新 PR。cargo 依赖编译进所有产物，提交前缀为 `fix(deps)`，合并后随补丁版本发布；npm 开发工具、Actions 与镜像的更新前缀为 `chore(deps)` 或 `ci`，不触发发版。`wasm-bindgen` 不在 Dependabot 范围内：需要手动在 `crates/runtimes/kodama-wasm/Cargo.toml`、各工作流与 `docker/dev.Dockerfile` 中同时升级，版本不一致时 `make check-versions` 会报错。
 
 ## 发版
 
 合并到 `main` 后，release-please 会开启或更新「发版 PR」，其中包含下一个版本号与 CHANGELOG。合并发版 PR 会打标签 `vX.Y.Z` 并创建 GitHub Release，随后 `release.yml` 发布：
 
-- `@violetjs/pet` 到 npm（需维护者在 `npm` 环境中批准）；
-- `pet-cli` 各平台归档、`SHA256SUMS` 与构建来源证明，作为该 GitHub Release 的附件；
-- 多架构的 `pet-service` 镜像到 `ghcr.io/vod-studio/pet-service`。
+- `@violetjs/kodama` 到 npm（需维护者在 `npm` 环境中批准）；
+- `kodama` 各平台归档、`SHA256SUMS` 与构建来源证明，作为该 GitHub Release 的附件；
+- 多架构的 `kodama-service` 镜像到 `ghcr.io/vod-studio/kodama-service`。
 
 流程、需要的仓库设置与支持的平台见 [docs/operations/distribution.md](docs/operations/distribution.md)。
 
