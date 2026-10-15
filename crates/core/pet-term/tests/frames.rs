@@ -12,6 +12,7 @@ fn input(w: u16, h: u16, t: u64, pose: Pose) -> FrameInput {
         stage: 0,
         lineage: Vec::new(),
         outfit: Outfit::default(),
+        rarity: 0,
     }
 }
 

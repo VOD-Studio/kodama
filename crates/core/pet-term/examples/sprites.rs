@@ -1,6 +1,8 @@
 //! 导出像素画风的总览图，用于改动素材后目视检查。输出是不依赖任何资源的 HTML（内联 SVG）。
 //!   cargo run -p pet-term --example sprites -- [姿态] [时刻] [输出文件]
 //!     8 个物种 × 16 种外形（幼体、3 种少年、12 种成年）；默认 `observe 0 target/sprites.html`
+//!   cargo run -p pet-term --example sprites -- individuals [时刻] [输出文件]
+//!     每个物种 12 只不同基因与稀有度的个体：检查花纹与光效；默认 `0 target/individuals.html`
 //!   cargo run -p pet-term --example sprites -- outfits [姿态] [时刻] [输出文件]
 //!     8 个物种的幼体与成年 × 每件装扮与两套搭配；默认 `observe 0 target/outfits.html`
 use pet_term::{render_pixels, PixelInput, SPECIES_COUNT};
@@ -87,10 +89,55 @@ fn outfits(args: &[String]) {
     println!("{out}");
 }
 
+/// 个体总览：每个物种 12 只不同基因的个体（成年），稀有度依次是普通到传说；用来检查花纹与光效。
+fn individuals(args: &[String]) {
+    let t = args.first().map_or("0", String::as_str);
+    let out = args
+        .get(1)
+        .map_or("target/individuals.html", String::as_str);
+    let mut html = format!("<!doctype html><meta charset=utf-8><title>pet individuals</title>{STYLE}<p>t = {t}；稀有度：0 普通 1 不凡 2 稀有 3 史诗 4 传说</p><table>");
+    for species in 0..SPECIES_COUNT {
+        for lineage in [vec![], vec!["curious", "sage"]] {
+            let _ = write!(
+                html,
+                "<tr><th>{species} {}</th>",
+                if lineage.is_empty() { "baby" } else { "adult" }
+            );
+            for n in 0..12u32 {
+                let g = |k: u32| {
+                    ((n * 97 + k * 31 + species as u32 * 7).wrapping_mul(2_654_435_761) >> 24) as u8
+                };
+                let genes: Vec<u8> = (0..8)
+                    .map(|k| {
+                        if k == 3 {
+                            (n * 37 + species as u32 * 11) as u8
+                        } else {
+                            g(k)
+                        }
+                    })
+                    .collect();
+                let rarity = n % 5;
+                let cell = svg(serde_json::json!({
+                    "species": species, "genes": genes, "pose": "observe", "stage": lineage.len(), "lineage": lineage,
+                    "w": W, "h": H, "t": t, "rarity": rarity,
+                }));
+                let _ = write!(html, "<td>{cell}<br>gene3 {} · r{rarity}</td>", genes[3]);
+            }
+            html.push_str("</tr>");
+        }
+    }
+    html.push_str("</table>");
+    std::fs::write(out, html).expect("write preview");
+    println!("{out}");
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.first().map(String::as_str) == Some("outfits") {
         return outfits(&args[1..]);
+    }
+    if args.first().map(String::as_str) == Some("individuals") {
+        return individuals(&args[1..]);
     }
     let pose = args.first().map_or("observe", String::as_str);
     let t = args.get(1).map_or("0", String::as_str);

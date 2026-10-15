@@ -128,6 +128,15 @@ test("an outfit changes the picture; a background fills the whole canvas", () =>
   m.dispose();
 });
 
+test("a legendary pet glows where a common one does not", () => {
+  const canvas = fakeCanvas();
+  const m = mountPet(canvas, { pet: { ...PET, rarity: 4 }, pose: "observe", window: fakeWindow({ reduced: true }) });
+  const legendary = snapshot(canvas.ctx);
+  m.setPet({ ...PET, rarity: 0 });
+  assert.notEqual(snapshot(canvas.ctx), legendary);
+  m.dispose();
+});
+
 test("passive pets let clicks through; interactive pets are keyboard buttons; dispose restores the canvas", () => {
   const passive = fakeCanvas();
   const a = mountPet(passive, { pet: PET, window: fakeWindow() });

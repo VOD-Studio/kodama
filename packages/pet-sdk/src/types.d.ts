@@ -540,6 +540,10 @@ export interface FrameInput {
   lineage?: Branch[];
   outfit?: Outfit;
   pose: Pose;
+  /**
+   * 出生稀有度 0–4；只有 `blocks` 画风画出光效。
+   */
+  rarity?: number;
   species: number;
   /**
    * 成长阶段与进化记录，含义与 `sprite` 相同；只有 `blocks` 画风按外形绘制。
@@ -568,6 +572,10 @@ export interface PixelInput {
   lineage?: Branch[];
   outfit?: Outfit;
   pose: Pose;
+  /**
+   * 出生稀有度 0–4（普通、不凡、稀有、史诗、传说）：不凡起有闪光，史诗与传说描边变色，传说身边有光环。
+   */
+  rarity?: number;
   species: number;
   /**
    * 成长阶段：0 幼体、1 少年、2 成年。给出 `lineage` 时以进化记录为准。

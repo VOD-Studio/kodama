@@ -88,6 +88,7 @@ struct Look {
     genes: [u8; 8],
     lineage: Vec<Branch>,
     outfit: Outfit,
+    rarity: u8,
 }
 
 /// 本地预览依次试穿的装扮（按 u 切换）：不穿、草地一套、夜空一套。
@@ -117,6 +118,7 @@ fn preview(species: u8, form: usize, outfit: usize) -> Look {
         genes: [37, 0, 0, 0, 0, 0, 0, 0],
         lineage: FORMS[form % FORMS.len()].to_vec(),
         outfit: demo_outfit(outfit),
+        rarity: 0,
     }
 }
 
@@ -133,6 +135,7 @@ fn input(look: Look, w: u16, h: u16, t: u64, pose: Pose, cs: Charset) -> FrameIn
         stage: lineage.len() as u8,
         lineage,
         outfit: look.outfit,
+        rarity: look.rarity,
     }
 }
 
@@ -232,6 +235,7 @@ pub fn run(account: bool) -> i32 {
                         genes: v.genes,
                         lineage: v.lineage.clone(),
                         outfit: v.outfit.clone(),
+                        rarity: v.rarity,
                     },
                     None => preview(1, 0, 0),
                 };

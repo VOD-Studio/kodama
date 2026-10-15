@@ -17,7 +17,7 @@ export function mountTerminalPet({ stream = process.stdout, region, pet, getPose
     const h = Math.min(region.height, Math.max(0, (stream.rows ?? 0) - region.row + 1));
     if (w < 1 || h < 1) return;
     const lineage = pet.lineage ?? [];
-    const r = run({ op: "frame", species: pet.species, genes: pet.genes, pose: getPose(), charset, w, h, t: String(t++), stage: pet.stage ?? lineage.length, lineage, outfit: pet.outfit ?? {} });
+    const r = run({ op: "frame", species: pet.species, genes: pet.genes, pose: getPose(), charset, w, h, t: String(t++), stage: pet.stage ?? lineage.length, lineage, outfit: pet.outfit ?? {}, rarity: pet.rarity ?? 0 });
     if (!r.ok) return;
     let out = "\x1b7";
     r.value.rows.forEach((row, y) => {

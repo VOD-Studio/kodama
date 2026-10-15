@@ -92,6 +92,9 @@ pub struct FrameInput {
     /// 穿戴的装扮；只有 `blocks` 画风画出来。
     #[serde(default)]
     pub outfit: Outfit,
+    /// 出生稀有度 0–4；只有 `blocks` 画风画出光效。
+    #[serde(default)]
+    pub rarity: u8,
 }
 
 #[derive(Serialize)]

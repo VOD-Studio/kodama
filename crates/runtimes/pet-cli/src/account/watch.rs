@@ -27,6 +27,8 @@ enum Resp {
 pub struct View {
     pub species: u8,
     pub genes: [u8; 8],
+    /// 出生稀有度：决定光效。
+    pub rarity: u8,
     pub lineage: Vec<Branch>,
     /// 身上的装扮。
     pub outfit: Outfit,
@@ -56,6 +58,9 @@ impl View {
         Some(View {
             species,
             genes,
+            rarity: look["rarity"]
+                .as_u64()
+                .map_or(prev.map_or(0, |p| p.rarity), |r| r as u8),
             lineage: pet.growth.lineage.clone(),
             outfit: pet.wardrobe.worn.clone(),
             phase: v["phase"].as_str().unwrap_or("healthy").into(),

@@ -56,5 +56,8 @@ const night = { head: "star_hat", face: "round_glasses", body: "bow_tie", back: 
 for (const [sp, w, h, t, pose, outfit] of [[0, 56, 38, "41", "idle", night], [6, 56, 38, "3", "observe", { back: "travel_pack", background: "meadow" }], [2, 40, 30, "9", "evolve", night]])
   out.push(exec(JSON.stringify({ op: "sprite", species: sp, genes: [37, 1, 2, 3, 4, 5, 6, 7], pose, stage: 2, lineage: ["gentle", "wanderer"], w, h, t, outfit })));
 out.push(exec(JSON.stringify({ op: "frame", species: 7, genes: [37, 1, 2, 3, 4, 5, 6, 7], pose: "idle", charset: "blocks", w: 48, h: 20, t: "12", outfit: night })));
+// 个体花纹（基因 3 的每种花纹）与稀有度光效
+for (const [sp, gene3, rarity, t] of [[0, 0, 0, "0"], [2, 1, 1, "4"], [3, 2, 2, "9"], [4, 3, 3, "13"], [6, 4, 4, "21"], [5, 31, 4, "30"]])
+  out.push(exec(JSON.stringify({ op: "sprite", species: sp, genes: [37, 1, 2, gene3, 4, 5, 6, 7], pose: "idle", stage: 2, lineage: ["curious", "sage"], w: 56, h: 36, t, rarity })));
 out.push(exec(JSON.stringify({ op: "capabilities" })));
 console.log(out.join("\n"));
