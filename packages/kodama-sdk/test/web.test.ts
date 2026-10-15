@@ -257,8 +257,12 @@ test("companion animation honors pause, visibility, accessibility and disposal",
 
 test("unavailable companion artwork never paints a draft or retains the prior character", () => {
   const canvas = fakeCanvas();
-  const m = mountPet(canvas, { pet: { ...PET, stage: 2, companion: { character: "gpt" } }, window: fakeWindow({ reduced: true }) });
+  const m = mountPet(canvas, { pet: { ...PET, stage: 0, companion: { character: "gpt" } }, window: fakeWindow({ reduced: true }) });
   assert.equal(canvas.ctx.rects.length, 0);
+  m.setPet({ ...PET, stage: 2, companion: { character: "gpt" } });
+  assert.ok(canvas.ctx.rects.length > 0, "the adult stage has artwork");
+  m.setPet({ ...PET, stage: 1, companion: { character: "gpt" } });
+  assert.equal(canvas.ctx.rects.length, 0, "earlier stages stay reserved");
   m.setPet({ ...PET, stage: 2, companion: { character: "deepseek" } });
   assert.ok(canvas.ctx.rects.length > 0);
   m.setPet({ ...PET, stage: 2, companion: { character: "claude" } });

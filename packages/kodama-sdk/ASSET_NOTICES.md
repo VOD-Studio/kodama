@@ -10,11 +10,10 @@ The planned companion collection references the existing community character
 designs collected at [AI gijinka reference](https://genderswapai.com/zh-CN/ai-gijinka).
 The reference set is [ZipZipPipe's published group](https://www.bilibili.com/opus/1233069202138464289).
 DeepSeek's underlying whale-girl character is by 上善无形; the maid interpretation
-is by ZipZipPipe. GPT's dragon reference is also documented in the
-[original dragon model sheets](https://www.bilibili.com/opus/1238613841710940181).
+is by ZipZipPipe.
 
-Only DeepSeek's original dsh-TUI whale and whale-girl clips are currently available.
-The other six identifiers are reserved; their artwork is pending and render
+DeepSeek's original dsh-TUI whale and whale-girl clips are available, and GPT has an
+original adult sprite (below). The other five identifiers are reserved; their artwork is pending and render
 requests are rejected instead of displaying the rejected geometric drafts.
 There are no accepted Kodama pixel adaptations for those six characters. DeepSeek's
 early stages share the original Deepy clips as detailed below; the distinct young
@@ -70,5 +69,15 @@ the project's MIT code license must not be substituted for that grant. This
 iteration is a local implementation and visual review, not a claim that these
 community assets have been cleared for commercial distribution.
 
-These characters are fan interpretations. No affiliation with or endorsement by
+### GPT adult (original)
+
+The GPT white dragon girl is an original design made for this project: a concept
+image produced with an image generation tool, then reduced to an 80×92 native pixel
+grid by `scripts/assets/import-gpt.py`. The source image is
+`assets/preview/companions/studies/gpt-v3-grid-study.png`. It does not use any
+third-party artwork or the community character designs listed above. Only the adult
+stage exists; baby and young are not designed yet. The sprite has two key poses
+(eyes open, eyes closed); actions are routed onto them rather than separately animated.
+
+The DeepSeek characters above are fan interpretations. No affiliation with or endorsement by
 the referenced AI vendors or original artists is claimed.

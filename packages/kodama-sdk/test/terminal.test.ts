@@ -87,8 +87,10 @@ const whale: MountOptions["pet"] = { species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0]
 const pixelRegion = { row: 1, col: 1, width: 69, height: 33 };
 
 test("reserved companion identities fail explicitly through the public SDK", () => {
-  for (const character of ["gpt", "claude", "grok", "glm", "kimi", "gemini"] as const) {
-    for (const stage of [0, 1, 2]) {
+  // GPT only has its adult stage; every other identity is reserved at all stages.
+  const cases = [["gpt", [0, 1]], ["claude", [0, 1, 2]], ["grok", [0, 1, 2]], ["glm", [0, 1, 2]], ["kimi", [0, 1, 2]], ["gemini", [0, 1, 2]]] as const;
+  for (const [character, stages] of cases) {
+    for (const stage of stages) {
       for (const [op, charset] of [["sprite", "blocks"], ["frame", "ascii"], ["frame", "unicode"], ["frame", "blocks"]] as ["sprite" | "frame", Charset][]) {
         const result = run({ op, ...whale, stage, charset, w: 69, h: 66, t: "0", pose: "idle", companion: { character } } as Command);
         assert.deepEqual(result, { ok: false, code: "bad_input", message: `${character} artwork not ready` });
@@ -102,7 +104,7 @@ test("terminal never draws a reserved character as a successful draft frame", (t
   const output: string[] = [];
   const mounted = mountTerminalPet({
     stream: { isTTY: true, columns: 69, rows: 34, write: (s) => output.push(s) },
-    region: pixelRegion, pet: { ...whale, companion: { character: "gpt" } }, charset: "blocks",
+    region: pixelRegion, pet: { ...whale, stage: 0, companion: { character: "gpt" } }, charset: "blocks",
     env: { TERM: "xterm-256color", COLORTERM: "truecolor" },
   });
   t.mock.timers.tick(100);
@@ -110,6 +112,15 @@ test("terminal never draws a reserved character as a successful draft frame", (t
   mounted.dispose();
   assert.equal(output.length, 1, "disposal still clears the borrowed rectangle");
   assert.ok(!/[▀▄█]/u.test(output[0]!));
+});
+
+test("GPT adult is available and its closed-eye pose differs from the open one", () => {
+  const input = { op: "sprite", ...whale, stage: 2, w: 80, h: 92, t: "0", companion: { character: "gpt" } } as Command;
+  const open = run({ ...input, pose: "idle" } as Command);
+  const closed = run({ ...input, pose: "sleep", companion: { character: "gpt", action: "sleep" } } as Command);
+  assert.equal(open.ok, true);
+  assert.equal(closed.ok, true);
+  assert.notDeepEqual((open as { value: unknown }).value, (closed as { value: unknown }).value);
 });
 
 test("truecolor terminal output decodes pixel-for-pixel to the web sprite at the same tick", (t) => {
