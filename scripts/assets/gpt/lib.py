@@ -4,11 +4,11 @@ try:
 except ImportError:  # only needed for the debug sheet
     Image = None
 W,H=49,48
-PAL={'O':'#241a44','P':'#4f3f8f','a':'#ffffff','b':'#eeeaf9','c':'#d3caef','d':'#ab9edd','e':'#8779c5',
- 'H':'#fff3df','J':'#f0d9b8','K':'#cfae8e','L':'#8f80c8','G':'#f2c14e','B':'#9a7b5e',
- 's':'#ffe6d6','t':'#f4c3b0','k':'#f7a8b4','m':'#d9707e','M':'#a8485a',
- 'i':'#5b49b8','I':'#8d7ae6','F':'#c6baf8','w':'#ffffff',
- 'W':'#ffffff','X':'#e9e5f6','Y':'#cdc6e8','Z':'#aaa0d4','g':'#b5bdd2','n':'#8c96b4',
+PAL={'O':'#2f2362','P':'#5b4a9c','a':'#ffffff','b':'#efebfa','c':'#d5ccf0','d':'#aea0de','e':'#8779c5',
+ 'H':'#f6f2fe','J':'#ddd4f3','K':'#b7aadd','L':'#8f80c8','G':'#f2c14e','B':'#9486c8',
+ 's':'#ffe9e0','t':'#f6c8bc','k':'#f7b0ba','m':'#d9707e','M':'#a8485a',
+ 'i':'#5f4cc4','I':'#8d7ae6','F':'#c9bdf8','w':'#ffffff',
+ 'W':'#ffffff','X':'#eae6f7','Y':'#cfc8e8','Z':'#aaa0d4','g':'#b8c0d6','n':'#8c96b4',
  'V':'#e4d9f6','U':'#b9acdf','T':'#8f80c8','S':'#f3effa','R':'#d6cbea','Q':'#b0a3d3','N':'#8a7dc0',
  '1':'#34c77a','2':'#1c8f52','3':'#ea4b62','4':'#a42a42','5':'#5aa0ff','6':'#ff82a2','7':'#8e97b0','8':'#4a526c','9':'#b07a4a','0':'#d8a56f','y':'#fff2a8'}
 class Img:
