@@ -1,11 +1,11 @@
 # GPT 造型稿
 
 - 幼年：`gpt-baby.png`；少年：`gpt-young.png`；成年：`gpt-adult.png`；幼年与少年的提示词见 `prompts-baby-young.txt`。
-- 这些是内置 `image_gen` 生成的原创造型研究，只作为设计参考。运行用的帧由 `scripts/assets/gpt/` 的生成器按 DeepSeek 的规格（69×66 画布、49×48 半身像）重新绘制，再由 `scripts/assets/import-gpt.py` 编码。目前只有成年阶段有运行帧，幼年和少年保持未开放。
-- 成年运行帧最初对照的是低分辨率像素簇版本的研究图；`gpt-adult.png` 现在是更细致的高分辨率版本，二者的角色设计一致。
+- 这些是内置图像生成工具制作的造型研究，沿用社区白龙拟人方向，不是 OpenAI 官方吉祥物。三张造型稿保持独立于运行用的像素帧。
+- 目前仅成年有运行美术。幼年与少年已有造型稿，动画尚未开放。
 
-## 低分辨率版本的生成提示词（原 v3，图已移除）
+成年运行资源以 `gpt-adult.png` 为身份参考，另行制作完整坐姿、表情、按键、抱箱、展翼等栅格关键姿势，保存在 `assets/sources/gpt/`。制作提示词和源图说明见该目录；导入清单见 `scripts/assets/gpt/manifest.json`。
 
-Edit image 1 into a REAL LOW-RESOLUTION DESKTOP GAME SPRITE. The previous result is a detailed high-resolution illustration and is NOT usable as pixel art. Preserve the exact GPT white dragon girl identity, silver-lavender palette, two white segmented horns, pointed ears, lavender eyes, long hair, small dragon wings, curled white tail, white long dress and silver knot/tassel ornaments, seated compact pose. But redraw its rendering completely on a true fixed 80x80 logical pixel grid, deliberately designing each pixel cluster for readability at 1x native resolution. Every single logical pixel must be a large perfectly flat hard-edged square displayed at the same integer enlargement across the entire image, including eyes and outlines. Requested canvas is 1280x1280 representing exactly 80x80 logical pixels at 16x display enlargement; no smaller marks than one 16x16 block. Image 2 is the actual existing whale-girl sprite strip: ONE character there occupies approximately 49x48 native pixels within a 69x66 frame, its face uses about 10x10 pixels. Use the same level of native game-sprite simplification and pixel discipline. Keep the dragon girl body inside about 58x60 logical pixels, face about 13x13 logical pixels, wing membranes small and folded close beside shoulders, tail curling compactly around feet rather than extending sideways, horns compact enough that the face stays big. Translate the attractive face, asymmetric layered fringe and dress folds of image 1 into elegant deliberate pixel clusters, NOT many hairline strokes. Dark purple selectively colored 1px outlines; about 48-64 carefully chosen flat RGB colors, 5 distinct lavender hair/white-cloth tones, lavender eyes with dark lashes and 1px highlights, tiny peach blush, tiny mouth. Chibi 2-head proportion, large dimensional head, short compact seated body. The image must visibly read as chunky but refined hand-drawn low-res contemporary anime game sprite, NOT smooth vector, high-res pixel-filtered anime, antialiased drawing, tiny noisy dithering, or geometric stick-figure RPG. Absolutely binary transparency: every character pixel fully opaque alpha255, background pixels fully transparent alpha0. No translucent character fill, no halo, no colored edge noise, no shadow. No text, no guides, no checkerboard printed into image. One character only, no extra sprite frames. Preserve original established character, change only to the production low-res sprite rendering and tighter silhouette.
+运行画布仍为 69×66。导入器以固定网格采样源 PNG、统一调色板与锚点，再生成网页和终端共同读取的帧数据，不再用几何图元重画人物。26 个动作序列复用关键姿势，六种表情为固定姿势；这不等于 26 套独立逐帧手绘动画。
 
-输入 1 是 v2 造型研究；输入 2 是原站鲸娘 idle 帧条。提示词中的目标尺寸和 alpha 要求是制作目标，不代表生成结果已经符合。
+完整制作与验收约束见 `docs/design/companion-motion-standard.md`。

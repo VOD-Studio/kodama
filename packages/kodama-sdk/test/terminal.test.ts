@@ -83,6 +83,11 @@ function decodeRgb(output: string, width: number, height: number): Rgb[][] {
   return rows;
 }
 
+function spriteRgb(sprite: PixelsResult["value"]): Rgb[][] {
+  const colors = Object.fromEntries(Object.entries(sprite.palette).map(([key, hex]) => [key, [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16))]));
+  return sprite.rows.map((row) => [...row].map((key) => key === "." ? null : colors[key]!));
+}
+
 const whale: MountOptions["pet"] = { species: 0, genes: [0, 0, 0, 0, 0, 0, 0, 0], stage: 2, companion: { character: "deepseek" } };
 const pixelRegion = { row: 1, col: 1, width: 69, height: 33 };
 
@@ -114,16 +119,16 @@ test("terminal never draws a reserved character as a successful draft frame", (t
   assert.ok(!/[▀▄█]/u.test(output[0]!));
 });
 
-test("GPT adult is available and each action plays its own clip", () => {
+test("GPT adult commands return native pixels for rest, work and life states", () => {
   const input = { op: "sprite", ...whale, stage: 2, w: 69, h: 66, t: "0", pose: "observe" } as Command;
-  const picture = (action: string, t = "0") => {
-    const result = run({ ...input, t, companion: { character: "gpt", action } } as Command);
+  for (const action of ["idle", "work", "think", "sleep", "end"] as const) {
+    const result = run({ ...input, companion: { character: "gpt", action } } as Command) as PixelsResult;
     assert.equal(result.ok, true, action);
-    return JSON.stringify((result as { value: unknown }).value);
-  };
-  assert.notEqual(picture("idle"), picture("sleep"));
-  assert.notEqual(picture("work"), picture("complete"));
-  assert.notEqual(picture("think", "0"), picture("think", "9"), "a clip changes over time");
+    assert.deepEqual([result.value.w, result.value.h], [69, 66]);
+    assert.equal(result.value.rows.length, 66);
+    assert.ok(result.value.rows.every((row) => row.length === 69));
+    assert.ok(result.value.rows.some((row) => [...row].some((key) => key !== ".")), "an available action cannot return an empty success");
+  }
 });
 
 test("truecolor terminal output decodes pixel-for-pixel to the web sprite at the same tick", (t) => {
@@ -140,12 +145,42 @@ test("truecolor terminal output decodes pixel-for-pixel to the web sprite at the
     for (const tick of [0, 7]) {
       const sprite = run({ op: "sprite", ...individual, genes: individual.genes as [number, number, number, number, number, number, number, number], pose: "idle", w: 69, h: 66, t: String(tick) }) as PixelsResult;
       assert.equal(sprite.ok, true);
-      const colors = Object.fromEntries(Object.entries(sprite.value.palette).map(([key, hex]) => [key, [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16))]));
-      const expected = sprite.value.rows.map((row) => [...row].map((key) => key === "." ? null : colors[key]));
-      assert.deepEqual(decodeRgb(output[tick]!, 69, 33), expected);
+      assert.deepEqual(decodeRgb(output[tick]!, 69, 33), spriteRgb(sprite.value));
     }
     assert.ok(output[0]!.includes("\x1b[38;2;") && output[0]!.includes("\x1b[48;2;"));
-    assert.ok(!output[0]!.includes(";5;"));
+    assert.ok(!/\x1b\[(?:38|48);5;/u.test(output[0]!));
+    mounted.dispose();
+  }
+});
+
+test("GPT adult ANSI bytes preserve the native sprite RGB and transparency across actions", (t) => {
+  t.mock.timers.enable({ apis: ["setInterval"] });
+  const cases = [
+    ["idle", undefined], ["blink", undefined], ["move", undefined], ["think", undefined],
+    ["work", undefined], ["carry", undefined], ["complete", undefined], ["poke_left", undefined],
+    ["sleep", undefined], ["end", undefined], ["idle", "happy"],
+  ] as const;
+  for (const [action, expression] of cases) {
+    const individual: MountOptions["pet"] = { ...whale, stage: 2, companion: { character: "gpt", action, expression } };
+    const output: string[] = [];
+    const mounted = mountTerminalPet({
+      stream: { isTTY: true, columns: 69, rows: 33, write: (s) => output.push(s) },
+      region: pixelRegion, pet: individual, charset: "blocks",
+      env: { TERM: "xterm-256color", COLORTERM: "truecolor" },
+    });
+    t.mock.timers.tick(1900);
+    for (const tick of [0, 1, 7, 19]) {
+      const result = run({
+        op: "sprite", ...individual, genes: individual.genes as [number, number, number, number, number, number, number, number],
+        stage: 2, pose: "idle", w: 69, h: 66, t: String(tick),
+      }) as PixelsResult;
+      assert.equal(result.ok, true, `${action} at tick ${tick} must be available`);
+      const decoded = decodeRgb(output[tick]!, 69, 33);
+      assert.deepEqual(decoded, spriteRgb(result.value), `${action}/${expression ?? "auto"} tick ${tick}`);
+      assert.ok(output[tick]!.includes("\x1b[38;2;"), "original 24-bit RGB is emitted");
+      assert.ok(!/\x1b\[(?:38|48);5;/u.test(output[tick]!), "no palette quantization is hidden in truecolor mode");
+    }
+    if (action === "end") assert.deepEqual(decodeRgb(output[0]!, 69, 33), decodeRgb(output[19]!, 69, 33), "End stays still in the terminal too");
     mounted.dispose();
   }
 });

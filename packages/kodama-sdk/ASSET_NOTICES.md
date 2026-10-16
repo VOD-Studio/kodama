@@ -13,9 +13,9 @@ DeepSeek's underlying whale-girl character is by 上善无形; the maid interpre
 is by ZipZipPipe.
 
 DeepSeek's original dsh-TUI whale and whale-girl clips are available, and GPT has an
-original adult sprite (below). The other five identifiers are reserved; their artwork is pending and render
+adult sprite adaptation (below). The other five identifiers are reserved; their runtime artwork is pending and render
 requests are rejected instead of displaying the rejected geometric drafts.
-There are no accepted Kodama pixel adaptations for those six characters. DeepSeek's
+There are no accepted runtime pixel adaptations for those five characters. DeepSeek's
 early stages share the original Deepy clips as detailed below; the distinct young
 stage remains unfinished. These evolution lines are not claimed as original-creator
 or official model-vendor canon. The reference pages retain their individual attribution
@@ -69,15 +69,17 @@ the project's MIT code license must not be substituted for that grant. This
 iteration is a local implementation and visual review, not a claim that these
 community assets have been cleared for commercial distribution.
 
-### GPT adult (original)
+### GPT adult (white dragon adaptation)
 
-The GPT white dragon girl is an original design made for this project. The concept
-image `assets/preview/companions/studies/gpt/gpt-adult.png` (produced with an image
-generation tool) is the design reference; the runtime frames are redrawn at the original
-companion's spec (69×66 canvas, 49×48 half-body figure) by the generator in
-`scripts/assets/gpt/` and encoded by `scripts/assets/import-gpt.py`. No third-party
-artwork or community character design is used. Only the adult stage exists; baby and
-young are not designed yet.
+The white dragon girl follows the community dragon interpretation described above;
+it is not an official OpenAI mascot. The project's AI-generated concept study at
+`assets/preview/companions/studies/gpt/gpt-adult.png` guides the additional raster
+key poses in `assets/sources/gpt/`. Their prompts and source references are recorded
+there. The importer at `scripts/assets/import-gpt.py` samples these PNG poses into
+one 69×66 pixel grid, a shared RGB palette and RLE data used by both web and terminal.
+Source hashes, explicit crop/placement anchors and animation timing are recorded in
+`crates/core/kodama-term/src/companions/gpt/SOURCES.json` and the import manifest.
+Baby and young concept studies exist, but only adult runtime artwork is available.
 
 The DeepSeek characters above are fan interpretations. No affiliation with or endorsement by
 the referenced AI vendors or original artists is claimed.

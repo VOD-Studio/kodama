@@ -124,7 +124,7 @@ companion.setExpression();
 companion.dispose();
 ```
 
-`deepseek` 三个阶段都有美术：幼体和少年使用原版 Deepy 小鲸鱼，终阶使用选定的鲸娘原帧；少年目前与幼体共用 Deepy。`gpt` 目前只有成年阶段（69×66 半身像，26 个动作各有片段），幼年和少年尚未设计。其余五个枚举值（`claude`、`grok`、`glm`、`kimi`、`gemini`）仅预留角色身份。对预留的角色或阶段，原始 `sprite`、`frame` 请求会返回 `{ ok: false, code: "bad_input", message: "<character> artwork not ready" }`。已否决草稿不参与编译和渲染。`setAction()` 与 `setExpression()` 只修改呈现，不改写传入的投影、出生身份、稀有度或养成状态。`sick`、`evolve`、`end`、`sleep` 姿态优先于伙伴动作。
+`deepseek` 三个阶段都有美术：幼体和少年使用原版 Deepy 小鲸鱼，终阶使用选定的鲸娘原帧；少年目前与幼体共用 Deepy。`gpt` 目前只有成年阶段（69×66 栅格姿势组成的 26 个动作序列、六种固定表情），幼年和少年已有造型稿，运行帧尚未完成。其余五个枚举值（`claude`、`grok`、`glm`、`kimi`、`gemini`）仅预留角色身份。对预留的角色或阶段，原始 `sprite`、`frame` 请求会返回 `{ ok: false, code: "bad_input", message: "<character> artwork not ready" }`。已否决草稿不参与编译和渲染。`setAction()` 与 `setExpression()` 只修改呈现，不改写传入的投影、出生身份、稀有度或养成状态。`sick`、`evolve`、`end`、`sleep` 姿态优先于伙伴动作。
 
 ## 本地模式
 

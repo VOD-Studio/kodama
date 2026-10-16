@@ -117,7 +117,7 @@ async function main() {
     stdin.setRawMode(true);
     stdin.resume();
     const title = name[form === "baby" ? 0 : 1];
-    stdout.write(`\x1b[1;1H${title} · ${action}\x1b[2;1H${colorLabel((frame as Core.FrameResult).value)} · ${width} 列 × ${height} 行\x1b[3;1Hq / Ctrl+C 退出 · 当前未通过质量验收`);
+    stdout.write(`\x1b[1;1H${title} · ${action}\x1b[2;1H${colorLabel((frame as Core.FrameResult).value)} · ${width} 列 × ${height} 行\x1b[3;1Hq / Ctrl+C 退出`);
     mounted = terminal.mountTerminalPet({ stream: stdout, region, pet, getPose: () => pose, charset: "blocks", colorMode: "auto" });
   } catch (error) {
     finish(1, error);

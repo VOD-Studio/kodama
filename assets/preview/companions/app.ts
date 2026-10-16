@@ -46,7 +46,7 @@ const characters: Character[] = [
     stages: [{ value: 2, label: "白龙娘 · 成年", series: "稀有系列 · 成年" }],
     canvas: { w: 69, h: 66, scale: 6 },
     expressions: () => true,
-    note: "幼年与少年尚未设计。",
+    note: "成年使用白龙娘栅格姿势；幼年与少年已有造型稿，动画尚未开放。",
   },
   { key: "claude", label: "Claude", name: "Claude", ...pending },
   { key: "grok", label: "Grok", name: "Grok", ...pending },
@@ -65,6 +65,12 @@ const actions: Pair[] = [
   ["carry", "搬运"], ["wake", "醒来"], ["poke_left", "戳左侧"], ["poke_right", "戳右侧"],
   ["tickle", "挠痒"], ["lift", "拎起"], ["praise", "赞许"],
 ];
+const gptActionLabels: Record<string, string> = {
+  eat: "进食", play: "玩耍", sick: "生病", evolve: "进化 · 展翼姿势", end: "生命终结 · 静态睡姿",
+};
+function actionLabel(key: string) {
+  return (state.character === "gpt" ? gptActionLabels[key] : undefined) ?? actions.find(([value]) => value === key)?.[1] ?? "待机";
+}
 const expressions: Pair[] = [
   ["curious", "好奇"], ["focused", "专注"], ["shy", "害羞"],
   ["happy", "喜悦"], ["startled", "受惊"], ["smug", "得意"],
@@ -317,12 +323,13 @@ function selectCharacter(key: string, reset = false) {
   note.textContent = character.note ?? "";
   note.hidden = !character.note;
   byId("status").textContent = `${formName()}已载入`;
-  const actionLabel = actions.find(([key]) => key === state.action)?.[1] ?? "待机";
+  for (const option of byId<HTMLSelectElement>("action").options) option.label = actionLabel(option.value);
+  const selectedAction = actionLabel(state.action);
   const expressionLabel = expressionOptions.find(([key]) => key === state.expression)?.[1] ?? "自动";
   canvases.forEach((canvas) => {
-    canvas.setAttribute("aria-label", `${selected}，${actionLabel}，${expressionLabel}表情`);
+    canvas.setAttribute("aria-label", `${selected}，${selectedAction}，${expressionLabel}表情`);
   });
-  byId("terminal-output").setAttribute("aria-label", `${selected}，${character.canvas.w} 列 × ${character.canvas.h / 2} 行终端字符帧，${actionLabel}，${expressionLabel}表情`);
+  byId("terminal-output").setAttribute("aria-label", `${selected}，${character.canvas.w} 列 × ${character.canvas.h / 2} 行终端字符帧，${selectedAction}，${expressionLabel}表情`);
   document.querySelectorAll<HTMLElement>(".character-button").forEach((button) => {
     button.setAttribute("aria-pressed", String(button.dataset.character === key));
   });

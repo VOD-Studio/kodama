@@ -153,7 +153,7 @@ fn selected_adult_whale_keeps_original_pixels_at_one_times_scale() {
 }
 
 #[test]
-fn gpt_earlier_stages_stay_reserved_and_every_action_has_its_own_clip() {
+fn gpt_earlier_stages_stay_reserved_and_adult_actions_fit_the_native_canvas() {
     let look = |action, expression| CompanionAppearance {
         character: Companion::Gpt,
         action: Some(action),
@@ -168,9 +168,7 @@ fn gpt_earlier_stages_stay_reserved_and_every_action_has_its_own_clip() {
         assert!(p.palette.is_empty(), "stage {stage} must not show artwork");
     }
     assert!(is_ready(&look(CompanionAction::Idle, None), 2, &[]));
-    let mut per_action = BTreeSet::new();
     for action in CompanionAction::ALL {
-        let mut frames = BTreeSet::new();
         for t in 0..80 {
             let p = render(&input(2, t, "observe", 69, 66), &look(action, None));
             assert_eq!((p.w, p.h), (69, 66), "{} t{t}", action.name());
@@ -179,27 +177,21 @@ fn gpt_earlier_stages_stay_reserved_and_every_action_has_its_own_clip() {
             for key in p.rows.iter().flat_map(|r| r.chars()).filter(|c| *c != '.') {
                 assert!(p.palette.contains_key(&key.to_string()));
             }
-            frames.insert(p.rows);
         }
-        if action != CompanionAction::End {
-            assert!(frames.len() > 1, "{} must animate", action.name());
-        }
-        per_action.insert(frames);
     }
-    assert!(per_action.len() >= 25, "actions must not share one clip");
 }
 
 #[test]
-fn gpt_expressions_hold_a_distinct_face_over_the_rest_clips() {
-    let draw = |expression, t| {
+fn gpt_expressions_select_rest_clips_and_leave_task_faces_untouched() {
+    let draw = |action, expression, t| {
         let look = CompanionAppearance {
             character: Companion::Gpt,
-            action: Some(CompanionAction::Idle),
+            action: Some(action),
             expression,
         };
-        render(&input(2, t, "observe", 69, 66), &look).rows
+        let pixels = render(&input(2, t, "observe", 69, 66), &look);
+        (pixels.rows, pixels.palette)
     };
-    let mut seen = BTreeSet::new();
     for expression in [
         Expression::Curious,
         Expression::Focused,
@@ -208,10 +200,26 @@ fn gpt_expressions_hold_a_distinct_face_over_the_rest_clips() {
         Expression::Startled,
         Expression::Smug,
     ] {
-        assert_ne!(draw(Some(expression), 0), draw(None, 0), "{expression:?}");
-        seen.insert(draw(Some(expression), 0));
+        for tick in [0, 7, 19] {
+            assert_eq!(
+                draw(CompanionAction::Idle, Some(expression), tick),
+                draw(CompanionAction::Observe, Some(expression), tick),
+                "an explicit rest expression is held across idle/observe"
+            );
+            for action in [
+                CompanionAction::Work,
+                CompanionAction::Carry,
+                CompanionAction::Build,
+                CompanionAction::Complete,
+            ] {
+                assert_eq!(
+                    draw(action, Some(expression), tick),
+                    draw(action, None, tick),
+                    "{action:?} must retain its authored face at tick {tick}"
+                );
+            }
+        }
     }
-    assert_eq!(seen.len(), 6, "six expressions are six distinct faces");
 }
 
 #[test]
