@@ -42,10 +42,10 @@ def frame(expr='open', hands='clasp', bob=0, ahoge=0, tail=0, wing=0, dx=0, dy=0
         g.insert(SEAM, list(g[SEAM]))
         del g[0]
     lift = 1 if bob else 0
-    shift_region(g, 26, 10 - lift, 37, 21 - lift, ahoge, 0, copy=False)      # cowlick sways
-    shift_region(g, 54, 42, 63, 54, 0, tail)                                  # tail tip wags
-    shift_region(g, 13, 39, 23, 51, 0, wing)                                  # wings flap
-    shift_region(g, 52, 39, 62, 49, 0, wing)
+    shift_region(g, 27, 14 - lift, 36, 19 - lift, ahoge, 0, copy=False)      # cowlick sways
+    shift_region(g, 57, 48, 62, 60, 0, max(-1, min(1, tail)), copy=True)     # tail tip wags
+    shift_region(g, 13, 47, 19, 57, 0, max(-2, min(1, wing)), copy=False)    # left wing flaps
+    shift_region(g, 54, 47, 62, 60, 0, max(-1, min(1, wing)), copy=True)     # right wing flaps
     if dx or dy:
         moved = [['.'] * CANVAS_W for _ in range(CANVAS_H)]
         for y in range(CANVAS_H):

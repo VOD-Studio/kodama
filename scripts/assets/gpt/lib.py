@@ -4,12 +4,12 @@ try:
 except ImportError:  # only needed for the debug sheet
     Image = None
 W,H=49,48
-PAL={'O':'#2f2362','P':'#5b4a9c','a':'#ffffff','b':'#efebfa','c':'#d5ccf0','d':'#aea0de','e':'#8779c5',
- 'H':'#f6f2fe','J':'#ddd4f3','K':'#b7aadd','L':'#8f80c8','G':'#f2c14e','B':'#9486c8',
- 's':'#ffe9e0','t':'#f6c8bc','k':'#f7b0ba','m':'#d9707e','M':'#a8485a',
- 'i':'#5f4cc4','I':'#8d7ae6','F':'#c9bdf8','w':'#ffffff',
- 'W':'#ffffff','X':'#eae6f7','Y':'#cfc8e8','Z':'#aaa0d4','g':'#b8c0d6','n':'#8c96b4',
- 'V':'#e4d9f6','U':'#b9acdf','T':'#8f80c8','S':'#f3effa','R':'#d6cbea','Q':'#b0a3d3','N':'#8a7dc0',
+PAL={'O':'#23194f','P':'#4e3e8c','a':'#ffffff','b':'#f4f1fc','c':'#ded6f4','d':'#bfb1e4','e':'#9685ca',
+ 'H':'#fbf9ff','J':'#e6def8','K':'#c6b9e6','L':'#8e7ec4','G':'#f5c856','B':'#9a8bce',
+ 's':'#fff0e6','t':'#f6cabd','k':'#f7a4b5','m':'#d96b7c','M':'#a34254',
+ 'i':'#4936a8','I':'#7e68de','F':'#cabcf9','w':'#ffffff',
+ 'W':'#ffffff','X':'#ece8f8','Y':'#d2cae9','Z':'#ada1d4','g':'#bcc4da','n':'#7f88a8',
+ 'V':'#e8dff9','U':'#c7bae8','T':'#9e8fd1','S':'#f6f3fc','R':'#ddd4f2','Q':'#bab0df','N':'#9283c7',
  '1':'#34c77a','2':'#1c8f52','3':'#ea4b62','4':'#a42a42','5':'#5aa0ff','6':'#ff82a2','7':'#8e97b0','8':'#4a526c','9':'#b07a4a','0':'#d8a56f','y':'#fff2a8'}
 class Img:
     def __init__(s,w=W,h=H): s.w,s.h=w,h; s.g=[['.']*w for _ in range(h)]
