@@ -72,7 +72,7 @@ community assets have been cleared for commercial distribution.
 ### GPT adult (original)
 
 The GPT white dragon girl is an original design made for this project. The concept
-image `assets/preview/companions/studies/gpt-v3-grid-study.png` (produced with an image
+image `assets/preview/companions/studies/gpt/gpt-v3-grid-study.png` (produced with an image
 generation tool) is the design reference; the runtime frames are redrawn at the original
 companion's spec (69×66 canvas, 49×48 half-body figure) by the generator in
 `scripts/assets/gpt/` and encoded by `scripts/assets/import-gpt.py`. No third-party

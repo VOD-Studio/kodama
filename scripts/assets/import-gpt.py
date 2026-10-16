@@ -7,7 +7,7 @@ python3 scripts/assets/import-gpt.py --sheet out.png idle think   # contact shee
 The figure, symbols and clips are authored in scripts/assets/gpt/ (figure.py, props.py,
 clips.py) to the same spec as the original companion: a 69x66 canvas, a 49x48 half-body
 figure, one short clip per action with uneven frame times. The concept study in
-assets/preview/companions/studies/ is only the design reference.
+assets/preview/companions/studies/gpt/ is only the design reference.
 
 frames.bin layout: per frame, runs of (count u8, colour u8) over the canvas in row-major
 order; colour 0 is transparent and colour n is COLORS[n - 1]. Identical frames are stored
