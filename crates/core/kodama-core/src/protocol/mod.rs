@@ -68,8 +68,10 @@ pub fn execute(input: &str) -> String {
             codec::ok(&growth::evolution_options(&pet.growth, pet.food))
         }
         Ok(Command::Capabilities) => codec::ok(&catalog()),
-        Ok(Command::Frame(f)) => codec::ok(&kodama_term::render(&f)),
-        Ok(Command::Sprite(s)) => codec::ok(&kodama_term::render_pixels(&s)),
+        Ok(Command::Frame(f)) => companion_error(f.companion, f.stage, &f.lineage)
+            .unwrap_or_else(|| codec::ok(&kodama_term::render(&f))),
+        Ok(Command::Sprite(s)) => companion_error(s.companion, s.stage, &s.lineage)
+            .unwrap_or_else(|| codec::ok(&kodama_term::render_pixels(&s))),
         Ok(Command::VerifyBirth {
             certificate,
             issuer_keys,
@@ -85,4 +87,19 @@ pub fn execute(input: &str) -> String {
         },
     };
     out
+}
+
+fn companion_error(
+    companion: Option<kodama_term::companions::CompanionAppearance>,
+    stage: u8,
+    lineage: &[kodama_term::Branch],
+) -> Option<String> {
+    companion
+        .filter(|look| !kodama_term::companions::is_ready(look, stage, lineage))
+        .map(|look| {
+            codec::error(
+                ErrorCode::BadInput,
+                &alloc::format!("{} artwork not ready", look.character.name()),
+            )
+        })
 }

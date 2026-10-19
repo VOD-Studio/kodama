@@ -1,0 +1,2302 @@
+{
+  "animations": {
+    "await_confirmation": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 900,
+          "pose": "ask"
+        },
+        {
+          "ms": 500,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "blink": {
+      "frames": [
+        {
+          "ms": 200,
+          "pose": "curious"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_half"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_closed"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_half"
+        },
+        {
+          "ms": 300,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "build": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 300,
+          "pose": "organize"
+        },
+        {
+          "ms": 400,
+          "pose": "organize_place"
+        },
+        {
+          "ms": 300,
+          "pose": "organize"
+        },
+        {
+          "ms": 400,
+          "pose": "complete"
+        },
+        {
+          "ms": 500,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "carry": {
+      "frames": [
+        {
+          "ms": 500,
+          "pose": "carry"
+        },
+        {
+          "ms": 500,
+          "pose": "carry_shift"
+        },
+        {
+          "ms": 600,
+          "pose": "carry"
+        }
+      ],
+      "loop": true
+    },
+    "complete": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 700,
+          "pose": "complete"
+        },
+        {
+          "ms": 300,
+          "pose": "happy"
+        },
+        {
+          "ms": 500,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "eat": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 300,
+          "pose": "eat"
+        },
+        {
+          "ms": 500,
+          "pose": "eat_bite"
+        },
+        {
+          "ms": 300,
+          "pose": "eat"
+        },
+        {
+          "ms": 300,
+          "pose": "happy"
+        },
+        {
+          "ms": 500,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "end": {
+      "frames": [
+        {
+          "ms": 1200,
+          "pose": "sleep"
+        }
+      ],
+      "loop": false
+    },
+    "error": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "focused"
+        },
+        {
+          "ms": 300,
+          "pose": "startled"
+        },
+        {
+          "ms": 300,
+          "pose": "sick"
+        },
+        {
+          "ms": 300,
+          "pose": "focused"
+        }
+      ],
+      "loop": true
+    },
+    "evolve": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "land"
+        },
+        {
+          "ms": 200,
+          "pose": "fly_mid"
+        },
+        {
+          "ms": 400,
+          "pose": "fly_open"
+        },
+        {
+          "ms": 200,
+          "pose": "fly_mid"
+        },
+        {
+          "ms": 300,
+          "pose": "land"
+        },
+        {
+          "ms": 400,
+          "pose": "complete"
+        },
+        {
+          "ms": 500,
+          "pose": "land"
+        }
+      ],
+      "loop": true
+    },
+    "idle": {
+      "frames": [
+        {
+          "ms": 700,
+          "pose": "curious"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_half"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_closed"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_half"
+        },
+        {
+          "ms": 700,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "lift": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "land"
+        },
+        {
+          "ms": 300,
+          "pose": "fly_mid"
+        },
+        {
+          "ms": 300,
+          "pose": "fly_open"
+        },
+        {
+          "ms": 300,
+          "pose": "fly_mid"
+        },
+        {
+          "ms": 300,
+          "pose": "land"
+        }
+      ],
+      "loop": true
+    },
+    "move": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "land"
+        },
+        {
+          "ms": 200,
+          "pose": "fly_mid"
+        },
+        {
+          "ms": 400,
+          "pose": "fly_open"
+        },
+        {
+          "ms": 200,
+          "pose": "fly_mid"
+        },
+        {
+          "ms": 500,
+          "pose": "land"
+        }
+      ],
+      "loop": true
+    },
+    "observe": {
+      "frames": [
+        {
+          "ms": 400,
+          "pose": "curious"
+        },
+        {
+          "ms": 300,
+          "pose": "look_left"
+        },
+        {
+          "ms": 200,
+          "pose": "curious"
+        },
+        {
+          "ms": 300,
+          "pose": "look_right"
+        },
+        {
+          "ms": 400,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "organize": {
+      "frames": [
+        {
+          "ms": 500,
+          "pose": "organize"
+        },
+        {
+          "ms": 500,
+          "pose": "organize_place"
+        },
+        {
+          "ms": 600,
+          "pose": "organize"
+        }
+      ],
+      "loop": true
+    },
+    "parallel": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "work"
+        },
+        {
+          "ms": 200,
+          "pose": "work_press"
+        },
+        {
+          "ms": 200,
+          "pose": "work_release"
+        },
+        {
+          "ms": 200,
+          "pose": "work_press"
+        },
+        {
+          "ms": 200,
+          "pose": "work_release"
+        },
+        {
+          "ms": 500,
+          "pose": "work"
+        }
+      ],
+      "loop": true
+    },
+    "play": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 300,
+          "pose": "play"
+        },
+        {
+          "ms": 400,
+          "pose": "play_tap"
+        },
+        {
+          "ms": 300,
+          "pose": "play"
+        },
+        {
+          "ms": 300,
+          "pose": "happy"
+        },
+        {
+          "ms": 500,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "poke_left": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 300,
+          "pose": "look_left"
+        },
+        {
+          "ms": 300,
+          "pose": "startled"
+        },
+        {
+          "ms": 300,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "poke_right": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 300,
+          "pose": "look_right"
+        },
+        {
+          "ms": 300,
+          "pose": "startled"
+        },
+        {
+          "ms": 300,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "praise": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 700,
+          "pose": "praise"
+        },
+        {
+          "ms": 300,
+          "pose": "happy"
+        },
+        {
+          "ms": 500,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "sick": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "sick"
+        },
+        {
+          "ms": 300,
+          "pose": "sleep"
+        },
+        {
+          "ms": 300,
+          "pose": "sick"
+        }
+      ],
+      "loop": true
+    },
+    "sleep": {
+      "frames": [
+        {
+          "ms": 1200,
+          "pose": "sleep"
+        }
+      ],
+      "loop": true
+    },
+    "startled": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 300,
+          "pose": "startled"
+        },
+        {
+          "ms": 300,
+          "pose": "shy"
+        },
+        {
+          "ms": 300,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "think": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 800,
+          "pose": "think"
+        },
+        {
+          "ms": 500,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "tickle": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        },
+        {
+          "ms": 200,
+          "pose": "complete"
+        },
+        {
+          "ms": 400,
+          "pose": "happy"
+        },
+        {
+          "ms": 200,
+          "pose": "shy"
+        },
+        {
+          "ms": 500,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "wake": {
+      "frames": [
+        {
+          "ms": 500,
+          "pose": "sleep"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_closed"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_half"
+        },
+        {
+          "ms": 700,
+          "pose": "curious"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_half"
+        },
+        {
+          "ms": 100,
+          "pose": "blink_closed"
+        },
+        {
+          "ms": 500,
+          "pose": "sleep"
+        }
+      ],
+      "loop": true
+    },
+    "work": {
+      "frames": [
+        {
+          "ms": 400,
+          "pose": "work"
+        },
+        {
+          "ms": 200,
+          "pose": "work_press"
+        },
+        {
+          "ms": 200,
+          "pose": "work_release"
+        },
+        {
+          "ms": 200,
+          "pose": "work_press"
+        },
+        {
+          "ms": 500,
+          "pose": "work"
+        }
+      ],
+      "loop": true
+    }
+  },
+  "artifact_sha256": {
+    "data.rs": "acfda7b5a81d7005175cdfe3e13aeeb528aec64a4235efefee68d5eb4377f1c3",
+    "frames.bin": "875677b80ddb86ff25e65f7db40e7a8dd20866ab1978eec6a6bafcf0826badb8"
+  },
+  "expressions": {
+    "curious": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "curious"
+        }
+      ],
+      "loop": true
+    },
+    "focused": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "focused"
+        }
+      ],
+      "loop": true
+    },
+    "happy": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "happy"
+        }
+      ],
+      "loop": true
+    },
+    "shy": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "shy"
+        }
+      ],
+      "loop": true
+    },
+    "smug": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "smug"
+        }
+      ],
+      "loop": true
+    },
+    "startled": {
+      "frames": [
+        {
+          "ms": 300,
+          "pose": "startled"
+        }
+      ],
+      "loop": true
+    }
+  },
+  "importer_sha256": {
+    "scripts/assets/gpt/atlas.py": "ed0065263f1779b8c2dbdfb11db963d76b5c4424b672e525f56e5c7b29280a9a",
+    "scripts/assets/gpt/manifest.py": "b099f34a2f4c46918f2991922fac6fe8d13a748d2199923188e5af2ed6c944ff",
+    "scripts/assets/import-gpt.py": "998aaa5deab985092eccca0dcdae0424f3696d921e1a0b3f512de585ee111da4"
+  },
+  "manifest": "scripts/assets/gpt/manifest.json",
+  "manifest_sha256": "8b0a3f52f5f3e3ac206f421b215545383e984a0fc242139c9a9bccb8b80e13f0",
+  "palette": {
+    "method": "shared octree then nearest RGB; no dithering",
+    "palette_rgb_count": 80,
+    "source_rgb_count": 32354
+  },
+  "placement_groups": {
+    "seated": {
+      "feet_x": [
+        24,
+        45
+      ],
+      "feet_y": 64,
+      "head_x": 34,
+      "head_y": [
+        24,
+        39
+      ]
+    }
+  },
+  "pose_order": [
+    "curious",
+    "focused",
+    "shy",
+    "happy",
+    "startled",
+    "smug",
+    "sleep",
+    "blink_half",
+    "blink_closed",
+    "think",
+    "work",
+    "carry",
+    "eat",
+    "play",
+    "complete",
+    "praise",
+    "ask",
+    "organize",
+    "fly_open",
+    "fly_mid",
+    "land",
+    "look_left",
+    "look_right",
+    "sick",
+    "work_press",
+    "work_release",
+    "carry_shift",
+    "eat_bite",
+    "play_tap",
+    "organize_place"
+  ],
+  "quality_status": "raster_key_pose_adaptation",
+  "sampling": {
+    "alpha_threshold": 224,
+    "chroma_key": [
+      0,
+      255,
+      0
+    ],
+    "filter": "nearest",
+    "green_dominance": 32,
+    "native_cell": [
+      64,
+      64
+    ],
+    "phase": [
+      2,
+      0
+    ]
+  },
+  "source_kind": "AI-generated raster key poses",
+  "sources": {
+    "matte_policy": {
+      "despill": "G=min(G,max(R,B))",
+      "max_chroma_distance": 16,
+      "minimum_green": 64,
+      "transparent_rgba": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "pillow": "12.3.0",
+    "poses": {
+      "ask": {
+        "cell": [
+          1,
+          1
+        ],
+        "crop": [
+          524,
+          508,
+          1034,
+          1024
+        ],
+        "native_bbox": [
+          6,
+          4,
+          69,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          4
+        ],
+        "opaque_pixels": 2528,
+        "rgba_sha256": "2dde01a3a6a840ee580264d82def44a6b2f79569387ba43e936ca7bf499712ed",
+        "sampling_origin": [
+          512,
+          512
+        ],
+        "sheet": "tasks",
+        "source_anchors": {
+          "feet": [
+            760,
+            996
+          ],
+          "head": [
+            760,
+            746
+          ]
+        }
+      },
+      "blink_closed": {
+        "cell": [
+          2,
+          0
+        ],
+        "crop": [
+          1032,
+          0,
+          1536,
+          504
+        ],
+        "native_bbox": [
+          6,
+          4,
+          68,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          3
+        ],
+        "opaque_pixels": 2486,
+        "rgba_sha256": "7e215902074938d69798eb07fb2e85602b9d4fb154cef3f0615d53c4fd2ed942",
+        "sampling_origin": [
+          1024,
+          0
+        ],
+        "sheet": "rest",
+        "source_anchors": {
+          "feet": [
+            1272,
+            492
+          ],
+          "head": [
+            1272,
+            240
+          ]
+        }
+      },
+      "blink_half": {
+        "cell": [
+          1,
+          0
+        ],
+        "crop": [
+          520,
+          0,
+          1032,
+          504
+        ],
+        "native_bbox": [
+          6,
+          4,
+          68,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          3
+        ],
+        "opaque_pixels": 2492,
+        "rgba_sha256": "6125f98e37445317e67fb0eead173f9b9bb34408f16d76bc4b7a4fd039acae80",
+        "sampling_origin": [
+          512,
+          0
+        ],
+        "sheet": "rest",
+        "source_anchors": {
+          "feet": [
+            760,
+            492
+          ],
+          "head": [
+            760,
+            240
+          ]
+        }
+      },
+      "carry": {
+        "cell": [
+          2,
+          1
+        ],
+        "crop": [
+          1032,
+          504,
+          1536,
+          1024
+        ],
+        "native_bbox": [
+          6,
+          5,
+          68,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          34
+        ],
+        "native_offset": [
+          4,
+          5
+        ],
+        "opaque_pixels": 2511,
+        "rgba_sha256": "722ab3563e1bdb1131160a025281a66c2ea95d363a447bf222d926bdaf55cdd3",
+        "sampling_origin": [
+          1024,
+          512
+        ],
+        "sheet": "rest",
+        "source_anchors": {
+          "feet": [
+            1272,
+            991
+          ],
+          "head": [
+            1272,
+            745
+          ]
+        }
+      },
+      "carry_shift": {
+        "cell": [
+          2,
+          0
+        ],
+        "crop": [
+          1032,
+          0,
+          1536,
+          503
+        ],
+        "native_bbox": [
+          6,
+          4,
+          68,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          34
+        ],
+        "native_offset": [
+          4,
+          3
+        ],
+        "opaque_pixels": 2480,
+        "rgba_sha256": "898e623b109275034c9cb7e3de101770819a56d513ca034acc477b8c6ac2f148",
+        "sampling_origin": [
+          1024,
+          0
+        ],
+        "sheet": "followthrough",
+        "source_anchors": {
+          "feet": [
+            1272,
+            492
+          ],
+          "head": [
+            1272,
+            250
+          ]
+        }
+      },
+      "complete": {
+        "cell": [
+          2,
+          0
+        ],
+        "crop": [
+          1034,
+          0,
+          1536,
+          508
+        ],
+        "native_bbox": [
+          5,
+          4,
+          67,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          2
+        ],
+        "opaque_pixels": 2528,
+        "rgba_sha256": "27a97e1b19684ca9902dc13420a0c3b5419c876918a2149d01c50dae9b00fe23",
+        "sampling_origin": [
+          1024,
+          0
+        ],
+        "sheet": "tasks",
+        "source_anchors": {
+          "feet": [
+            1270,
+            498
+          ],
+          "head": [
+            1270,
+            250
+          ]
+        }
+      },
+      "curious": {
+        "cell": [
+          0,
+          0
+        ],
+        "crop": [
+          0,
+          0,
+          524,
+          525
+        ],
+        "native_bbox": [
+          4,
+          4,
+          67,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          32
+        ],
+        "native_offset": [
+          3,
+          0
+        ],
+        "opaque_pixels": 2483,
+        "rgba_sha256": "80582d87febad8bc15dbc3bc358b8055c7cf7877fbb194668a27294cd2b8319a",
+        "sampling_origin": [
+          0,
+          0
+        ],
+        "sheet": "expressions",
+        "source_anchors": {
+          "feet": [
+            250,
+            515
+          ],
+          "head": [
+            250,
+            260
+          ]
+        }
+      },
+      "eat": {
+        "cell": [
+          0,
+          0
+        ],
+        "crop": [
+          0,
+          0,
+          524,
+          508
+        ],
+        "native_bbox": [
+          5,
+          4,
+          67,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          3,
+          2
+        ],
+        "opaque_pixels": 2463,
+        "rgba_sha256": "5db1330d204121609ac9e8613723e486a71c79c9c824be9e12e528d2d8a3c57a",
+        "sampling_origin": [
+          0,
+          0
+        ],
+        "sheet": "tasks",
+        "source_anchors": {
+          "feet": [
+            250,
+            498
+          ],
+          "head": [
+            250,
+            250
+          ]
+        }
+      },
+      "eat_bite": {
+        "cell": [
+          0,
+          1
+        ],
+        "crop": [
+          0,
+          503,
+          518,
+          1024
+        ],
+        "native_bbox": [
+          5,
+          3,
+          67,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          3,
+          4
+        ],
+        "opaque_pixels": 2535,
+        "rgba_sha256": "467d18c25d632c30dbc4fbfc88520dd5c4937c7f3a20d7c2ad5df36dd533921d",
+        "sampling_origin": [
+          0,
+          512
+        ],
+        "sheet": "followthrough",
+        "source_anchors": {
+          "feet": [
+            250,
+            992
+          ],
+          "head": [
+            250,
+            750
+          ]
+        }
+      },
+      "fly_mid": {
+        "cell": [
+          1,
+          0
+        ],
+        "crop": [
+          520,
+          0,
+          1032,
+          509
+        ],
+        "native_bbox": [
+          5,
+          4,
+          68,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          2
+        ],
+        "opaque_pixels": 2588,
+        "rgba_sha256": "daf2155906f0d2d0ddb27d6f4bdc1eee44952af5c11bc9bffab70ba4ab97ebf2",
+        "sampling_origin": [
+          512,
+          0
+        ],
+        "sheet": "motion",
+        "source_anchors": {
+          "feet": [
+            760,
+            498
+          ],
+          "head": [
+            760,
+            251
+          ]
+        }
+      },
+      "fly_open": {
+        "cell": [
+          0,
+          0
+        ],
+        "crop": [
+          0,
+          0,
+          520,
+          509
+        ],
+        "native_bbox": [
+          6,
+          4,
+          67,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          3,
+          2
+        ],
+        "opaque_pixels": 2614,
+        "rgba_sha256": "2fd2c504e6555028e634fc0d09e698190463467f8abf501858b3142123c4492c",
+        "sampling_origin": [
+          0,
+          0
+        ],
+        "sheet": "motion",
+        "source_anchors": {
+          "feet": [
+            250,
+            498
+          ],
+          "head": [
+            250,
+            251
+          ]
+        }
+      },
+      "focused": {
+        "cell": [
+          1,
+          0
+        ],
+        "crop": [
+          524,
+          0,
+          1036,
+          525
+        ],
+        "native_bbox": [
+          6,
+          4,
+          68,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          32
+        ],
+        "native_offset": [
+          4,
+          0
+        ],
+        "opaque_pixels": 2480,
+        "rgba_sha256": "544bdf7432ca5e41b6f10657d1df1fd6b4e5d721ccbb60d557dccaedb8df8175",
+        "sampling_origin": [
+          512,
+          0
+        ],
+        "sheet": "expressions",
+        "source_anchors": {
+          "feet": [
+            760,
+            515
+          ],
+          "head": [
+            760,
+            260
+          ]
+        }
+      },
+      "happy": {
+        "cell": [
+          0,
+          1
+        ],
+        "crop": [
+          0,
+          525,
+          524,
+          1024
+        ],
+        "native_bbox": [
+          4,
+          4,
+          67,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          32
+        ],
+        "native_offset": [
+          3,
+          2
+        ],
+        "opaque_pixels": 2494,
+        "rgba_sha256": "b3a9632755881c1992dec207d7904726cf353dc9f27b074c5623d51a51080c41",
+        "sampling_origin": [
+          0,
+          512
+        ],
+        "sheet": "expressions",
+        "source_anchors": {
+          "feet": [
+            250,
+            1008
+          ],
+          "head": [
+            250,
+            755
+          ]
+        }
+      },
+      "land": {
+        "cell": [
+          2,
+          0
+        ],
+        "crop": [
+          1032,
+          0,
+          1536,
+          509
+        ],
+        "native_bbox": [
+          10,
+          6,
+          66,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          2
+        ],
+        "opaque_pixels": 2315,
+        "rgba_sha256": "b6b6fe56289fa3526c54920c433a36fa6597420dd0601d225723123a03bf5ce3",
+        "sampling_origin": [
+          1024,
+          0
+        ],
+        "sheet": "motion",
+        "source_anchors": {
+          "feet": [
+            1270,
+            498
+          ],
+          "head": [
+            1270,
+            251
+          ]
+        }
+      },
+      "look_left": {
+        "cell": [
+          0,
+          1
+        ],
+        "crop": [
+          0,
+          509,
+          520,
+          1024
+        ],
+        "native_bbox": [
+          8,
+          4,
+          68,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          34
+        ],
+        "native_offset": [
+          3,
+          4
+        ],
+        "opaque_pixels": 2445,
+        "rgba_sha256": "38df6bc075ccd4bd2ee831eebd70fc34af724cb27b281dd77eb0ba254f35cf4b",
+        "sampling_origin": [
+          0,
+          512
+        ],
+        "sheet": "motion",
+        "source_anchors": {
+          "feet": [
+            250,
+            992
+          ],
+          "head": [
+            250,
+            757
+          ]
+        }
+      },
+      "look_right": {
+        "cell": [
+          0,
+          0
+        ],
+        "crop": [
+          64,
+          0,
+          1184,
+          1120
+        ],
+        "native_bbox": [
+          4,
+          3,
+          67,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          34
+        ],
+        "native_offset": [
+          3,
+          2
+        ],
+        "opaque_pixels": 2517,
+        "rgba_sha256": "6300dc1b9656977ca9b045718acc71a477f183cdae1f1116e7b5029844c1249b",
+        "sampling_origin": [
+          64,
+          0
+        ],
+        "sheet": "right_glance",
+        "source_anchors": {
+          "feet": [
+            610,
+            1100
+          ],
+          "head": [
+            610,
+            565
+          ]
+        }
+      },
+      "organize": {
+        "cell": [
+          2,
+          1
+        ],
+        "crop": [
+          1034,
+          508,
+          1536,
+          1024
+        ],
+        "native_bbox": [
+          6,
+          4,
+          68,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          4
+        ],
+        "opaque_pixels": 2517,
+        "rgba_sha256": "31e6ef44944a77f1079adb0eaa43db123b1a4e3ff6b024548f7ba98a0117f852",
+        "sampling_origin": [
+          1024,
+          512
+        ],
+        "sheet": "tasks",
+        "source_anchors": {
+          "feet": [
+            1270,
+            996
+          ],
+          "head": [
+            1270,
+            746
+          ]
+        }
+      },
+      "organize_place": {
+        "cell": [
+          2,
+          1
+        ],
+        "crop": [
+          1032,
+          503,
+          1536,
+          1024
+        ],
+        "native_bbox": [
+          6,
+          3,
+          68,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          4
+        ],
+        "opaque_pixels": 2504,
+        "rgba_sha256": "5afa693ad73d8ca38d6858bc55e3cffb18af64166c5426a8e2bbca1bb7944cca",
+        "sampling_origin": [
+          1024,
+          512
+        ],
+        "sheet": "followthrough",
+        "source_anchors": {
+          "feet": [
+            1272,
+            992
+          ],
+          "head": [
+            1272,
+            750
+          ]
+        }
+      },
+      "play": {
+        "cell": [
+          1,
+          0
+        ],
+        "crop": [
+          524,
+          0,
+          1034,
+          508
+        ],
+        "native_bbox": [
+          6,
+          4,
+          69,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          2
+        ],
+        "opaque_pixels": 2485,
+        "rgba_sha256": "a0dd797e1d56e03aefaa3411ec610a75323bdca0de06694720df367dbffcfb6e",
+        "sampling_origin": [
+          512,
+          0
+        ],
+        "sheet": "tasks",
+        "source_anchors": {
+          "feet": [
+            760,
+            498
+          ],
+          "head": [
+            760,
+            250
+          ]
+        }
+      },
+      "play_tap": {
+        "cell": [
+          1,
+          1
+        ],
+        "crop": [
+          518,
+          503,
+          1032,
+          1024
+        ],
+        "native_bbox": [
+          4,
+          3,
+          68,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          4,
+          4
+        ],
+        "opaque_pixels": 2513,
+        "rgba_sha256": "f5f9a89682e703f0a5f4fea22f6f8457049019f7350faa594a5a9da09612c0aa",
+        "sampling_origin": [
+          512,
+          512
+        ],
+        "sheet": "followthrough",
+        "source_anchors": {
+          "feet": [
+            760,
+            992
+          ],
+          "head": [
+            760,
+            750
+          ]
+        }
+      },
+      "praise": {
+        "cell": [
+          0,
+          1
+        ],
+        "crop": [
+          0,
+          508,
+          524,
+          1024
+        ],
+        "native_bbox": [
+          5,
+          4,
+          67,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          3,
+          4
+        ],
+        "opaque_pixels": 2531,
+        "rgba_sha256": "0b8026d3fca4f42d6c5d8f514373b251a5ad98199bc0961876a46723e3249321",
+        "sampling_origin": [
+          0,
+          512
+        ],
+        "sheet": "tasks",
+        "source_anchors": {
+          "feet": [
+            250,
+            996
+          ],
+          "head": [
+            250,
+            746
+          ]
+        }
+      },
+      "shy": {
+        "cell": [
+          2,
+          0
+        ],
+        "crop": [
+          1036,
+          0,
+          1536,
+          525
+        ],
+        "native_bbox": [
+          6,
+          4,
+          67,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          32
+        ],
+        "native_offset": [
+          4,
+          0
+        ],
+        "opaque_pixels": 2460,
+        "rgba_sha256": "e4e412f13697aeefc3cbb9971a4664dab4293c08e53731f0e257d90a72155b16",
+        "sampling_origin": [
+          1024,
+          0
+        ],
+        "sheet": "expressions",
+        "source_anchors": {
+          "feet": [
+            1272,
+            515
+          ],
+          "head": [
+            1272,
+            260
+          ]
+        }
+      },
+      "sick": {
+        "cell": [
+          2,
+          1
+        ],
+        "crop": [
+          1032,
+          509,
+          1536,
+          1024
+        ],
+        "native_bbox": [
+          11,
+          6,
+          66,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          34
+        ],
+        "native_offset": [
+          4,
+          4
+        ],
+        "opaque_pixels": 2240,
+        "rgba_sha256": "52f01679da522e31cb63299372460a6854105f38c6111644a99c8635f7bcfa76",
+        "sampling_origin": [
+          1024,
+          512
+        ],
+        "sheet": "motion",
+        "source_anchors": {
+          "feet": [
+            1270,
+            992
+          ],
+          "head": [
+            1270,
+            757
+          ]
+        }
+      },
+      "sleep": {
+        "cell": [
+          0,
+          0
+        ],
+        "crop": [
+          0,
+          0,
+          520,
+          504
+        ],
+        "native_bbox": [
+          5,
+          4,
+          67,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          33
+        ],
+        "native_offset": [
+          3,
+          3
+        ],
+        "opaque_pixels": 2492,
+        "rgba_sha256": "08c75d82cff9a91fd11277f42f0d7d6b383b0da9d4abf02107501dc8210833ba",
+        "sampling_origin": [
+          0,
+          0
+        ],
+        "sheet": "rest",
+        "source_anchors": {
+          "feet": [
+            250,
+            492
+          ],
+          "head": [
+            250,
+            240
+          ]
+        }
+      },
+      "smug": {
+        "cell": [
+          2,
+          1
+        ],
+        "crop": [
+          1036,
+          525,
+          1536,
+          1024
+        ],
+        "native_bbox": [
+          6,
+          4,
+          67,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          32
+        ],
+        "native_offset": [
+          4,
+          2
+        ],
+        "opaque_pixels": 2474,
+        "rgba_sha256": "8066739e893bfeb252431e8f6754e9303a8a439d8f106a0f789cc08edf5c6fa7",
+        "sampling_origin": [
+          1024,
+          512
+        ],
+        "sheet": "expressions",
+        "source_anchors": {
+          "feet": [
+            1272,
+            1008
+          ],
+          "head": [
+            1272,
+            755
+          ]
+        }
+      },
+      "startled": {
+        "cell": [
+          1,
+          1
+        ],
+        "crop": [
+          524,
+          525,
+          1036,
+          1024
+        ],
+        "native_bbox": [
+          6,
+          4,
+          68,
+          65
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          32
+        ],
+        "native_offset": [
+          4,
+          2
+        ],
+        "opaque_pixels": 2500,
+        "rgba_sha256": "c10761ac77e402753b0052d2677b8a806c7861896e1325b842b0f32c389de4b9",
+        "sampling_origin": [
+          512,
+          512
+        ],
+        "sheet": "expressions",
+        "source_anchors": {
+          "feet": [
+            760,
+            1008
+          ],
+          "head": [
+            760,
+            755
+          ]
+        }
+      },
+      "think": {
+        "cell": [
+          0,
+          1
+        ],
+        "crop": [
+          0,
+          504,
+          520,
+          1024
+        ],
+        "native_bbox": [
+          5,
+          5,
+          68,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          34
+        ],
+        "native_offset": [
+          3,
+          5
+        ],
+        "opaque_pixels": 2573,
+        "rgba_sha256": "c421f06513497bcf5cfca88fee9a4ecfffd977ad8e24ed2ce76a335f6223e169",
+        "sampling_origin": [
+          0,
+          512
+        ],
+        "sheet": "rest",
+        "source_anchors": {
+          "feet": [
+            250,
+            991
+          ],
+          "head": [
+            250,
+            745
+          ]
+        }
+      },
+      "work": {
+        "cell": [
+          1,
+          1
+        ],
+        "crop": [
+          520,
+          504,
+          1032,
+          1024
+        ],
+        "native_bbox": [
+          6,
+          5,
+          68,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          34
+        ],
+        "native_offset": [
+          4,
+          5
+        ],
+        "opaque_pixels": 2519,
+        "rgba_sha256": "0920f1e70b574aa82201d8d22ff0a75fda5b4234f853571004499ea0c17204cc",
+        "sampling_origin": [
+          512,
+          512
+        ],
+        "sheet": "rest",
+        "source_anchors": {
+          "feet": [
+            760,
+            991
+          ],
+          "head": [
+            760,
+            745
+          ]
+        }
+      },
+      "work_press": {
+        "cell": [
+          0,
+          0
+        ],
+        "crop": [
+          0,
+          0,
+          518,
+          503
+        ],
+        "native_bbox": [
+          5,
+          4,
+          67,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          34
+        ],
+        "native_offset": [
+          3,
+          3
+        ],
+        "opaque_pixels": 2484,
+        "rgba_sha256": "ea524fb9b9dfdd9df322bbae78d37c747ad53761f9ae98aae1b584a4fc71e0fb",
+        "sampling_origin": [
+          0,
+          0
+        ],
+        "sheet": "followthrough",
+        "source_anchors": {
+          "feet": [
+            250,
+            492
+          ],
+          "head": [
+            250,
+            250
+          ]
+        }
+      },
+      "work_release": {
+        "cell": [
+          1,
+          0
+        ],
+        "crop": [
+          518,
+          0,
+          1032,
+          503
+        ],
+        "native_bbox": [
+          6,
+          4,
+          68,
+          66
+        ],
+        "native_feet": [
+          34,
+          64
+        ],
+        "native_head": [
+          34,
+          34
+        ],
+        "native_offset": [
+          4,
+          3
+        ],
+        "opaque_pixels": 2482,
+        "rgba_sha256": "a359012dbd810e8af74204a8d46f3f600943498de42d42a3b4699fd3fdb3bad6",
+        "sampling_origin": [
+          512,
+          0
+        ],
+        "sheet": "followthrough",
+        "source_anchors": {
+          "feet": [
+            760,
+            492
+          ],
+          "head": [
+            760,
+            250
+          ]
+        }
+      }
+    },
+    "sheets": {
+      "expressions": {
+        "cell": [
+          512,
+          512
+        ],
+        "image_cell": [
+          512,
+          512
+        ],
+        "layout": [
+          3,
+          2
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "path": "assets/sources/gpt/expressions-chroma.png",
+        "sha256": "bfc62e13aac88a5a2cb6b5035bfebc675f17029d06e94c3a54f3e25444d96cbd",
+        "size": [
+          1536,
+          1024
+        ]
+      },
+      "followthrough": {
+        "cell": [
+          512,
+          512
+        ],
+        "image_cell": [
+          512,
+          512
+        ],
+        "layout": [
+          3,
+          2
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "path": "assets/sources/gpt/followthrough-chroma.png",
+        "sha256": "ca327feed0f7b1cf51da479643638f827100a3a4acaadc8b7d51e080d08f99f4",
+        "size": [
+          1536,
+          1024
+        ]
+      },
+      "motion": {
+        "cell": [
+          512,
+          512
+        ],
+        "image_cell": [
+          512,
+          512
+        ],
+        "layout": [
+          3,
+          2
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "path": "assets/sources/gpt/motion-chroma.png",
+        "sha256": "6ad2b24bfbb46ac9088ca4a6057583f883c0aa27330270b3c2e0a9e7d9fa81d0",
+        "size": [
+          1536,
+          1024
+        ]
+      },
+      "rest": {
+        "cell": [
+          512,
+          512
+        ],
+        "image_cell": [
+          512,
+          512
+        ],
+        "layout": [
+          3,
+          2
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "path": "assets/sources/gpt/rest-chroma.png",
+        "sha256": "3ef87eef70dc817211b9a7ffd602413f929ac0c797fcf6f2d303d26236996c37",
+        "size": [
+          1536,
+          1024
+        ]
+      },
+      "right_glance": {
+        "cell": [
+          1120,
+          1120
+        ],
+        "image_cell": [
+          1254,
+          1254
+        ],
+        "layout": [
+          1,
+          1
+        ],
+        "origin": [
+          64,
+          0
+        ],
+        "path": "assets/sources/gpt/look-right-chroma.png",
+        "sha256": "a7d843f8ed1ec56f3c46c3f0da62e9659423f6c0e13a2fb64580db046a77386b",
+        "size": [
+          1254,
+          1254
+        ]
+      },
+      "tasks": {
+        "cell": [
+          512,
+          512
+        ],
+        "image_cell": [
+          512,
+          512
+        ],
+        "layout": [
+          3,
+          2
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "path": "assets/sources/gpt/tasks-chroma.png",
+        "sha256": "3157ddb49a26190705ef54f746727a443e2c3cd562cc36a9a35ca5dff60e406e",
+        "size": [
+          1536,
+          1024
+        ]
+      }
+    }
+  },
+  "unique_frames": 30,
+  "version": 1
+}

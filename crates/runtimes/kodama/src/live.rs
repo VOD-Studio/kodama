@@ -11,18 +11,34 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 enum ColorMode {
     None,
     Ansi16,
     Ansi256,
+    TrueColor,
 }
 
 fn color_mode() -> ColorMode {
     let env = |k: &str| std::env::var(k).unwrap_or_default();
-    if std::env::var_os("NO_COLOR").is_some() || env("TERM") == "dumb" || env("TERM").is_empty() {
+    color_mode_for(
+        &env("TERM"),
+        &env("COLORTERM"),
+        std::env::var_os("NO_COLOR").is_some(),
+    )
+}
+
+fn color_mode_for(term: &str, colorterm: &str, no_color: bool) -> ColorMode {
+    let (term, colorterm) = (term.to_ascii_lowercase(), colorterm.to_ascii_lowercase());
+    if no_color || term == "dumb" || term.is_empty() {
         ColorMode::None
-    } else if env("COLORTERM").contains("truecolor") || env("TERM").contains("256color") {
+    } else if colorterm.contains("truecolor")
+        || colorterm.contains("24bit")
+        || term.contains("direct")
+        || term.contains("truecolor")
+    {
+        ColorMode::TrueColor
+    } else if term.contains("256color") {
         ColorMode::Ansi256
     } else {
         ColorMode::Ansi16
@@ -79,7 +95,7 @@ const FORMS: [&[Branch]; 8] = [
     &[Branch::Curious, Branch::Radiant],
 ];
 
-/// 半格像素画的最低高度：放得下幼体；更矮或不支持 UTF-8、256 色时退回字符画。
+/// 半格像素画的最低高度：放得下幼体；更矮或不支持 UTF-8、至少 256 色时退回字符画。
 const BLOCKS_MIN_ROWS: u16 = 10;
 
 /// 要画的个体：本地预览是固定的演示个体，账号模式来自服务的投影。
@@ -136,6 +152,7 @@ fn input(look: Look, w: u16, h: u16, t: u64, pose: Pose, cs: Charset) -> FrameIn
         lineage,
         outfit: look.outfit,
         rarity: look.rarity,
+        companion: None,
     }
 }
 
@@ -209,8 +226,9 @@ pub fn run(account: bool) -> i32 {
         }
     };
     let (mode, glyphs) = (color_mode(), charset());
-    // 半格像素画需要 UTF-8 与 256 色；否则用字符画
-    let blocks = mode == ColorMode::Ansi256 && glyphs == Charset::Unicode;
+    // 真彩色使用原 RGB；256 色只是同一像素网格的降色回退。
+    let blocks =
+        matches!(mode, ColorMode::TrueColor | ColorMode::Ansi256) && glyphs == Charset::Unicode;
     let mut pose = Pose::Idle;
     let mut species = 1u8;
     let mut form = 0usize;
@@ -260,6 +278,34 @@ pub fn run(account: bool) -> i32 {
                         }
                         let _ = queue!(out, Print(ch));
                     }
+                    (ColorMode::TrueColor, c) => {
+                        let _ = queue!(out, ResetColor);
+                        if let Some(rgb) = f.fg_rgb.get(y).and_then(|r| r.get(x)).copied().flatten()
+                        {
+                            let _ = queue!(
+                                out,
+                                SetForegroundColor(Color::Rgb {
+                                    r: rgb[0],
+                                    g: rgb[1],
+                                    b: rgb[2]
+                                })
+                            );
+                        } else {
+                            let _ = queue!(out, SetForegroundColor(Color::AnsiValue(c)));
+                        }
+                        if let Some(rgb) = f.bg_rgb.get(y).and_then(|r| r.get(x)).copied().flatten()
+                        {
+                            let _ = queue!(
+                                out,
+                                SetBackgroundColor(Color::Rgb {
+                                    r: rgb[0],
+                                    g: rgb[1],
+                                    b: rgb[2]
+                                })
+                            );
+                        }
+                        let _ = queue!(out, Print(ch));
+                    }
                     (ColorMode::Ansi16, c) => {
                         let _ = queue!(
                             out,
@@ -277,7 +323,21 @@ pub fn run(account: bool) -> i32 {
                 form_label(form)
             ),
         };
-        let status: String = status.chars().take(w as usize).collect();
+        let display = match (mode, cs) {
+            (ColorMode::TrueColor, Charset::Blocks) => "RGB pixels",
+            (ColorMode::Ansi256, Charset::Blocks) => "256-color fallback",
+            (ColorMode::None, _) => "no-color glyph fallback",
+            _ => "glyph fallback",
+        };
+        let crop = if cs == Charset::Blocks && (w < 56 || rows < 18) {
+            " (cropped region)"
+        } else {
+            ""
+        };
+        let status: String = format!("{display}{crop} | {status}")
+            .chars()
+            .take(w as usize)
+            .collect();
         let _ = queue!(
             out,
             cursor::MoveTo(0, h.saturating_sub(1)),
@@ -333,4 +393,35 @@ pub fn run(account: bool) -> i32 {
     }
     drop(guard);
     0
+}
+
+#[cfg(test)]
+mod color_tests {
+    use super::*;
+
+    #[test]
+    fn truecolor_is_not_demoted_to_ansi256_and_no_color_takes_priority() {
+        assert_eq!(
+            color_mode_for("xterm-256color", "truecolor", false),
+            ColorMode::TrueColor
+        );
+        assert_eq!(
+            color_mode_for("xterm", "24bit", false),
+            ColorMode::TrueColor
+        );
+        assert_eq!(
+            color_mode_for("xterm-direct", "", false),
+            ColorMode::TrueColor
+        );
+        assert_eq!(
+            color_mode_for("xterm-256color", "", false),
+            ColorMode::Ansi256
+        );
+        assert_eq!(color_mode_for("xterm", "", false), ColorMode::Ansi16);
+        assert_eq!(
+            color_mode_for("xterm-256color", "truecolor", true),
+            ColorMode::None
+        );
+        assert_eq!(color_mode_for("dumb", "truecolor", false), ColorMode::None);
+    }
 }

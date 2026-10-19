@@ -23,7 +23,7 @@ __pycache__/
 .tanstack/
 
 # 本地开发状态与密钥 ———————————————————————————————————
-# scripts/dev/dev.mjs 生成的开发密钥、环境与 SQLite 库，绝不提交
+# scripts/dev/dev.mts 生成的开发密钥、环境与 SQLite 库，绝不提交
 /.dev/
 .env
 .env.*

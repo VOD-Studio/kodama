@@ -65,7 +65,7 @@ The directory is the layer: every crate lives in `crates/<layer>/<crate>`, and t
 | `runtimes` | `kodama`, `kodama-wasm` | `core` |
 | `tools` | `kodama-schema` | `core` |
 
-`scripts/check/check-arch.mjs` (run by `make check-arch` and the CI Lint job) fails when:
+`scripts/check/check-arch.mts` (run by `make check-arch` and the CI Lint job) fails when:
 
 - a crate sits outside `crates/<its layer>/<its name>`, or a new crate is not registered;
 - a crate depends on another layer than the table allows, or on a workspace crate outside its own allowlist;
@@ -74,7 +74,7 @@ The directory is the layer: every crate lives in `crates/<layer>/<crate>`, and t
 
 The same target then compiles the core layer for `thumbv7em-none-eabihf`, a target with no standard library. A dependency that quietly pulls in `std` fails there, even though it would build fine for native targets and `wasm32-unknown-unknown`.
 
-To add a crate or an edge, change `scripts/check/check-arch.mjs` and this document in the same pull request.
+To add a crate or an edge, change `scripts/check/check-arch.mts` and this document in the same pull request.
 
 ### Inside the crates
 
@@ -107,6 +107,7 @@ Public paths do not depend on the internal layout: `kodama_core` re-exports ever
 
 ```
 kodama/
+├── .agents/skills/<skill>/   reusable agent workflows, each with a SKILL.md entry
 ├── crates/<layer>/<crate>/   Rust, grouped by layer (see above)
 ├── packages/<package>/       npm packages: kodama-sdk is @violetjs/kodama
 ├── assets/                   art and its records: catalog/species.json today
@@ -118,8 +119,8 @@ kodama/
 │   ├── consumers/<name>/     installed artifacts outside the repository; each has run.sh
 │   └── bench/
 ├── scripts/
-│   ├── dev/                  local development: dev.mjs, with-postgres.sh
-│   ├── check/                repository checks: check-arch.mjs, version.mjs
+│   ├── dev/                  local development: dev.mts, with-postgres.sh
+│   ├── check/                repository checks: check-arch.mts, version.mts
 │   └── release/              packaging and publishing
 ├── docker/                   dev.Dockerfile, service.Dockerfile (each with its own .dockerignore), compose.yaml
 ├── docs/
@@ -187,6 +188,8 @@ CAPABILITIES (kodama-core::caps) ───────────────�
 ```
 
 Generated files are committed. `make schema` regenerates them, and `make schema-check` (CI Core job) fails if they are stale, validates real responses against the schema, and compiles positive and negative type tests. A new command has to be registered in `CAPABILITIES`, or the tests fail.
+
+Run `make three-end` first to produce `target/out-native.txt` and its matching `target/ops-native.json`. Schema validation uses the operations recorded during execution to choose each response type; scenario additions do not require a separate operation-count or ordering list.
 
 Encoding rules: 64-bit integers are decimal strings (JavaScript numbers lose precision above 2^53), every response is `{ok:true,value}` or `{ok:false,code,message}`, and callers branch on `code`.
 

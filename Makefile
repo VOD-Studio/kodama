@@ -8,7 +8,7 @@ SHELL_SCRIPTS := $(shell git ls-files '*.sh')
 
 .PHONY: help fmt fmt-check clippy check-arch lint-scripts lint-workflows check-versions deny lint \
 	test test-pg three-end schema schema-check sdk-test tty e2e e2e-pg consumers ci \
-	term preview dev-init dev token wasm cli-archive image image-smoke clean \
+	term preview companions-preview companions-terminal dev-init dev token wasm cli-archive image image-smoke clean \
 	docker-build docker-shell docker-dev docker-token docker-down docker-clean
 
 ##@ 日常开发
@@ -22,14 +22,20 @@ term: ## 在终端里养一只宠物
 preview: ## 在终端里预览像素画：ARGS="forms 3" 全部外形，"poses 3" 姿态，"outfits 3" 装扮，"individuals 3" 不同个体，"ascii" 字符画
 	cargo run -q -p kodama-term --example preview -- $(ARGS)
 
-dev-init: ## 生成 .dev/ 里的开发密钥与环境(已存在则保留)
-	node scripts/dev/dev.mjs init
+companions-preview: wasm ## 构建并启动本地伙伴工作台服务(127.0.0.1:8841)
+	node scripts/dev/companions.mts
 
-dev: ## 启动本地服务(SQLite,127.0.0.1:8787),模拟接入方由 scripts/dev/dev.mjs 提供
-	node scripts/dev/dev.mjs serve
+companions-terminal: wasm ## 在真实终端预览原站 DeepSeek，ARGS="baby work" 可选形态和动作；q 退出
+	node scripts/dev/companions-terminal.mts $(ARGS)
+
+dev-init: ## 生成 .dev/ 里的开发密钥与环境(已存在则保留)
+	node scripts/dev/dev.mts init
+
+dev: ## 启动本地服务(SQLite,127.0.0.1:8787),模拟接入方由 scripts/dev/dev.mts 提供
+	node scripts/dev/dev.mts serve
 
 token: ## 以 SUB(默认 alice)换取访问令牌,供 curl 使用;需先 make dev
-	@node scripts/dev/dev.mjs token $(SUB)
+	@node scripts/dev/dev.mts token $(SUB)
 
 fmt: ## 格式化 Rust 代码(含 tests/consumers/rust-host)
 	cargo fmt --all
@@ -50,11 +56,11 @@ clippy: ## clippy,警告即失败
 	cargo clippy --workspace --all-targets -- -D warnings
 
 check-arch: ## 目录结构白名单、crate 分层与依赖方向、核心依赖范围,并在无 std 目标上编译核心
-	node scripts/check/check-arch.mjs
+	node scripts/check/check-arch.mts
 	cargo build -q -p kodama-core -p kodama-term --target $(NO_STD_TARGET)
 
 check-versions: ## 各处版本号与 wasm-bindgen 版本一致
-	node scripts/check/version.mjs check
+	node scripts/check/version.mts check
 
 lint-scripts: ## shellcheck 全部 shell 脚本
 	shellcheck --severity=warning $(SHELL_SCRIPTS)
@@ -84,8 +90,8 @@ tty: ## 真实 pty 中验证 kodama live:动画、resize、退出恢复终端、
 	cargo build --release -q -p kodama
 	python3 tests/tty/tty_test.py
 
-sdk-test: wasm ## SDK 的 JS 部分(网页渲染的生命周期与无障碍),基于刚构建的 dist
-	cd packages/kodama-sdk && node --test test/*.test.mjs
+sdk-test: wasm ## SDK 的 TypeScript 部分(网页渲染的生命周期与无障碍),基于刚构建的 dist
+	cd packages/kodama-sdk && pnpm exec tsc -p tsconfig.scripts.json && node --test test/*.test.ts
 
 e2e: ## 服务端到端(真实二进制、HTTP、重启),SQLite
 	sh tests/e2e/run.sh
@@ -136,7 +142,7 @@ docker-dev: ## 在容器里启动本地服务,宿主可访问 127.0.0.1:8787
 	$(DOCKER_RUN) --service-ports --name kodama-dev -e KODAMA_LISTEN=0.0.0.0:8787 dev make dev
 
 docker-token: ## 向 make docker-dev 启动的服务换取 SUB 的访问令牌
-	@docker exec kodama-dev node scripts/dev/dev.mjs token $(SUB)
+	@docker exec kodama-dev node scripts/dev/dev.mts token $(SUB)
 
 docker-down: ## 停止 compose 里的 Postgres 等后台服务
 	$(COMPOSE) down

@@ -73,13 +73,13 @@ pub const CAPABILITIES: &[Capability] = &[
     },
     Capability {
         op: "frame",
-        summary: "将姿态与呈现时钟合成为字符单元网格",
+        summary: "将姿态与呈现时钟合成为字符单元网格;可选伙伴外观、动作与表情(DeepSeek 三阶段，GPT 仅成年)，其余角色或阶段美术未就绪时返回 bad_input",
         mutates_state: false,
         errors: &[BadInput],
     },
     Capability {
         op: "sprite",
-        summary: "将姿态、成长阶段与呈现时钟合成为像素画调色板与网格",
+        summary: "将姿态、成长阶段与呈现时钟合成为像素画调色板与网格;可选伙伴外观、动作与表情(DeepSeek 三阶段，GPT 仅成年)，其余角色或阶段美术未就绪时返回 bad_input",
         mutates_state: false,
         errors: &[BadInput],
     },

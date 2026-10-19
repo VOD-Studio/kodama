@@ -15,7 +15,7 @@ on:
       - "crates/runtimes/kodama/**"
       - "packages/**"
       - "scripts/release/**"
-      - "scripts/check/version.mjs"
+      - "scripts/check/version.mts"
       - "tests/consumers/cli-archive/**"
       - "tests/tty/**"
       - ".github/workflows/package.yml"
@@ -49,7 +49,7 @@ jobs:
           persist-credentials: false
       - name: Version files agree with the tag
         if: inputs.version
-        run: node scripts/check/version.mjs check "v$VERSION"
+        run: node scripts/check/version.mts check "v$VERSION"
       - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           targets: wasm32-unknown-unknown
@@ -60,6 +60,11 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 10
+      - run: pnpm install --frozen-lockfile
+        working-directory: packages/kodama-sdk
       - run: packages/kodama-sdk/build.sh
       - name: Pack and dry-run
         run: |

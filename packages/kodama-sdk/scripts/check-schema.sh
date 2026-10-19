@@ -1,5 +1,5 @@
 #!/bin/sh
-# schema 与类型声明必须与 Rust 类型同源:重新生成后不得与已有文件有差异;真实转录必须通过 schema 校验;类型测试必须编译。
+# schema 与类型声明必须与 Rust 类型同源:重新生成后不得与已有文件有差异;真实转录必须通过 schema 校验;源码与类型测试必须编译。
 set -e
 cd "$(dirname "$0")/.."
 TMP=$(mktemp -d)
@@ -11,6 +11,7 @@ cp docs/capabilities.md "$TMP/capabilities.md" 2>/dev/null || : > "$TMP/capabili
 cmp -s schema/kodama.schema.json "$TMP/schema.json" || { echo "FAIL: schema/kodama.schema.json is stale; run scripts/gen.sh"; exit 1; }
 cmp -s src/types.d.ts "$TMP/types.d.ts" || { echo "FAIL: src/types.d.ts is stale; run scripts/gen.sh"; exit 1; }
 cmp -s docs/capabilities.md "$TMP/capabilities.md" || { echo "FAIL: docs/capabilities.md is stale; run scripts/gen.sh"; exit 1; }
-node scripts/validate-transcript.mjs
+node scripts/validate-transcript.ts
+pnpm exec tsc -p tsconfig.json --noEmit
 pnpm exec tsc -p tsconfig.typetest.json
 echo "types OK: positive and negative type tests"

@@ -1,7 +1,7 @@
 # 开发环境镜像：与 CI 相同的工具链，本机不装 Rust、Node 也能运行全部 make 目标。
 # 基于 slim 镜像以控制体积（约 1.5 GB）；构建产物在命名卷里，另需数 GB 磁盘。
 # 不直接使用，经 docker/compose.yaml 与 Makefile 的 docker-* 目标调用，见 CONTRIBUTING.md。
-# 工具版本与 CI 一致；wasm-bindgen 必须与 crates/runtimes/kodama-wasm 锁定的版本相同（scripts/check/version.mjs 校验）。
+# 工具版本与 CI 一致；wasm-bindgen 必须与 crates/runtimes/kodama-wasm 锁定的版本相同（scripts/check/version.mts 校验）。
 FROM node:22-bookworm-slim AS node
 
 FROM rust:1-slim-bookworm

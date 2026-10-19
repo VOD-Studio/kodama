@@ -1,4 +1,4 @@
-import type { BirthResult, Command, OutcomeResult, Pet, ErrorBody, ResultOf } from "../src/index";
+import type { BirthResult, Command, OutcomeResult, Pet, ErrorBody, ResultOf, Frame } from "../src/index";
 import { run } from "../src/index";
 
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
@@ -41,6 +41,10 @@ import { mountPet } from "../src/web";
 declare const canvas: HTMLCanvasElement;
 const mounted = mountPet(canvas, { pet: { species: 0, genes: [1, 2, 3, 4, 5, 6, 7, 8], lineage: ["curious", "sage"] }, pose: () => "idle" });
 mounted.setPose("sleep");
+mounted.setAction("think");
+mounted.setExpression("curious");
+mounted.setAction();
+mounted.setExpression();
 mounted.dispose();
 // @ts-expect-error 未知的进化分支
 mountPet(canvas, { pet: { species: 0, genes: [], lineage: ["dragon"] } });
@@ -49,6 +53,26 @@ mountPet(canvas, { pet: { species: 0, genes: [] }, pose: "fly" });
 // 装扮：槽位与物品是线上协议里的取值
 mountPet(canvas, { pet: { species: 0, genes: [], outfit: { head: "star_hat", background: "night_sky" } } });
 mountPet(canvas, { pet: { species: 0, genes: [], rarity: 4 } });
+mountPet(canvas, { pet: { species: 0, genes: [], companion: { character: "deepseek", action: "work", expression: "focused" } } });
+// @ts-expect-error 未知的伙伴
+mountPet(canvas, { pet: { species: 0, genes: [], companion: { character: "dragon" } } });
+// @ts-expect-error 未知的伙伴动作
+mounted.setAction("teleport");
+// @ts-expect-error 未知的伙伴表情
+mounted.setExpression("angry");
+import { mountTerminalPet } from "../src/terminal";
+mountTerminalPet({ region: { row: 1, col: 1, width: 40, height: 12 }, pet: { species: 0, genes: [], companion: { character: "deepseek" } }, getAction: () => "think", getExpression: () => "curious" });
+mountTerminalPet({ region: { row: 1, col: 1, width: 69, height: 33 }, pet: { species: 0, genes: [] }, charset: "blocks", colorMode: "truecolor", env: { COLORTERM: "truecolor" } });
+const glyphFrame: Frame = { w: 1, h: 1, rows: [" "], colors: [[0]], bg: [[0]] };
+const rgbFrame: Frame = { ...glyphFrame, fg_rgb: [[[128, 128, 128]]], bg_rgb: [[null]] };
+void rgbFrame;
+// @ts-expect-error RGB requires exactly three channels
+const invalidRgb: Frame = { ...glyphFrame, fg_rgb: [[[128, 128]]] };
+void invalidRgb;
+// @ts-expect-error terminal colour modes are a closed union
+mountTerminalPet({ region: { row: 1, col: 1, width: 40, height: 12 }, pet: { species: 0, genes: [] }, colorMode: "rgb-ish" });
+// @ts-expect-error 非法的终端伙伴动作
+mountTerminalPet({ region: { row: 1, col: 1, width: 40, height: 12 }, pet: { species: 0, genes: [] }, getAction: () => "teleport" });
 // @ts-expect-error 未知的物品
 mountPet(canvas, { pet: { species: 0, genes: [], outfit: { head: "golden_crown" } } });
 void run({ op: "act", pet, action: { equip: { item: "knit_scarf" } }, now: "1", request_id: "r" });

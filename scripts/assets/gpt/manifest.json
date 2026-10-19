@@ -1,0 +1,1454 @@
+{
+  "version": 1,
+  "canvas": [
+    69,
+    66
+  ],
+  "sampling": {
+    "native_cell": [
+      64,
+      64
+    ],
+    "alpha_threshold": 224,
+    "chroma_key": [
+      0,
+      255,
+      0
+    ],
+    "green_dominance": 32,
+    "filter": "nearest",
+    "phase": [
+      2,
+      0
+    ]
+  },
+  "palette": {
+    "max_colors": 80
+  },
+  "placement_groups": {
+    "seated": {
+      "head_x": 34,
+      "feet_y": 64,
+      "head_y": [
+        24,
+        39
+      ],
+      "feet_x": [
+        24,
+        45
+      ]
+    }
+  },
+  "sheets": {
+    "expressions": {
+      "path": "assets/sources/gpt/expressions-chroma.png",
+      "sha256": "bfc62e13aac88a5a2cb6b5035bfebc675f17029d06e94c3a54f3e25444d96cbd",
+      "columns": 3,
+      "rows": 2
+    },
+    "rest": {
+      "path": "assets/sources/gpt/rest-chroma.png",
+      "sha256": "3ef87eef70dc817211b9a7ffd602413f929ac0c797fcf6f2d303d26236996c37",
+      "columns": 3,
+      "rows": 2
+    },
+    "tasks": {
+      "path": "assets/sources/gpt/tasks-chroma.png",
+      "sha256": "3157ddb49a26190705ef54f746727a443e2c3cd562cc36a9a35ca5dff60e406e",
+      "columns": 3,
+      "rows": 2
+    },
+    "motion": {
+      "path": "assets/sources/gpt/motion-chroma.png",
+      "sha256": "6ad2b24bfbb46ac9088ca4a6057583f883c0aa27330270b3c2e0a9e7d9fa81d0",
+      "columns": 3,
+      "rows": 2
+    },
+    "followthrough": {
+      "path": "assets/sources/gpt/followthrough-chroma.png",
+      "sha256": "ca327feed0f7b1cf51da479643638f827100a3a4acaadc8b7d51e080d08f99f4",
+      "columns": 3,
+      "rows": 2
+    },
+    "right_glance": {
+      "path": "assets/sources/gpt/look-right-chroma.png",
+      "sha256": "a7d843f8ed1ec56f3c46c3f0da62e9659423f6c0e13a2fb64580db046a77386b",
+      "columns": 1,
+      "rows": 1,
+      "sampling_cell": [
+        1120,
+        1120
+      ],
+      "sampling_origin": [
+        64,
+        0
+      ]
+    }
+  },
+  "poses": {
+    "curious": {
+      "sheet": "expressions",
+      "cell": [
+        0,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          260
+        ],
+        "feet": [
+          250,
+          515
+        ]
+      },
+      "crop": [
+        0,
+        0,
+        524,
+        525
+      ]
+    },
+    "focused": {
+      "sheet": "expressions",
+      "cell": [
+        1,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          760,
+          260
+        ],
+        "feet": [
+          760,
+          515
+        ]
+      },
+      "crop": [
+        524,
+        0,
+        1036,
+        525
+      ]
+    },
+    "shy": {
+      "sheet": "expressions",
+      "cell": [
+        2,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1272,
+          260
+        ],
+        "feet": [
+          1272,
+          515
+        ]
+      },
+      "crop": [
+        1036,
+        0,
+        1536,
+        525
+      ]
+    },
+    "happy": {
+      "sheet": "expressions",
+      "cell": [
+        0,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          755
+        ],
+        "feet": [
+          250,
+          1008
+        ]
+      },
+      "crop": [
+        0,
+        525,
+        524,
+        1024
+      ]
+    },
+    "startled": {
+      "sheet": "expressions",
+      "cell": [
+        1,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          760,
+          755
+        ],
+        "feet": [
+          760,
+          1008
+        ]
+      },
+      "crop": [
+        524,
+        525,
+        1036,
+        1024
+      ]
+    },
+    "smug": {
+      "sheet": "expressions",
+      "cell": [
+        2,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1272,
+          755
+        ],
+        "feet": [
+          1272,
+          1008
+        ]
+      },
+      "crop": [
+        1036,
+        525,
+        1536,
+        1024
+      ]
+    },
+    "sleep": {
+      "sheet": "rest",
+      "cell": [
+        0,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          240
+        ],
+        "feet": [
+          250,
+          492
+        ]
+      },
+      "crop": [
+        0,
+        0,
+        520,
+        504
+      ]
+    },
+    "blink_half": {
+      "sheet": "rest",
+      "cell": [
+        1,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          760,
+          240
+        ],
+        "feet": [
+          760,
+          492
+        ]
+      },
+      "crop": [
+        520,
+        0,
+        1032,
+        504
+      ]
+    },
+    "blink_closed": {
+      "sheet": "rest",
+      "cell": [
+        2,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1272,
+          240
+        ],
+        "feet": [
+          1272,
+          492
+        ]
+      },
+      "crop": [
+        1032,
+        0,
+        1536,
+        504
+      ]
+    },
+    "think": {
+      "sheet": "rest",
+      "cell": [
+        0,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          745
+        ],
+        "feet": [
+          250,
+          991
+        ]
+      },
+      "crop": [
+        0,
+        504,
+        520,
+        1024
+      ]
+    },
+    "work": {
+      "sheet": "rest",
+      "cell": [
+        1,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          760,
+          745
+        ],
+        "feet": [
+          760,
+          991
+        ]
+      },
+      "crop": [
+        520,
+        504,
+        1032,
+        1024
+      ]
+    },
+    "carry": {
+      "sheet": "rest",
+      "cell": [
+        2,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1272,
+          745
+        ],
+        "feet": [
+          1272,
+          991
+        ]
+      },
+      "crop": [
+        1032,
+        504,
+        1536,
+        1024
+      ]
+    },
+    "eat": {
+      "sheet": "tasks",
+      "cell": [
+        0,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          250
+        ],
+        "feet": [
+          250,
+          498
+        ]
+      },
+      "crop": [
+        0,
+        0,
+        524,
+        508
+      ]
+    },
+    "play": {
+      "sheet": "tasks",
+      "cell": [
+        1,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          760,
+          250
+        ],
+        "feet": [
+          760,
+          498
+        ]
+      },
+      "crop": [
+        524,
+        0,
+        1034,
+        508
+      ]
+    },
+    "complete": {
+      "sheet": "tasks",
+      "cell": [
+        2,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1270,
+          250
+        ],
+        "feet": [
+          1270,
+          498
+        ]
+      },
+      "crop": [
+        1034,
+        0,
+        1536,
+        508
+      ]
+    },
+    "praise": {
+      "sheet": "tasks",
+      "cell": [
+        0,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          746
+        ],
+        "feet": [
+          250,
+          996
+        ]
+      },
+      "crop": [
+        0,
+        508,
+        524,
+        1024
+      ]
+    },
+    "ask": {
+      "sheet": "tasks",
+      "cell": [
+        1,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          760,
+          746
+        ],
+        "feet": [
+          760,
+          996
+        ]
+      },
+      "crop": [
+        524,
+        508,
+        1034,
+        1024
+      ]
+    },
+    "organize": {
+      "sheet": "tasks",
+      "cell": [
+        2,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1270,
+          746
+        ],
+        "feet": [
+          1270,
+          996
+        ]
+      },
+      "crop": [
+        1034,
+        508,
+        1536,
+        1024
+      ]
+    },
+    "fly_open": {
+      "sheet": "motion",
+      "cell": [
+        0,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          251
+        ],
+        "feet": [
+          250,
+          498
+        ]
+      },
+      "crop": [
+        0,
+        0,
+        520,
+        509
+      ]
+    },
+    "fly_mid": {
+      "sheet": "motion",
+      "cell": [
+        1,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          760,
+          251
+        ],
+        "feet": [
+          760,
+          498
+        ]
+      },
+      "crop": [
+        520,
+        0,
+        1032,
+        509
+      ]
+    },
+    "land": {
+      "sheet": "motion",
+      "cell": [
+        2,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1270,
+          251
+        ],
+        "feet": [
+          1270,
+          498
+        ]
+      },
+      "crop": [
+        1032,
+        0,
+        1536,
+        509
+      ]
+    },
+    "look_left": {
+      "sheet": "motion",
+      "cell": [
+        0,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          757
+        ],
+        "feet": [
+          250,
+          992
+        ]
+      },
+      "crop": [
+        0,
+        509,
+        520,
+        1024
+      ]
+    },
+    "look_right": {
+      "sheet": "right_glance",
+      "cell": [
+        0,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          610,
+          565
+        ],
+        "feet": [
+          610,
+          1100
+        ]
+      },
+      "crop": [
+        64,
+        0,
+        1184,
+        1120
+      ]
+    },
+    "sick": {
+      "sheet": "motion",
+      "cell": [
+        2,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1270,
+          757
+        ],
+        "feet": [
+          1270,
+          992
+        ]
+      },
+      "crop": [
+        1032,
+        509,
+        1536,
+        1024
+      ]
+    },
+    "work_press": {
+      "sheet": "followthrough",
+      "cell": [
+        0,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          250
+        ],
+        "feet": [
+          250,
+          492
+        ]
+      },
+      "crop": [
+        0,
+        0,
+        518,
+        503
+      ]
+    },
+    "work_release": {
+      "sheet": "followthrough",
+      "cell": [
+        1,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          760,
+          250
+        ],
+        "feet": [
+          760,
+          492
+        ]
+      },
+      "crop": [
+        518,
+        0,
+        1032,
+        503
+      ]
+    },
+    "carry_shift": {
+      "sheet": "followthrough",
+      "cell": [
+        2,
+        0
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1272,
+          250
+        ],
+        "feet": [
+          1272,
+          492
+        ]
+      },
+      "crop": [
+        1032,
+        0,
+        1536,
+        503
+      ]
+    },
+    "eat_bite": {
+      "sheet": "followthrough",
+      "cell": [
+        0,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          250,
+          750
+        ],
+        "feet": [
+          250,
+          992
+        ]
+      },
+      "crop": [
+        0,
+        503,
+        518,
+        1024
+      ]
+    },
+    "play_tap": {
+      "sheet": "followthrough",
+      "cell": [
+        1,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          760,
+          750
+        ],
+        "feet": [
+          760,
+          992
+        ]
+      },
+      "crop": [
+        518,
+        503,
+        1032,
+        1024
+      ]
+    },
+    "organize_place": {
+      "sheet": "followthrough",
+      "cell": [
+        2,
+        1
+      ],
+      "placement": "seated",
+      "anchors": {
+        "head": [
+          1272,
+          750
+        ],
+        "feet": [
+          1272,
+          992
+        ]
+      },
+      "crop": [
+        1032,
+        503,
+        1536,
+        1024
+      ]
+    }
+  },
+  "animations": {
+    "idle": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 700
+        },
+        {
+          "pose": "blink_half",
+          "ms": 100
+        },
+        {
+          "pose": "blink_closed",
+          "ms": 100
+        },
+        {
+          "pose": "blink_half",
+          "ms": 100
+        },
+        {
+          "pose": "curious",
+          "ms": 700
+        }
+      ]
+    },
+    "blink": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 200
+        },
+        {
+          "pose": "blink_half",
+          "ms": 100
+        },
+        {
+          "pose": "blink_closed",
+          "ms": 100
+        },
+        {
+          "pose": "blink_half",
+          "ms": 100
+        },
+        {
+          "pose": "curious",
+          "ms": 300
+        }
+      ]
+    },
+    "move": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "land",
+          "ms": 300
+        },
+        {
+          "pose": "fly_mid",
+          "ms": 200
+        },
+        {
+          "pose": "fly_open",
+          "ms": 400
+        },
+        {
+          "pose": "fly_mid",
+          "ms": 200
+        },
+        {
+          "pose": "land",
+          "ms": 500
+        }
+      ]
+    },
+    "observe": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 400
+        },
+        {
+          "pose": "look_left",
+          "ms": 300
+        },
+        {
+          "pose": "curious",
+          "ms": 200
+        },
+        {
+          "pose": "look_right",
+          "ms": 300
+        },
+        {
+          "pose": "curious",
+          "ms": 400
+        }
+      ]
+    },
+    "eat": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "eat",
+          "ms": 300
+        },
+        {
+          "pose": "eat_bite",
+          "ms": 500
+        },
+        {
+          "pose": "eat",
+          "ms": 300
+        },
+        {
+          "pose": "happy",
+          "ms": 300
+        },
+        {
+          "pose": "curious",
+          "ms": 500
+        }
+      ]
+    },
+    "play": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "play",
+          "ms": 300
+        },
+        {
+          "pose": "play_tap",
+          "ms": 400
+        },
+        {
+          "pose": "play",
+          "ms": 300
+        },
+        {
+          "pose": "happy",
+          "ms": 300
+        },
+        {
+          "pose": "curious",
+          "ms": 500
+        }
+      ]
+    },
+    "sleep": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "sleep",
+          "ms": 1200
+        }
+      ]
+    },
+    "startled": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "startled",
+          "ms": 300
+        },
+        {
+          "pose": "shy",
+          "ms": 300
+        },
+        {
+          "pose": "curious",
+          "ms": 300
+        }
+      ]
+    },
+    "sick": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "sick",
+          "ms": 300
+        },
+        {
+          "pose": "sleep",
+          "ms": 300
+        },
+        {
+          "pose": "sick",
+          "ms": 300
+        }
+      ]
+    },
+    "evolve": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "land",
+          "ms": 300
+        },
+        {
+          "pose": "fly_mid",
+          "ms": 200
+        },
+        {
+          "pose": "fly_open",
+          "ms": 400
+        },
+        {
+          "pose": "fly_mid",
+          "ms": 200
+        },
+        {
+          "pose": "land",
+          "ms": 300
+        },
+        {
+          "pose": "complete",
+          "ms": 400
+        },
+        {
+          "pose": "land",
+          "ms": 500
+        }
+      ]
+    },
+    "end": {
+      "loop": false,
+      "frames": [
+        {
+          "pose": "sleep",
+          "ms": 1200
+        }
+      ]
+    },
+    "think": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "think",
+          "ms": 800
+        },
+        {
+          "pose": "curious",
+          "ms": 500
+        }
+      ]
+    },
+    "work": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "work",
+          "ms": 400
+        },
+        {
+          "pose": "work_press",
+          "ms": 200
+        },
+        {
+          "pose": "work_release",
+          "ms": 200
+        },
+        {
+          "pose": "work_press",
+          "ms": 200
+        },
+        {
+          "pose": "work",
+          "ms": 500
+        }
+      ]
+    },
+    "parallel": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "work",
+          "ms": 300
+        },
+        {
+          "pose": "work_press",
+          "ms": 200
+        },
+        {
+          "pose": "work_release",
+          "ms": 200
+        },
+        {
+          "pose": "work_press",
+          "ms": 200
+        },
+        {
+          "pose": "work_release",
+          "ms": 200
+        },
+        {
+          "pose": "work",
+          "ms": 500
+        }
+      ]
+    },
+    "build": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "organize",
+          "ms": 300
+        },
+        {
+          "pose": "organize_place",
+          "ms": 400
+        },
+        {
+          "pose": "organize",
+          "ms": 300
+        },
+        {
+          "pose": "complete",
+          "ms": 400
+        },
+        {
+          "pose": "curious",
+          "ms": 500
+        }
+      ]
+    },
+    "error": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "focused",
+          "ms": 300
+        },
+        {
+          "pose": "startled",
+          "ms": 300
+        },
+        {
+          "pose": "sick",
+          "ms": 300
+        },
+        {
+          "pose": "focused",
+          "ms": 300
+        }
+      ]
+    },
+    "complete": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "complete",
+          "ms": 700
+        },
+        {
+          "pose": "happy",
+          "ms": 300
+        },
+        {
+          "pose": "curious",
+          "ms": 500
+        }
+      ]
+    },
+    "await_confirmation": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "ask",
+          "ms": 900
+        },
+        {
+          "pose": "curious",
+          "ms": 500
+        }
+      ]
+    },
+    "organize": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "organize",
+          "ms": 500
+        },
+        {
+          "pose": "organize_place",
+          "ms": 500
+        },
+        {
+          "pose": "organize",
+          "ms": 600
+        }
+      ]
+    },
+    "carry": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "carry",
+          "ms": 500
+        },
+        {
+          "pose": "carry_shift",
+          "ms": 500
+        },
+        {
+          "pose": "carry",
+          "ms": 600
+        }
+      ]
+    },
+    "wake": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "sleep",
+          "ms": 500
+        },
+        {
+          "pose": "blink_closed",
+          "ms": 100
+        },
+        {
+          "pose": "blink_half",
+          "ms": 100
+        },
+        {
+          "pose": "curious",
+          "ms": 700
+        },
+        {
+          "pose": "blink_half",
+          "ms": 100
+        },
+        {
+          "pose": "blink_closed",
+          "ms": 100
+        },
+        {
+          "pose": "sleep",
+          "ms": 500
+        }
+      ]
+    },
+    "poke_left": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "look_left",
+          "ms": 300
+        },
+        {
+          "pose": "startled",
+          "ms": 300
+        },
+        {
+          "pose": "curious",
+          "ms": 300
+        }
+      ]
+    },
+    "poke_right": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "look_right",
+          "ms": 300
+        },
+        {
+          "pose": "startled",
+          "ms": 300
+        },
+        {
+          "pose": "curious",
+          "ms": 300
+        }
+      ]
+    },
+    "tickle": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "complete",
+          "ms": 200
+        },
+        {
+          "pose": "happy",
+          "ms": 400
+        },
+        {
+          "pose": "shy",
+          "ms": 200
+        },
+        {
+          "pose": "curious",
+          "ms": 500
+        }
+      ]
+    },
+    "lift": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "land",
+          "ms": 300
+        },
+        {
+          "pose": "fly_mid",
+          "ms": 300
+        },
+        {
+          "pose": "fly_open",
+          "ms": 300
+        },
+        {
+          "pose": "fly_mid",
+          "ms": 300
+        },
+        {
+          "pose": "land",
+          "ms": 300
+        }
+      ]
+    },
+    "praise": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        },
+        {
+          "pose": "praise",
+          "ms": 700
+        },
+        {
+          "pose": "happy",
+          "ms": 300
+        },
+        {
+          "pose": "curious",
+          "ms": 500
+        }
+      ]
+    }
+  },
+  "expressions": {
+    "curious": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "curious",
+          "ms": 300
+        }
+      ]
+    },
+    "focused": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "focused",
+          "ms": 300
+        }
+      ]
+    },
+    "shy": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "shy",
+          "ms": 300
+        }
+      ]
+    },
+    "happy": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "happy",
+          "ms": 300
+        }
+      ]
+    },
+    "startled": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "startled",
+          "ms": 300
+        }
+      ]
+    },
+    "smug": {
+      "loop": true,
+      "frames": [
+        {
+          "pose": "smug",
+          "ms": 300
+        }
+      ]
+    }
+  }
+}

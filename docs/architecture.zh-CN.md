@@ -65,7 +65,7 @@ flowchart BT
 | `runtimes` | `kodama`、`kodama-wasm` | `core` |
 | `tools` | `kodama-schema` | `core` |
 
-`scripts/check/check-arch.mjs`（由 `make check-arch` 与 CI 的 Lint 作业运行）在以下情况失败：
+`scripts/check/check-arch.mts`（由 `make check-arch` 与 CI 的 Lint 作业运行）在以下情况失败：
 
 - crate 不在 `crates/<它的层>/<它的名字>`，或新增 crate 没有登记；
 - crate 依赖了上表不允许的层，或依赖了自己白名单之外的 workspace crate；
@@ -74,7 +74,7 @@ flowchart BT
 
 同一目标随后在 `thumbv7em-none-eabihf`（没有标准库的目标）上编译核心层。悄悄引入 `std` 的依赖在原生与 `wasm32-unknown-unknown` 上都能编译通过，在这里会失败。
 
-新增 crate 或依赖边时，在同一个 PR 里修改 `scripts/check/check-arch.mjs` 与本文。
+新增 crate 或依赖边时，在同一个 PR 里修改 `scripts/check/check-arch.mts` 与本文。
 
 ### crate 内部
 
@@ -107,6 +107,7 @@ crates/service/kodama-service/src/
 
 ```
 kodama/
+├── .agents/skills/<技能>/    可复用的智能体工作流，每项以 SKILL.md 为入口
 ├── crates/<层>/<crate>/      Rust，按层分组（见上文）
 ├── packages/<包>/            npm 包：kodama-sdk 即 @violetjs/kodama
 ├── assets/                   美术及其记录：目前是 catalog/species.json
@@ -118,8 +119,8 @@ kodama/
 │   ├── consumers/<名称>/     在仓库外使用安装后的产物；每个都有 run.sh
 │   └── bench/
 ├── scripts/
-│   ├── dev/                  本地开发：dev.mjs、with-postgres.sh
-│   ├── check/                仓库检查：check-arch.mjs、version.mjs
+│   ├── dev/                  本地开发：dev.mts、with-postgres.sh
+│   ├── check/                仓库检查：check-arch.mts、version.mts
 │   └── release/              打包与发布
 ├── docker/                   dev.Dockerfile、service.Dockerfile（各带自己的 .dockerignore）、compose.yaml
 ├── docs/
@@ -187,6 +188,8 @@ CAPABILITIES（kodama-core::caps）───────────────
 ```
 
 生成的文件随仓库提交。`make schema` 重新生成；`make schema-check`（CI 的 Core 作业）在生成物过期时失败，用 schema 校验真实响应，并编译正反两组类型测试。新增命令必须在 `CAPABILITIES` 登记，否则测试失败。
+
+先运行 `make three-end`，生成 `target/out-native.txt` 及其配套的 `target/ops-native.json`。schema 校验根据执行时记录的真实操作逐行选择响应类型；新增场景不需要另行维护操作数量或顺序列表。
 
 编码规则：64 位整数编码为十进制字符串（JavaScript 的 number 超过 2^53 会失去精度）；每个响应都是 `{ok:true,value}` 或 `{ok:false,code,message}`，调用方按 `code` 分支。
 

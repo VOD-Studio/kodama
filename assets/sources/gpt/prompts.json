@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "tool": "built-in image_gen.imagegen",
+  "character_reference": "assets/preview/companions/studies/gpt/gpt-adult.png",
+  "interpretation": "Community white-dragon interpretation adapted for Kodama, not an official OpenAI mascot.",
+  "source_notes": "Source atlases are AI-generated raster key poses on chroma green, not native-resolution hand-pixelled animation. Expression atlas background was corrected from an intermediate generation. The bottom-middle motion cell is rejected because it mirrors character identity; look-right-chroma.png replaces it.",
+  "prompts": [
+    {
+      "file": "expressions-chroma.png",
+      "prompt": "Edit this production sprite atlas. KEEP the six white/lavender dragon-girl sprites, pixel colors, outfits, facial expressions, pose and exact 3-column 2-row arrangement. Change ONLY the entire background and spaces between/inside silhouettes to one absolutely FLAT SOLID CHROMA GREEN RGB(0,255,0), hex #00FF00. Remove all gray/purple halos, gradients and background shading completely, including in the gaps between wings/hair/tail and behind each character. Do not tint the opaque white/purple character pixels green. Clean hard cutout outline.\nFor build tooling the final asset will be color-keyed, so this request intentionally uses an OPAQUE PURE GREEN background rather than transparency. There must be no checkerboard, no shadows, no glow, no text and no other colors anywhere outside the character silhouettes. Keep all six figures the same size, no missing parts, and give each square cell enough pure-green safety margin so no character touches a cell boundary. Output a regular 3x2 atlas with six square cells, 1536x1024.",
+      "names": [
+        "curious",
+        "focused",
+        "shy",
+        "happy",
+        "startled",
+        "smug"
+      ],
+      "accepted_poses": [
+        "curious",
+        "focused",
+        "shy",
+        "happy",
+        "startled",
+        "smug"
+      ]
+    },
+    {
+      "file": "rest-chroma.png",
+      "prompt": "Create a second PRODUCTION PIXEL SPRITE ATLAS of the EXACT SAME GPT white dragon girl as reference image 1 (the green 3x2 expression atlas). Reference image 2 is her original full-body identity; reference 3 is the whale-girl native pixel-art craft benchmark only.\nUse the IDENTICAL compact seated body scale, horn shape, lavender eyes, side hairpin, silver-white curved hair locks, robe/dress folds, small white wings and ONE white scaled curled tail. Do not change hair color, outfit design, facing direction or identity between cells. The whole character is redrawn with ACTUAL HAND/ARM/FACE POSTURES for each state, not badges or speech bubbles.\nMANDATORY layout: a horizontal 3 equal columns × 2 equal rows, SIX sprites, 1536x1024 with square512 cells. Each cell represents a low-resolution64x64 logical sprite at8x integer display. Match reference1 character size closely, preserve enough PURE GREEN safety margins in each cell, no clipping, no crossing cell boundaries, no labels or dividers.\nExactly these six poses read left-to-right then top-to-bottom:\n1 SLEEP: closed relaxed eyes, tiny peaceful closed mouth, head gently lowered toward hands together near cheek, shoulders resting, wings tucked close. Full body still visible.\n2 BLINK HALF: original neutral gathered-hands seated body, eyelids halfway down on BOTH eyes; keep face, body, head and tail aligned exactly to neutral sprite.\n3 BLINK CLOSED: original neutral gathered-hands seated body, BOTH eyes closed with simple flat relaxed eyelids, tiny neutral mouth, NOT a happy laughing face. Same alignment.\n4 THINK: one small hand touches the chin, the other hand supports the folded sleeve below it, eyes directed slightly upward, head slightly tilted, visible connected arms.\n5 WORK: the two actual hands rest apart on a compact gray/lavender KEYBOARD positioned naturally on her lap, elbows and hanging sleeves connected, head and gaze look down in concentration. Make a clear silhouette of forearms and typing hands; no floating keyboard and no code badges.\n6 CARRY: both hands support the underside of a small warm-brown box at waist/lap height, elbows drawn forward and shoulders slightly gathered for the weight, box never covers face or head ornaments. The body visibly responds to holding the box, not the neutral pose with a pasted box.\nNative pixel craft: crisp deliberate chunky square clusters throughout, selective dark plum 1-logical-pixel stepped outlines, flat ivory/lavender ramps with a few peach skin and brown box colors, around48-64 RGB colors, readable expressive18x14px face, eyes5x4px, clear tiny hands against white sleeves. No high-resolution thin hair strokes, gradients, smooth illustration, geometric programmer avatar or straight comb-like hair strips.\nBACKGROUND MUST BE ONE PERFECTLY FLAT OPAQUE PURE CHROMA GREEN #00FF00 RGB(0,255,0), including all gaps inside silhouettes. No green appears on the actual character/props. NO gray/purple glow, no shadows, no gradient, no text/numbers, no effects, no checkerboard. Six whole sprites only.",
+      "names": [
+        "sleep",
+        "blink_half",
+        "blink_closed",
+        "think",
+        "work",
+        "carry"
+      ],
+      "accepted_poses": [
+        "sleep",
+        "blink_half",
+        "blink_closed",
+        "think",
+        "work",
+        "carry"
+      ]
+    },
+    {
+      "file": "tasks-chroma.png",
+      "prompt": "Create a third matching PRODUCTION PIXEL SPRITE ATLAS for the exact GPT white dragon girl in reference images 1 and 2. Reference3 is the original design identity. This is a new sheet of genuine BODY/HAND key poses, not pasted emoji overlays.\nKeep the same silver-white seated chibi, lavender eyes, horns, asymmetric long hair and side knot/tassel pin, white robe with silver ornaments, white wings and ONE white scaled tail. Same native64x64 character scale and three-quarter facing direction. Reuse clothing design and face identity exactly, but redraw the arms/hands/face and upper-body response for each pose.\nLayout exactly 3 equal columns x2 equal rows on1536x1024, six square512px cells, true64x64 native pixel clusters at8x integer enlargement, all full figures with safety margins, no labels or cell borders.\nThe SIX poses are, left-to-right then top-to-bottom:\n1 EAT: both small hands bring a small golden pastry to the mouth, head leans forward slightly, a tiny satisfied chewing expression; pastry never hides both eyes. Hands connect to the actual sleeves.\n2 PLAY: one actual hand holds a small lavender ball near the lap, the other hand reaches to tap it, alert amused eyes, shoulders respond and tail curls playfully. Ball touches palm; no floating ball.\n3 COMPLETE: BOTH actual arms raised outward in a little happy celebration, sleeves hanging naturally, smiling closed eyes, shoulders lifted and wings slightly raised in response; show body joy without stars/checkmarks.\n4 PRAISE: one real arm comes forward with a readable tiny THUMBS-UP hand, the other hand near chest, a warm confident smile and small nod of head. No floating hand icon.\n5 ASK / AWAIT CONFIRMATION: one real arm extends an open small palm toward the viewer, the other hand holds its sleeve near chest, curious polite gaze, gently tilted head. No question bubble.\n6 ORGANIZE: both real hands hold and straighten a small stack of three gray/lavender cards on the lap, concentrated downward gaze, elbows and sleeves bent naturally; no stack floating beside the head.\nUse exquisite but deliberately chunky low-res anime game pixel art with flat48-64 color ramps and selective dark plum stepped outlines, readable18x14px face, clear tiny peach hands against white fabric. No fine high-res painting, gradients, geometric programmer sprites, straight stripe hair or blocky blank eyes. Match first sheets' horn/head scale and feet baseline so these work as actual animation poses of the SAME character.\nPURE FLAT OPAQUE CHROMA GREEN #00FF00 RGB(0,255,0) behind and inside all gaps; no green in figure or props. No halos, shadows, glow, labels, text, numbers, badges, emoji or particles. Exactly six figures, fully visible, no crossings between cells.",
+      "names": [
+        "eat",
+        "play",
+        "complete",
+        "praise",
+        "ask",
+        "organize"
+      ],
+      "accepted_poses": [
+        "eat",
+        "play",
+        "complete",
+        "praise",
+        "ask",
+        "organize"
+      ]
+    },
+    {
+      "file": "motion-chroma.png",
+      "prompt": "Draw a fourth matching PRODUCTION PIXEL SPRITE ATLAS of the exact GPT white dragon girl from references 1 and2; reference3 is her original identity. Same compact chibi body size, lavender eyes, ivory segmented horns, long curved silver-white hair, right-side silver knot/tassel ornament, white robe, white dragon wings and ONE curled scaled tail. Redraw the actual head/body/wing posture per pose; do not use icons, badges or whole-image shifting as a substitute.\nLayout: horizontal1536x1024, exactly THREE columns and TWO rows of equal square512px cells. Six full figures, native64x64 logical sprite craft shown at8x enlargement. Use same head size, character scale and base anchor as the earlier sheets. Keep a clear PURE GREEN safety margin on every side of each cell; do not shrink individual characters to make large wings fit. Wings spread UPWARD compactly instead of far sideways.\nSIX cells in order left-to-right then top-to-bottom:\n1 FLY OPEN: a compact gentle hovering pose, both wings raised and clearly opened upward, forearms slightly outward for balance, seated robe gathered below, hair tips and curled tail falling a little in response. Face alert, no detached body parts.\n2 FLY MID: same hovering body, head and scale aligned to cell1, wings at a clearly different halfway DOWN stroke, forearms still balancing; a genuine second wing drawing for a flapping animation.\n3 LAND: knees/body settle slightly lower in the robe, shoulders tucked and wings nearly folded, both hands lightly rest near knees, hair and tail catching up with the landing. An actual compact recovery posture, not a flattened sprite.\n4 LOOK LEFT: remain in the ordinary seated gathered-hands rest pose, turn head and gaze slightly further toward the VIEWER'S LEFT with corresponding hair/ear perspective. Original ornament remains on its established side; do not horizontally mirror the character.\n5 LOOK RIGHT: same seated body/base scale, turn head and gaze toward the VIEWER'S RIGHT and redraw facial perspective correctly. Keep the same asymmetric fringe and original right-side ornament, no mirror-copy.\n6 SICK: one real hand gently touches forehead and the other rests against the upper stomach, shoulders slumped and tired eyes half-closed, hair drapes naturally around lowered head. No sweat icon, head halo or floating symbol: the body must convey being unwell.\nFine low-res game pixel art: coherent chunky square clusters, strong selective dark plum stepped outlines, flat48-64 ivory/lavender/peach color ramps, readable face and actual arms/sleeves. No geometric programmer drawing, fine high-resolution painting, fuzzy gradients or comb-like hair stripes. Silhouettes of wings, hair and tail clearly separate.\nBackground MUST be PERFECTLY FLAT PURE CHROMA GREEN #00FF00 RGB(0,255,0), including gaps in figures. No green on character, no glow, shadow, gradient, text, labels, borders, extra figures or particles.",
+      "names": [
+        "fly_open",
+        "fly_mid",
+        "land",
+        "look_left",
+        "look_right",
+        "sick"
+      ],
+      "accepted_poses": [
+        "fly_open",
+        "fly_mid",
+        "land",
+        "look_left",
+        "sick"
+      ]
+    },
+    {
+      "file": "followthrough-chroma.png",
+      "prompt": "Create a FIFTH matching production pixel sprite atlas for the exact silver-white GPT dragon girl in the references. This sheet provides FOLLOW-THROUGH poses for real sprite animation, so closely LOCK the character's face, horn/head/body size, original seated three-quarter orientation, right-side knot/tassel hairpin, white robe folds, white wings, ONE curled white tail and source-key-frame object placement. Do not redesign any clothes or mirror the character.\nMANDATORY:1536x1024 horizontal, THREE equal columns by TWO equal rows, SIX full-body sprites in square512px cells,64x64 logical native pixel craft enlarged8x, pure green safety margins, no clipped/crossed figures, no labels.\nSix cells left-to-right then top-to-bottom:\n1 WORK PRESS: use the work pose from image1 bottom-middle. Same gray/lavender keyboard across lap at EXACT same position, same downward concentrated face. Both wrists connect clearly to sleeves. The near hand's small fingers press DOWN onto the keys; the far hand rests lightly on the opposite key area. Make peach fingertips and darker keyboard edge distinct.\n2 WORK RELEASE: same character/keyboard/head EXACTLY aligned to cell1, but near fingertips lifted slightly above the keys and far fingers press down, a genuine subtle second typing drawing. Do not move the whole character or keyboard, and never separate hands from wrists.\n3 CARRY SHIFT: use the box-carry pose from image1 bottom-right, same box size and position at lap/waist. Both palms now curl visibly UNDER the bottom corners to support the box, forearms gathered inward and shoulders lean slightly with the weight; fingers must be visibly skin color against warm brown box. Full face clear.\n4 EAT BITE: use the pastry pose from image2 top-left. Same small golden pastry and matching arm position, one bite missing from pastry edge, mouth closed chewing with softly pleased eyes, hands still contacting pastry. No floating crumbs or emoji.\n5 PLAY TAP: use the lavender ball pose from image2 top-middle. Ball remains supported by one palm at the same lap position; other real hand now taps the ball slightly from the opposite side, elbow and sleeve follow through, happy curious face. No detached hands.\n6 ORGANIZE PLACE: use the three-card pose from image2 bottom-right. One hand supports the little gray-lavender stack on lap while the other places ONE card neatly onto the top, a clear actual hand/object interaction. Head looks down thoughtfully, connected forearms and sleeves.\nRefined native anime game pixel art with chunky flat square clusters, dark plum selective stepped1px outlines, about64 colors, expressive18x14px face and readable5x4px eyes. NO high-res mini-painting or fuzzy downscale style, no linear stripe hair, no geometric box person. Improve visibility of tiny hands: clean peach palm/fingers separated from white sleeve by one dark lilac pixel boundary.\nBackground MUST be uniformly opaque CHROMA GREEN #00FF00 RGB0,255,0 including every empty gap. No green on actual figure or objects, no gradient/halo/shadow/floor, no text, badges, particles, borders or additional sprites.",
+      "names": [
+        "work_press",
+        "work_release",
+        "carry_shift",
+        "eat_bite",
+        "play_tap",
+        "organize_place"
+      ],
+      "accepted_poses": [
+        "work_press",
+        "work_release",
+        "carry_shift",
+        "eat_bite",
+        "play_tap",
+        "organize_place"
+      ]
+    },
+    {
+      "file": "look-right-chroma.png",
+      "prompt": "Create ONE single full-body pixel-art sprite on a flat pure #00FF00 chroma green background. No grid, no text. This is an exact same-character additional pose for the silver-white chibi dragon girl in the reference atlas. MATCH the first top-left seated girl, including white robe, huge white flowing hair, two white horns, lavender eyes, lilac wings, white curled dragon tail on VIEWER RIGHT, silver interlocking knot ornament and dangling tassel on VIEWER RIGHT. Whole body seated, robe at bottom, horns with margin at top. Pose: ONLY the pupils look toward VIEWER RIGHT. Keep her head facing forward, torso forward, hands clasped at chest. Do not turn the body and do not mirror anything: the single knot hairpin stays on VIEWER RIGHT, the big curled scaled tail stays on VIEWER RIGHT. This is an eye glance, not a profile pose. Dark crisp pixel outline, organized clusters, larger legible irises and separated eyelids, fewer hair highlight flecks. Same softly shaded white/lilac palette. Fill a square 1024x1024 image with the whole sprite proportional to a single square cell of the reference sheet. No glow, no shadow, no floor, no gradients on the background, no lettering.",
+      "names": [
+        "look_right"
+      ],
+      "accepted_poses": [
+        "look_right"
+      ]
+    }
+  ]
+}

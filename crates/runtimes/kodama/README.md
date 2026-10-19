@@ -56,10 +56,11 @@ kodama --version                # release version and rules version
 
 | Condition | Behavior |
 |---|---|
-| UTF-8 locale, 256 colours and at least 11 rows | Half-block pixel art: the same evolved forms and animations as the web, two pixels per character cell |
+| UTF-8 locale, at least 256 colours and 11 rows | Half-block pixel art from the same sprite grid as the web, two pixels per character cell; a small region crops without scaling |
 | Output is not a terminal | `live` prints one JSON status line and exits, with no escape codes |
 | `NO_COLOR` is set, or `TERM` is `dumb` or empty | No colors |
-| `COLORTERM=truecolor` or a `256color` `TERM` | 256 colors; otherwise the 16-color palette and character art |
+| `COLORTERM=truecolor`/`24bit`, or a `direct`/`truecolor` `TERM` | Original 24-bit RGB, labelled `RGB pixels` |
+| A `256color` `TERM` without truecolor | Same pixel grid with reduced colours, labelled `256-color fallback`; otherwise the 16-color palette and character art |
 | Locale is not UTF-8 | ASCII only |
 | Terminal is resized | The frame follows the new size; very small terminals do not crash |
 

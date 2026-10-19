@@ -8,6 +8,7 @@ use alloc::vec::Vec;
 use serde::{Deserialize, Serialize};
 
 mod blocks;
+pub mod companions;
 pub mod form;
 pub mod outfit;
 mod pixel;
@@ -66,7 +67,7 @@ pub enum Charset {
     Ascii,
     Unicode,
     /// 半格像素画：每个字符格显示上下两个像素（上半格前景色、下半格背景色），与 `sprite` 是同一套外形与动作。
-    /// 需要 UTF-8 与 256 色；高度不小于 10 行时完整显示幼体，约 20 行显示带翅膀的成年形态。
+    /// UTF-8 真彩色终端保留原 RGB；256 色终端按同一网格降色。区域不足时按 `sprite` 同样的规则裁切。
     Blocks,
 }
 
@@ -95,6 +96,9 @@ pub struct FrameInput {
     /// 出生稀有度 0–4；只有 `blocks` 画风画出光效。
     #[serde(default)]
     pub rarity: u8,
+    /// 可选的 AI 伙伴外观；仅影响呈现，不参与出生与养成规则。
+    #[serde(default)]
+    pub companion: Option<companions::CompanionAppearance>,
 }
 
 #[derive(Serialize)]
@@ -107,6 +111,13 @@ pub struct Frame {
     pub colors: Vec<Vec<u8>>,
     /// 与 rows 逐字符对应的背景 256 色索引；0 表示不设背景。只有 `blocks` 画风使用。
     pub bg: Vec<Vec<u8>>,
+    /// `blocks` 每格前景的原始 RGB，null 表示透明/默认色；真彩色输出应优先使用此网格。
+    /// 字符画省略此字段，旧消费方仍可使用 `colors`。
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub fg_rgb: Vec<Vec<Option<[u8; 3]>>>,
+    /// `blocks` 每格背景的原始 RGB，null 表示透明/默认色；字符画省略。
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub bg_rgb: Vec<Vec<Option<[u8; 3]>>>,
 }
 
 mod u64_string {
@@ -233,6 +244,9 @@ pub fn render(i: &FrameInput) -> Frame {
     if i.charset == Charset::Blocks {
         return blocks::render(i);
     }
+    if let Some(appearance) = &i.companion {
+        return companion_label(i, appearance);
+    }
     let (w, h) = (i.w.max(1), i.h.max(1));
     let mut cells: Vec<Vec<(char, u8)>> =
         (0..h).map(|_| (0..w).map(|_| (' ', 0)).collect()).collect();
@@ -299,5 +313,41 @@ pub fn render(i: &FrameInput) -> Frame {
             .iter()
             .map(|r| r.iter().map(|_| 0).collect())
             .collect(),
+        fg_rgb: Vec::new(),
+        bg_rgb: Vec::new(),
+    }
+}
+
+use companions::is_ready;
+
+fn companion_label(i: &FrameInput, appearance: &companions::CompanionAppearance) -> Frame {
+    let (w, h) = (i.w.max(1), i.h.max(1));
+    let action = match i.pose {
+        Pose::End | Pose::Sick | Pose::Evolve | Pose::Sleep => {
+            companions::CompanionAction::from_pose(i.pose)
+        }
+        _ => appearance
+            .action
+            .unwrap_or_else(|| companions::CompanionAction::from_pose(i.pose)),
+    };
+    let mut rows: Vec<String> = (0..h).map(|_| " ".repeat(w as usize)).collect();
+    let labels = if is_ready(appearance, i.stage, &i.lineage) {
+        [appearance.character.display_name(), action.name()]
+    } else {
+        ["", ""]
+    };
+    for (y, label) in labels.iter().enumerate().take(h as usize) {
+        rows[y] = label.chars().take(w as usize).collect();
+        let padding = w as usize - rows[y].len();
+        rows[y].extend(core::iter::repeat_n(' ', padding));
+    }
+    Frame {
+        w,
+        h,
+        rows,
+        colors: (0..h).map(|_| alloc::vec![0; w as usize]).collect(),
+        bg: (0..h).map(|_| alloc::vec![0; w as usize]).collect(),
+        fg_rgb: Vec::new(),
+        bg_rgb: Vec::new(),
     }
 }

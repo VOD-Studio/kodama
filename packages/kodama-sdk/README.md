@@ -108,7 +108,23 @@ pet.dispose();
 - Never reads or writes storage: pass the projection in, and replace it with `setPet()`. `dispose()` stops the clock, removes listeners and restores the canvas.
 - The import has no side effects and is safe during SSR; call `mountPet` on the client.
 
-A canvas of at least 56×36 logical pixels (the default is 96×40) never clips a form; the extra width is room to walk.
+A canvas of at least 56×36 logical pixels (the default is 96×40) never clips an original species form; the extra width is room to walk.
+
+Pass an optional `companion` to render an AI companion instead. Its default canvas is 96×96; `setPet()` adjusts the default height when switching between companions and original species. An explicit `width` or `height` is retained.
+
+```js
+const companion = mountPet(document.querySelector("canvas"), {
+  pet: { species: born.value.species, genes: born.value.genes, stage: 2, companion: { character: "deepseek" } },
+  label: "DeepSeek",
+});
+companion.setAction("think");
+companion.setAction(); // restore the action selected by pose
+companion.setExpression("curious");
+companion.setExpression();
+companion.dispose();
+```
+
+`deepseek` has artwork for all three stages: the original Deepy whale for baby and young, and the selected whale-girl frames for the adult stage (the young stage currently shares Deepy). `gpt` has only its adult stage (69×66 raster key poses arranged into 26 action sequences and six held expressions); its baby and young have concept studies but no runtime artwork. The other five enum values (`claude`, `grok`, `glm`, `kimi`, `gemini`) reserve identities for future artwork. Raw `sprite` and `frame` requests for a reserved character or stage return `{ ok: false, code: "bad_input", message: "<character> artwork not ready" }`. Rejected drafts are excluded from compilation and rendering. `setAction()` and `setExpression()` only change presentation; they do not change the supplied projection, birth identity, rarity or care state. The `sick`, `evolve`, `end` and `sleep` poses take precedence over companion actions.
 
 ## Local mode
 
@@ -156,7 +172,9 @@ const pet = mountTerminalPet({
 pet.dispose(); // stops drawing and clears the region
 ```
 
-With `charset: "blocks"` (and the pet's `lineage`), the pet is drawn as half-block pixel art in its evolved form, which needs a 256-colour terminal; `"ascii"` and `"unicode"` draw small character art. The pet draws only inside `region`, using save and restore cursor plus absolute positioning. It never reads stdin, switches to the alternate screen, hides the cursor or changes terminal modes, and it does nothing when the stream is not a TTY. Your tool keeps its own output out of the region, for example with a scroll region, and calls `dispose()` before it exits.
+With `charset: "blocks"` (and the pet's `lineage`), the pet is drawn as half-block pixel art. Truecolor terminals receive the original 24-bit sprite RGB; 256-colour output is a colour-reduced fallback on the same pixel grid. `colorMode` defaults to `"auto"` using `TERM`/`COLORTERM`, or can be `"truecolor"`, `"256"`, `"16"` or `"none"`; `NO_COLOR` always disables colour. With only 16 colours or no colour, `blocks` falls back to character art. The pet draws only inside `region`, using save and restore cursor plus absolute positioning. It never reads stdin, switches to the alternate screen, hides the cursor or changes terminal modes, and it does nothing when the stream is not a TTY. Your tool keeps its own output out of the region, for example with a scroll region, and calls `dispose()` before it exits.
+
+Terminal pets also accept `pet.companion`, with optional `getAction` and `getExpression` callbacks evaluated each frame. `blocks` uses the same companion pixels as the web canvas; the other charsets show the character name and current action as ASCII labels. At the same tick, a `w` × `h` block frame represents the exact `w` × `2h` sprite grid; `fg_rgb`/`bg_rgb` carry original RGB (or `null` for transparent/default cells), while `colors`/`bg` retain the legacy 256-colour indices. A 69-column × 33-row region shows a 69×66 sprite at one times scale; smaller regions crop using the same sprite rules, without enlarging the character. The shared sprite renderer resolves source alpha before both outputs, so terminal and canvas use identical visible samples.
 
 For a standalone terminal pet, use the native [`kodama`](https://github.com/VOD-Studio/kodama/blob/main/crates/runtimes/kodama/README.md) instead.
 

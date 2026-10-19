@@ -108,7 +108,23 @@ pet.dispose();
 - 不读写任何存储：投影由调用方传入，用 `setPet()` 替换。`dispose()` 停止时钟、移除监听并恢复 canvas。
 - 导入没有副作用，SSR 期间安全；在客户端调用 `mountPet`。
 
-逻辑画布不小于 56×36 时任何外形都不会被裁切（缺省 96×40），多出的宽度用来走动。
+原有物种的逻辑画布不小于 56×36 时任何外形都不会被裁切（缺省 96×40），多出的宽度用来走动。
+
+传入可选的 `companion` 即可改为 AI 伙伴外观，缺省画布为 96×96。`setPet()` 在伙伴与原有物种之间切换时会调整缺省高度；显式设置的 `width`、`height` 会保留。
+
+```js
+const companion = mountPet(document.querySelector("canvas"), {
+  pet: { species: born.value.species, genes: born.value.genes, stage: 2, companion: { character: "deepseek" } },
+  label: "DeepSeek",
+});
+companion.setAction("think");
+companion.setAction(); // 恢复由 pose 决定的动作
+companion.setExpression("curious");
+companion.setExpression();
+companion.dispose();
+```
+
+`deepseek` 三个阶段都有美术：幼体和少年使用原版 Deepy 小鲸鱼，终阶使用选定的鲸娘原帧；少年目前与幼体共用 Deepy。`gpt` 目前只有成年阶段（69×66 栅格姿势组成的 26 个动作序列、六种固定表情），幼年和少年已有造型稿，运行帧尚未完成。其余五个枚举值（`claude`、`grok`、`glm`、`kimi`、`gemini`）仅预留角色身份。对预留的角色或阶段，原始 `sprite`、`frame` 请求会返回 `{ ok: false, code: "bad_input", message: "<character> artwork not ready" }`。已否决草稿不参与编译和渲染。`setAction()` 与 `setExpression()` 只修改呈现，不改写传入的投影、出生身份、稀有度或养成状态。`sick`、`evolve`、`end`、`sleep` 姿态优先于伙伴动作。
 
 ## 本地模式
 
@@ -156,7 +172,9 @@ const pet = mountTerminalPet({
 pet.dispose(); // 停止绘制并清空区域
 ```
 
-`charset: "blocks"`（并传入宠物的 `lineage`）时以半格像素画绘制进化后的外形，需要 256 色终端；`"ascii"` 与 `"unicode"` 绘制小尺寸的字符画。宠物只在 `region` 内绘制，只用保存/恢复光标与绝对定位；不读取 stdin、不进入备用屏、不隐藏光标、不修改终端模式，输出不是 TTY 时什么都不做。宿主负责让自己的输出避开该区域（例如设置滚动区域），并在退出前调用 `dispose()`。
+`charset: "blocks"`（并传入宠物的 `lineage`）时以半格像素画绘制外形。真彩色终端输出素材原始的 24 位 RGB；256 色是在相同像素网格上的降色回退。`colorMode` 默认 `"auto"`，根据 `TERM`/`COLORTERM` 判断，也可指定 `"truecolor"`、`"256"`、`"16"` 或 `"none"`；`NO_COLOR` 始终优先关闭颜色。仅 16 色或无颜色时，`blocks` 降级为字符画。宠物只在 `region` 内绘制，只用保存/恢复光标与绝对定位；不读取 stdin、不进入备用屏、不隐藏光标、不修改终端模式，输出不是 TTY 时什么都不做。宿主负责让自己的输出避开该区域（例如设置滚动区域），并在退出前调用 `dispose()`。
+
+终端也接受 `pet.companion`，可以通过逐帧调用的 `getAction`、`getExpression` 覆盖动作与表情。`blocks` 与网页画布使用同一套伙伴像素，其他字符集降级为角色名称与当前动作的 ASCII 标签。同一时刻的 `w` 列 × `h` 行半格帧对应 `w` × `2h` 的原始像素网格；`fg_rgb`/`bg_rgb` 保存原始 RGB（`null` 为透明/默认色），`colors`/`bg` 保留兼容的 256 色索引。69 列 × 33 行可按一倍尺寸展示 69×66 素材；更小区域按同一套像素规则裁剪，不放大角色。源素材的透明度由共享像素渲染器提前处理，终端与画布取得相同的可见采样。
 
 需要独立运行的终端宠物时，请改用原生的 [`kodama`](https://github.com/VOD-Studio/kodama/blob/main/crates/runtimes/kodama/README.zh-CN.md)。
 

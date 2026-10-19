@@ -27,6 +27,7 @@
   "sideEffects": false,
   "files": [
     "LICENSE",
+    "ASSET_NOTICES.md",
     "dist",
     "docs",
     "schema"
@@ -58,7 +59,9 @@
     "./wasm": "./dist/kodama_wasm_bg.wasm"
   },
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "build": "./build.sh",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/*.test.ts"
   },
   "engines": {
     "node": ">=22"
@@ -67,6 +70,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@types/node": "^22",
     "ajv": "^8",
     "fake-indexeddb": "^6",
     "json-schema-to-typescript": "^16",

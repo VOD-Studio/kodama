@@ -1,0 +1,60 @@
+GLM 三阶造型稿：完整提示词
+制作方式：内置 image_gen，transparent_background=true。
+只生成静态设计图，不修改代码，不接入运行素材。
+
+GLM · 幼年
+选定图片：glm-baby.png
+参考图片：
+- /tmp/kodama-community-refs/glm.webp
+- assets/preview/companions/studies/gpt/gpt-baby.png
+- /tmp/kodama-deepseek-frames/idle.png
+
+Use case: stylized-concept. Asset type: one standalone character growth-stage DESIGN STUDY for the Kodama rare AI pet series, not an animation, app screen or contact sheet.
+Reference 1 establishes THIS character's community identity, colors, identifying ornaments and garment language. Adapt this identity carefully; it is not a generic anime child. The GPT reference is STYLE ONLY: match its carefully drawn adorable chibi face, compact silhouette, rich but readable folds and white/colored pixel clusters. Do not import GPT horns, dragon anatomy, white hair or silver knots into unrelated characters. The whale-girl strip is a second STYLE/CRAFT benchmark only, do not copy the whale anatomy or blue-haired design.
+Visual medium: refined contemporary anime game PIXEL ART, deliberately coherent low-resolution flat square clusters enlarged at integer scale, crisp dark selectively colored stepped outlines, readable highlights and shadow ramps, carefully grouped hair/fur and fabric folds. Aim for about 80x80 logical sprite detail with roughly 48-64 selected colors and an appealing meticulously drawn face. No smooth vector art, soft airbrush painting, gradients, 3D plush texture, primitive geometric placeholder art, fine noisy hair strands or fake pixel filter. Make the character highly recognizable with the finish and density of the GPT design reference, using THIS character's own palette.
+Composition: exactly ONE full-body character centered, compact three-quarter view facing slightly to the viewer's left, all limbs and identifying appendages visible and connected correctly, generous transparent margins. A charming natural authored pose, not a stiff mannequin.
+Background: genuinely transparent. No floor, cast shadow, glow, particle effects, fake checkerboard, frame, labels, watermarks, written explanations, other stages, repeated views or extra characters. Any explicitly requested single-letter ornament is part of the character, not a label.
+Growth invariants: animal first stages must have a complete animal head/muzzle/body rather than a human face in an animal suit. Human first stages stay human and never gain an invented animal lineage. Juveniles must have visibly different proportions, hair length and simplified garment construction from the long-haired adults; do not merely scale down an adult. All youthful designs are innocent, fully modest and child-proportioned, with no adult torso, revealing cut-outs, tall heels or glamour posing.
+
+Input map: image 1 adult GLM fox-girl IDENTITY ONLY; image 2 GPT baby dragon STYLE/animal-chibi proportions ONLY, do NOT copy its horns, wings, scales, white color or dragon anatomy; image 3 whale pixel-craft only. Render ONLY the black baby fox.
+Design a complete ANIMAL baby BLACK FOX, the first stage of the chosen community GLM fox-eared girl. It must unmistakably be a FOX, not a cat or a human-faced sphinx: pointed slender short fox muzzle with tiny black nose, triangular fox cheeks, two very large upright black fox ears with cool white inner fur, complete four-pawed compact fox body and ONE long bushy black tail with a broad clearly WHITE TIP, curling around the paws. No human face, human haircut, dress, human hands or humanoid limbs. Oversized but gently half-lidded cool gray-blue eyes give a sleepy clever expression; black fur is shaded with charcoal, muted navy and blue-gray so details remain readable. A few white chest tufts and little gray paws. The adult's black ruffled sleep mask is miniaturized and pushed up ON TOP of the fox forehead between the ears, embroidered with two closed-eye marks, not covering the actual eyes; a narrow navy ribbon collar has one small silver diamond clasp with a simple white Z-shaped mark. No written words. Seated slightly curled into its tail, forepaws together and both hind paws visibly accounted for, sleepy sweet expression. Keep the white tail tip big and distinct, and the fox muzzle clear.
+
+
+----------------------------------------
+
+GLM · 少年
+选定图片：glm-young-v3.png
+参考图片：
+- assets/preview/companions/studies/glm/glm-adult.png
+- assets/preview/companions/studies/glm/glm-baby.png
+- assets/preview/companions/studies/gpt/gpt-young.png
+
+Use case: stylized-concept, character growth-stage adaptation. Image 1 is the clean ADULT GLM fox girl; image 2 is her ANIMAL baby; image 3 is juvenile body proportion / pixel-art style only, NOT dragon identity.
+Create ONE JUVENILE GLM fox-girl between images 1 and 2. Keep the adult's appealing sleepy gray-blue eyes, black/navy hair palette, black FOX ears with white inner fur, black ruffled sleep mask pushed up on forehead with white closed-eye marks, ONE black fox tail with a broad white tip, silver diamond-and-Z motifs, black book, cream-and-black garment identity and crisp refined pixel clusters.
+Essential age changes: cut the hair into a SHORT chin-to-shoulder-length black bob, absolutely no long locks behind the body. Shorter childlike bipedal proportions about 2.2 heads tall, rounder younger face and tiny soft hands, flat youthful torso. Reduce the adult costume into a knee-length cream blouse/black pinafore/white apron with just two ruffle layers, navy ribbons and one diamond clasp; fewer ornaments, no dangling bells, elaborate chains or long skirt panels. A small black book rests against the waist under one hand; the other small hand touches the collar gently. Two little dark FOX PAW FEET peek below black stockings instead of adult lace-up boots, clear digit pads/claws in low-res clusters. Pose is upright, relaxed and compact. Same ears, sleep mask, tail tip and book as the original evolution family; no human ears, extra tails, dragon horns, wings or cat stripes.
+Match image 1's clean crisp transparent cutout, flat pixel clusters and readable limited black/white/navy/gray palette. EVERY pixel outside the sharp character silhouette is alpha0; EMPTY TRANSPARENT BACKGROUND ONLY. Do not add any gray/navy glow, vignette, gradient haze behind dark fur, shadow, ground, frame or text. No smooth gradients anywhere, no realistic hair strands, no 3D style. One character only with all appendages inside generous transparent margins. This is a younger different design, not a side-by-side comparison or resized adult.
+
+
+----------------------------------------
+
+GLM · 成年终阶
+选定图片：glm-adult.png
+参考图片：
+- /tmp/kodama-community-refs/glm.webp
+- assets/preview/companions/studies/glm/glm-baby.png
+- /Users/sun/Developer/kodama/assets/preview/companions/studies/gpt-v3-grid-study.png
+- /tmp/kodama-deepseek-frames/idle.png
+
+Use case: stylized-concept. Asset type: one standalone character growth-stage DESIGN STUDY for the Kodama rare AI pet series, not an animation, app screen or contact sheet.
+Reference 1 establishes THIS character's community identity, colors, identifying ornaments and garment language. Adapt this identity carefully; it is not a generic anime child. The GPT reference is STYLE ONLY: match its carefully drawn adorable chibi face, compact silhouette, rich but readable folds and white/colored pixel clusters. Do not import GPT horns, dragon anatomy, white hair or silver knots into unrelated characters. The whale-girl strip is a second STYLE/CRAFT benchmark only, do not copy the whale anatomy or blue-haired design.
+Visual medium: refined contemporary anime game PIXEL ART, deliberately coherent low-resolution flat square clusters enlarged at integer scale, crisp dark selectively colored stepped outlines, readable highlights and shadow ramps, carefully grouped hair/fur and fabric folds. Aim for about 80x80 logical sprite detail with roughly 48-64 selected colors and an appealing meticulously drawn face. No smooth vector art, soft airbrush painting, gradients, 3D plush texture, primitive geometric placeholder art, fine noisy hair strands or fake pixel filter. Make the character highly recognizable with the finish and density of the GPT design reference, using THIS character's own palette.
+Composition: exactly ONE full-body character centered, compact three-quarter view facing slightly to the viewer's left, all limbs and identifying appendages visible and connected correctly, generous transparent margins. A charming natural authored pose, not a stiff mannequin.
+Background: genuinely transparent. No floor, cast shadow, glow, particle effects, fake checkerboard, frame, labels, watermarks, written explanations, other stages, repeated views or extra characters. Any explicitly requested single-letter ornament is part of the character, not a label.
+
+Stage: ADULT FINAL EVOLUTION in Q/chibi pet form. The adult reference determines the complete long-haired character identity and developed original outfit. The juvenile reference establishes family continuity. Keep a large head, short compact limbs and readable pet silhouette rather than realistic adult anatomy. Differentiate adult from juvenile through the longer established hairstyle, fuller garment layers and composed expression. Do not merely enlarge the juvenile, or replace the identity with GPT's white dragon. Tasteful full character presentation with no glamour posing or anatomical exaggeration.
+
+Input map: image 1 actual adult GLM identity; image 2 THIS character's animal baby for fox-ear shape, sleepy eyes, mask and WHITE tail-tip continuity; image 3 GPT adult chibi STYLE ONLY, no dragon anatomy; image 4 whale pixel craft only. One adult fox girl only. Sharp silhouette cutout on a completely empty alpha-zero backdrop: no dark haze, gradient backdrop, outer glow, rim glow or shadow behind black hair/fur/clothing.
+Draw the ADULT final chibi evolution of the selected GLM black FOX girl from reference 1. Compact about 2.5 heads tall, mature through identity and costume, not a realistic adult body. Long black hair reaching beside the skirt, clear grouped navy-blue highlights, two large outward-pointing black FOX ears with white inner fur, ONE big black fluffy fox tail with broad WHITE TIP curling beside the lower body. A black ruffled sleep mask with two closed-eye stitched marks remains pushed above the forehead, decorated with the source's small blue/white ribbons and little silver bells. Cool gray-blue half-lidded thoughtful eyes and a quiet clever smile, visually distinct from Gemini's bright blue/purple heterochromatic cat. Full original black-and-white maid/scholar gown: cream puff sleeves, high ruffled collar, black/navy bow and silver diamond Z-shaped brooch, buttoned dark waist section, layered long black skirt and white apron front with restrained geometric pixel border patterns and blue diamond accents, subtle small tassel/chain, flat small black/white lace-up boots. No revealing cutouts or exaggerated torso. One arm holds the slim black book bearing a small silver diamond-and-Z motif at the chest, the other hand lightly touches the chin in a calm pondering pose. Preserve source mask, fox ear geometry and WHITE tail tip; no extra human ears, cat stripes, dragon horns, duplicate tails or invented accessories.
+
+
+----------------------------------------

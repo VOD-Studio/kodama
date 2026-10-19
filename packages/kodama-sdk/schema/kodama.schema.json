@@ -370,7 +370,7 @@
         },
         {
           "const": "blocks",
-          "description": "半格像素画：每个字符格显示上下两个像素（上半格前景色、下半格背景色），与 `sprite` 是同一套外形与动作。\n需要 UTF-8 与 256 色；高度不小于 10 行时完整显示幼体，约 20 行显示带翅膀的成年形态。",
+          "description": "半格像素画：每个字符格显示上下两个像素（上半格前景色、下半格背景色），与 `sprite` 是同一套外形与动作。\nUTF-8 真彩色终端保留原 RGB；256 色终端按同一网格降色。区域不足时按 `sprite` 同样的规则裁切。",
           "type": "string"
         }
       ]
@@ -525,6 +525,83 @@
           "type": "object"
         }
       ]
+    },
+    "Companion": {
+      "description": "AI 伙伴身份。`deepseek` 三阶段可用，`gpt` 仅成年可用；其余身份或阶段经 `sprite`/`frame` 请求时返回 `bad_input`。",
+      "enum": [
+        "deepseek",
+        "gpt",
+        "claude",
+        "grok",
+        "glm",
+        "kimi",
+        "gemini"
+      ],
+      "type": "string"
+    },
+    "CompanionAction": {
+      "enum": [
+        "idle",
+        "blink",
+        "move",
+        "observe",
+        "eat",
+        "play",
+        "sleep",
+        "startled",
+        "sick",
+        "evolve",
+        "end",
+        "think",
+        "work",
+        "parallel",
+        "build",
+        "error",
+        "complete",
+        "await_confirmation",
+        "organize",
+        "carry",
+        "wake",
+        "poke_left",
+        "poke_right",
+        "tickle",
+        "lift",
+        "praise"
+      ],
+      "type": "string"
+    },
+    "CompanionAppearance": {
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CompanionAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "character": {
+          "$ref": "#/$defs/Companion"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Expression"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "character"
+      ],
+      "type": "object"
     },
     "Context": {
       "description": "本次领取固定的上下文:世界、发行者、请求、资格与规则摘要。",
@@ -718,6 +795,17 @@
       ],
       "type": "object"
     },
+    "Expression": {
+      "enum": [
+        "curious",
+        "focused",
+        "shy",
+        "happy",
+        "startled",
+        "smug"
+      ],
+      "type": "string"
+    },
     "Frame": {
       "properties": {
         "bg": {
@@ -733,6 +821,27 @@
           },
           "type": "array"
         },
+        "bg_rgb": {
+          "description": "`blocks` 每格背景的原始 RGB，null 表示透明/默认色；字符画省略。",
+          "items": {
+            "items": {
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxItems": 3,
+              "minItems": 3,
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
         "colors": {
           "description": "与 rows 逐字符对应的 256 色索引;0 表示不着色。",
           "items": {
@@ -741,6 +850,27 @@
               "maximum": 255,
               "minimum": 0,
               "type": "integer"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "fg_rgb": {
+          "description": "`blocks` 每格前景的原始 RGB，null 表示透明/默认色；真彩色输出应优先使用此网格。\n字符画省略此字段，旧消费方仍可使用 `colors`。",
+          "items": {
+            "items": {
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxItems": 3,
+              "minItems": 3,
+              "type": [
+                "array",
+                "null"
+              ]
             },
             "type": "array"
           },
@@ -779,6 +909,18 @@
       "properties": {
         "charset": {
           "$ref": "#/$defs/Charset"
+        },
+        "companion": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CompanionAppearance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "可选的 AI 伙伴外观；仅影响呈现，不参与出生与养成规则。"
         },
         "genes": {
           "items": {
@@ -1294,8 +1436,20 @@
       "type": "string"
     },
     "PixelInput": {
-      "description": "`sprite` 命令的输入。画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；\n待机时会在画布里来回走动，需要更宽的画布才走得开，例如 96×40。画布更小时以身体中线居中裁切。",
+      "description": "`sprite` 命令的输入。原有物种的画布不小于 56×36 时任何外形与姿态都不会被裁切（最大的是展翅的成年形态）；\n待机时会在画布里来回走动，例如 96×40。AI 伙伴建议 96×96。更小的画布按身体中线裁切。",
       "properties": {
+        "companion": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CompanionAppearance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "可选的 AI 伙伴外观；仅影响呈现，不参与出生与养成规则。"
+        },
         "genes": {
           "items": {
             "format": "uint8",
@@ -1770,7 +1924,7 @@
         ],
         "mutates_state": false,
         "op": "frame",
-        "summary": "将姿态与呈现时钟合成为字符单元网格"
+        "summary": "将姿态与呈现时钟合成为字符单元网格;可选伙伴外观、动作与表情(DeepSeek 三阶段，GPT 仅成年)，其余角色或阶段美术未就绪时返回 bad_input"
       },
       {
         "errors": [
@@ -1778,7 +1932,7 @@
         ],
         "mutates_state": false,
         "op": "sprite",
-        "summary": "将姿态、成长阶段与呈现时钟合成为像素画调色板与网格"
+        "summary": "将姿态、成长阶段与呈现时钟合成为像素画调色板与网格;可选伙伴外观、动作与表情(DeepSeek 三阶段，GPT 仅成年)，其余角色或阶段美术未就绪时返回 bad_input"
       },
       {
         "errors": [

@@ -1,0 +1,66 @@
+Claude 三阶造型稿：完整提示词
+制作方式：内置 image_gen，transparent_background=true。
+只生成静态设计图，不修改代码，不接入运行素材。
+
+Claude · 幼年
+选定图片：claude-baby.png
+参考图片：
+- /tmp/kodama-community-refs/claude.webp
+- assets/preview/companions/studies/gpt/gpt-young.png
+- /tmp/kodama-deepseek-frames/idle.png
+
+Use case: stylized-concept. Asset type: one standalone character growth-stage DESIGN STUDY for the Kodama rare AI pet series, not an animation, app screen or contact sheet.
+Reference 1 establishes THIS character's community identity, colors, identifying ornaments and garment language. Adapt this identity carefully; it is not a generic anime child. The GPT reference is STYLE ONLY: match its carefully drawn adorable chibi face, compact silhouette, rich but readable folds and white/colored pixel clusters. Do not import GPT horns, dragon anatomy, white hair or silver knots into unrelated characters. The whale-girl strip is a second STYLE/CRAFT benchmark only, do not copy the whale anatomy or blue-haired design.
+Visual medium: refined contemporary anime game PIXEL ART, deliberately coherent low-resolution flat square clusters enlarged at integer scale, crisp dark selectively colored stepped outlines, readable highlights and shadow ramps, carefully grouped hair/fur and fabric folds. Aim for about 80x80 logical sprite detail with roughly 48-64 selected colors and an appealing meticulously drawn face. No smooth vector art, soft airbrush painting, gradients, 3D plush texture, primitive geometric placeholder art, fine noisy hair strands or fake pixel filter. Make the character highly recognizable with the finish and density of the GPT design reference, using THIS character's own palette.
+Composition: exactly ONE full-body character centered, compact three-quarter view facing slightly to the viewer's left, all limbs and identifying appendages visible and connected correctly, generous transparent margins. A charming natural authored pose, not a stiff mannequin.
+Background: genuinely transparent. No floor, cast shadow, glow, particle effects, fake checkerboard, frame, labels, watermarks, written explanations, other stages, repeated views or extra characters. Any explicitly requested single-letter ornament is part of the character, not a label.
+Growth invariants: animal first stages must have a complete animal head/muzzle/body rather than a human face in an animal suit. Human first stages stay human and never gain an invented animal lineage. Juveniles must have visibly different proportions, hair length and simplified garment construction from the long-haired adults; do not merely scale down an adult. All youthful designs are innocent, fully modest and child-proportioned, with no adult torso, revealing cut-outs, tall heels or glamour posing.
+
+Input map: image 1 adult identity, image 2 GPT juvenile style only, image 3 whale pixel-craft only.
+Design the HUMAN baby/toddler stage of this orange-haired scholar girl. No crab, shell, animal ears, wings, tail or magical mascot. Head about half of her seated height, short rounded limbs, tiny hands and feet. A warm copper-orange rounded bob with a little uneven fringe, ONE small burnt-orange flower hair clip on the same side as the reference, an understated black ribbon behind it, warm amber-brown eyes with softly relaxed upper lashes, peach cheeks and a quietly curious smile. She sits with knees tucked into a small cream ruffled smock dress; two little cream-socked feet in brown round shoes remain visible. The dress is simple and clearly youthful, with an orange hem panel, a short cream cape collar and a tiny black bow centered by a little orange flower clasp. She holds a small closed brown book with both tiny hands against her lap; the cover has one orange sunburst-flower symbol, no writing. Palette: copper hair, warm ivory, burnt orange, charcoal-black and antique-gold details. Preserve a few deliberate cream folds and warm amber highlights, while keeping the seated baby silhouette soft and compact.
+
+
+----------------------------------------
+
+Claude · 少年
+选定图片：claude-young.png
+参考图片：
+- /tmp/kodama-community-refs/claude.webp
+- assets/preview/companions/studies/claude/claude-baby.png
+- assets/preview/companions/studies/gpt/gpt-young.png
+- /tmp/kodama-deepseek-frames/idle.png
+
+Use case: stylized-concept. Asset type: one standalone character growth-stage DESIGN STUDY for the Kodama rare AI pet series, not an animation, app screen or contact sheet.
+Reference 1 establishes THIS character's community identity, colors, identifying ornaments and garment language. Adapt this identity carefully; it is not a generic anime child. The GPT reference is STYLE ONLY: match its carefully drawn adorable chibi face, compact silhouette, rich but readable folds and white/colored pixel clusters. Do not import GPT horns, dragon anatomy, white hair or silver knots into unrelated characters. The whale-girl strip is a second STYLE/CRAFT benchmark only, do not copy the whale anatomy or blue-haired design.
+Visual medium: refined contemporary anime game PIXEL ART, deliberately coherent low-resolution flat square clusters enlarged at integer scale, crisp dark selectively colored stepped outlines, readable highlights and shadow ramps, carefully grouped hair/fur and fabric folds. Aim for about 80x80 logical sprite detail with roughly 48-64 selected colors and an appealing meticulously drawn face. No smooth vector art, soft airbrush painting, gradients, 3D plush texture, primitive geometric placeholder art, fine noisy hair strands or fake pixel filter. Make the character highly recognizable with the finish and density of the GPT design reference, using THIS character's own palette.
+Composition: exactly ONE full-body character centered, compact three-quarter view facing slightly to the viewer's left, all limbs and identifying appendages visible and connected correctly, generous transparent margins. A charming natural authored pose, not a stiff mannequin.
+Background: genuinely transparent. No floor, cast shadow, glow, particle effects, fake checkerboard, frame, labels, watermarks, written explanations, other stages, repeated views or extra characters. Any explicitly requested single-letter ornament is part of the character, not a label.
+Growth invariants: animal first stages must have a complete animal head/muzzle/body rather than a human face in an animal suit. Human first stages stay human and never gain an invented animal lineage. Juveniles must have visibly different proportions, hair length and simplified garment construction from the long-haired adults; do not merely scale down an adult. All youthful designs are innocent, fully modest and child-proportioned, with no adult torso, revealing cut-outs, tall heels or glamour posing.
+
+Input map: image 1 adult identity; image 2 THIS character's baby design, preserve its face identity, colors and identifying ornaments while growing the body and hairstyle; image 3 GPT juvenile STYLE ONLY; image 4 whale pixel craft only. Draw only the new juvenile, not any reference character or stage lineup.
+Design the HUMAN juvenile scholar stage of Claude, growing directly from the baby's orange-haired identity. About 2.3 heads tall, short childlike limbs, standing compactly. Copper-orange shoulder-length hair, a small half-up gathered strand tied by the existing black ribbon, asymmetric fringe, ONE larger orange flower clip on the same side as the baby/adult, warm amber-brown thoughtful eyes and a gentle slightly knowing smile. Not adult-length hair. A modest youthful cream high-ruffled-collar blouse and layered knee-length cream skirt, short cream shoulder cape with a small orange sunburst-flower embroidered at its edge, simple charcoal waist panel with a few antique-gold buttons, a burnt-orange front skirt tab, black ribbon and orange-flower throat clasp. Full sleeves, cream tights, little brown lace-up ankle boots with flat soles. Both hands hold a small OPEN brown book close to the waist; pages have a few clean non-readable pixel lines and the cover's orange sunburst motif. The book must not hide the face or outfit. Carry forward the baby's warm copper/cream/black/orange palette and flower placement, but make the garment layering and upright posture clearly more developed. No crab or other animal features.
+
+
+----------------------------------------
+
+Claude · 成年终阶
+选定图片：claude-adult.png
+参考图片：
+- /tmp/kodama-community-refs/claude.webp
+- assets/preview/companions/studies/claude/claude-young.png
+- /Users/sun/Developer/kodama/assets/preview/companions/studies/gpt-v3-grid-study.png
+- /tmp/kodama-deepseek-frames/idle.png
+
+Use case: stylized-concept. Asset type: one standalone character growth-stage DESIGN STUDY for the Kodama rare AI pet series, not an animation, app screen or contact sheet.
+Reference 1 establishes THIS character's community identity, colors, identifying ornaments and garment language. Adapt this identity carefully; it is not a generic anime child. The GPT reference is STYLE ONLY: match its carefully drawn adorable chibi face, compact silhouette, rich but readable folds and white/colored pixel clusters. Do not import GPT horns, dragon anatomy, white hair or silver knots into unrelated characters. The whale-girl strip is a second STYLE/CRAFT benchmark only, do not copy the whale anatomy or blue-haired design.
+Visual medium: refined contemporary anime game PIXEL ART, deliberately coherent low-resolution flat square clusters enlarged at integer scale, crisp dark selectively colored stepped outlines, readable highlights and shadow ramps, carefully grouped hair/fur and fabric folds. Aim for about 80x80 logical sprite detail with roughly 48-64 selected colors and an appealing meticulously drawn face. No smooth vector art, soft airbrush painting, gradients, 3D plush texture, primitive geometric placeholder art, fine noisy hair strands or fake pixel filter. Make the character highly recognizable with the finish and density of the GPT design reference, using THIS character's own palette.
+Composition: exactly ONE full-body character centered, compact three-quarter view facing slightly to the viewer's left, all limbs and identifying appendages visible and connected correctly, generous transparent margins. A charming natural authored pose, not a stiff mannequin.
+Background: genuinely transparent. No floor, cast shadow, glow, particle effects, fake checkerboard, frame, labels, watermarks, written explanations, other stages, repeated views or extra characters. Any explicitly requested single-letter ornament is part of the character, not a label.
+
+Stage: ADULT FINAL EVOLUTION in Q/chibi pet form. The adult reference determines the complete long-haired character identity and developed original outfit. The juvenile reference establishes family continuity. Keep a large head, short compact limbs and readable pet silhouette rather than realistic adult anatomy. Differentiate adult from juvenile through the longer established hairstyle, fuller garment layers and composed expression. Do not merely enlarge the juvenile, or replace the identity with GPT's white dragon. Tasteful full character presentation with no glamour posing or anatomical exaggeration.
+
+Input map: image 1 actual adult identity; image 2 THIS character's juvenile for growth continuity; image 3 GPT adult chibi STYLE ONLY, do not copy its dragon features; image 4 whale pixel craft only. Draw exactly one final adult character.
+Draw the ADULT final chibi evolution of the selected community Claude girl. Preserve the actual adult character identity in reference 1, not a new costume or another mascot. A full adult FINAL FORM rendered as a compact collectible anime desktop-pet character, about 2.5 heads tall, with a large carefully drawn face and short compact limbs. Long flowing copper-orange hair now extending nearly to the feet behind the body, asymmetric fringe, the original large burnt-orange flower and black/cream ribbon hair ornament on the same side as the juvenile, warm amber-brown eyes with slightly calmer lowered upper lids and a gentle composed smile. One orange flower clasp over a black bow at the ruffled cream collar. Recreate the original cream layered long gown with charcoal-black panels, burnt-orange front drape, gold-edged hems, tiny warm flower/sunburst embroidery, cream cape shoulders with an orange sunburst, puffed sleeves, buttoned black waist panel and a restrained small chain/tassel. The skirt's silhouette and layers should be more complete and flowing than the juvenile's knee-length dress; small brown lace-up boots peek below. One hand holds the original closed brown book with the orange sunburst-flower cover beside the chest, the other rests naturally at the skirt side. Show the source's full adult outfit identity with chibi readability, not adult anatomical exaggeration. No animal appendages, magic props, floating effects or other characters. Keep the juvenile's copper/cream/black/orange family exactly; increase maturity via long hair, composed face and full garment layers, not taller realistic anatomy.
+
+
+----------------------------------------

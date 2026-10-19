@@ -1,0 +1,66 @@
+Grok 三阶造型稿：完整提示词
+制作方式：内置 image_gen，transparent_background=true。
+只生成静态设计图，不修改代码，不接入运行素材。
+
+Grok · 幼年
+选定图片：grok-baby.png
+参考图片：
+- /tmp/kodama-community-refs/grok.webp
+- assets/preview/companions/studies/gpt/gpt-young.png
+- /tmp/kodama-deepseek-frames/idle.png
+
+Use case: stylized-concept. Asset type: one standalone character growth-stage DESIGN STUDY for the Kodama rare AI pet series, not an animation, app screen or contact sheet.
+Reference 1 establishes THIS character's community identity, colors, identifying ornaments and garment language. Adapt this identity carefully; it is not a generic anime child. The GPT reference is STYLE ONLY: match its carefully drawn adorable chibi face, compact silhouette, rich but readable folds and white/colored pixel clusters. Do not import GPT horns, dragon anatomy, white hair or silver knots into unrelated characters. The whale-girl strip is a second STYLE/CRAFT benchmark only, do not copy the whale anatomy or blue-haired design.
+Visual medium: refined contemporary anime game PIXEL ART, deliberately coherent low-resolution flat square clusters enlarged at integer scale, crisp dark selectively colored stepped outlines, readable highlights and shadow ramps, carefully grouped hair/fur and fabric folds. Aim for about 80x80 logical sprite detail with roughly 48-64 selected colors and an appealing meticulously drawn face. No smooth vector art, soft airbrush painting, gradients, 3D plush texture, primitive geometric placeholder art, fine noisy hair strands or fake pixel filter. Make the character highly recognizable with the finish and density of the GPT design reference, using THIS character's own palette.
+Composition: exactly ONE full-body character centered, compact three-quarter view facing slightly to the viewer's left, all limbs and identifying appendages visible and connected correctly, generous transparent margins. A charming natural authored pose, not a stiff mannequin.
+Background: genuinely transparent. No floor, cast shadow, glow, particle effects, fake checkerboard, frame, labels, watermarks, written explanations, other stages, repeated views or extra characters. Any explicitly requested single-letter ornament is part of the character, not a label.
+Growth invariants: animal first stages must have a complete animal head/muzzle/body rather than a human face in an animal suit. Human first stages stay human and never gain an invented animal lineage. Juveniles must have visibly different proportions, hair length and simplified garment construction from the long-haired adults; do not merely scale down an adult. All youthful designs are innocent, fully modest and child-proportioned, with no adult torso, revealing cut-outs, tall heels or glamour posing.
+
+Input map: image 1 adult identity, image 2 GPT juvenile style only, image 3 whale pixel-craft only.
+Design the HUMAN baby/toddler stage of the established blonde gothic mischievous Grok girl in reference 1. This is NOT a red panda, bear or another product companion. No animal body, actual back wings or tail. A compact seated toddler, about 1.7 heads tall, round body and small hands/feet. Golden-blonde short bob ending in two tiny tied side tufts, black bat-shaped ribbon bows used as HAIR ORNAMENTS, one tiny black crown with antique-gold edging between the tufts, clear bright cobalt-blue eyes, a cheeky little smile with one very small fang. A modest black baby smock dress with a dark-crimson inner ruffle, cream ruffled high neckline and cuffs, an antique-gold X-shaped clasp at the front, just a few gold edging pixels. Fully covered torso, little black socks and round black flat shoes. Sitting with hands resting on her knees, expression playfully proud. No weapon for the baby; the X collar clasp establishes the adult axe's X identity. Blonde/black/crimson/antique-gold palette must be distinctive, not orange Claude colors or GPT lilac.
+
+
+----------------------------------------
+
+Grok · 少年
+选定图片：grok-young.png
+参考图片：
+- /tmp/kodama-community-refs/grok.webp
+- assets/preview/companions/studies/grok/grok-baby.png
+- assets/preview/companions/studies/gpt/gpt-young.png
+- /tmp/kodama-deepseek-frames/idle.png
+
+Use case: stylized-concept. Asset type: one standalone character growth-stage DESIGN STUDY for the Kodama rare AI pet series, not an animation, app screen or contact sheet.
+Reference 1 establishes THIS character's community identity, colors, identifying ornaments and garment language. Adapt this identity carefully; it is not a generic anime child. The GPT reference is STYLE ONLY: match its carefully drawn adorable chibi face, compact silhouette, rich but readable folds and white/colored pixel clusters. Do not import GPT horns, dragon anatomy, white hair or silver knots into unrelated characters. The whale-girl strip is a second STYLE/CRAFT benchmark only, do not copy the whale anatomy or blue-haired design.
+Visual medium: refined contemporary anime game PIXEL ART, deliberately coherent low-resolution flat square clusters enlarged at integer scale, crisp dark selectively colored stepped outlines, readable highlights and shadow ramps, carefully grouped hair/fur and fabric folds. Aim for about 80x80 logical sprite detail with roughly 48-64 selected colors and an appealing meticulously drawn face. No smooth vector art, soft airbrush painting, gradients, 3D plush texture, primitive geometric placeholder art, fine noisy hair strands or fake pixel filter. Make the character highly recognizable with the finish and density of the GPT design reference, using THIS character's own palette.
+Composition: exactly ONE full-body character centered, compact three-quarter view facing slightly to the viewer's left, all limbs and identifying appendages visible and connected correctly, generous transparent margins. A charming natural authored pose, not a stiff mannequin.
+Background: genuinely transparent. No floor, cast shadow, glow, particle effects, fake checkerboard, frame, labels, watermarks, written explanations, other stages, repeated views or extra characters. Any explicitly requested single-letter ornament is part of the character, not a label.
+Growth invariants: animal first stages must have a complete animal head/muzzle/body rather than a human face in an animal suit. Human first stages stay human and never gain an invented animal lineage. Juveniles must have visibly different proportions, hair length and simplified garment construction from the long-haired adults; do not merely scale down an adult. All youthful designs are innocent, fully modest and child-proportioned, with no adult torso, revealing cut-outs, tall heels or glamour posing.
+
+Input map: image 1 adult identity; image 2 THIS character's baby, preserve its identity and colors while growing the body and hairstyle; image 3 GPT juvenile STYLE ONLY; image 4 whale pixel craft only. Draw only the new juvenile.
+Design the HUMAN juvenile stage of this same golden-haired gothic Grok girl, not an animal or a borrowed Ani version. About 2.3 heads tall, childlike proportions, standing with a slight cheeky lean. Blonde twin ponytails now reaching the shoulders rather than the adult's long flowing hair, black bat-shaped hair bows, small black/gold crown, bright cobalt-blue eyes and a confident playful smile with a tiny fang. Keep the baby crown and bow identity clearly continuous. A fully modest high-collared black knee-length layered dress with long puff sleeves, small cream ruffles at neck and cuffs, dark-crimson underskirt and cape-collar lining, restrained antique-gold edging and X-shaped brooch. Black tights and small flat boots, no thigh cut-out, corset-shaped adult torso, high heels or cleavage. Carry a proportional short ceremonial double-axe STAFF at one side: the head has the original black and antique-gold X-crossed double-blade silhouette, compact blunt rounded edges, shorter and much smaller than the adult weapon, no violence or action. Keep it clear of face/hair/body so this remains a pet character, not a weapon illustration. One hand holds the shaft at waist height and the other rests lightly at the hip. No actual back wings, animal ears, tails or extra pets.
+
+
+----------------------------------------
+
+Grok · 成年终阶
+选定图片：grok-adult.png
+参考图片：
+- /tmp/kodama-community-refs/grok.webp
+- assets/preview/companions/studies/grok/grok-young.png
+- /Users/sun/Developer/kodama/assets/preview/companions/studies/gpt-v3-grid-study.png
+- /tmp/kodama-deepseek-frames/idle.png
+
+Use case: stylized-concept. Asset type: one standalone character growth-stage DESIGN STUDY for the Kodama rare AI pet series, not an animation, app screen or contact sheet.
+Reference 1 establishes THIS character's community identity, colors, identifying ornaments and garment language. Adapt this identity carefully; it is not a generic anime child. The GPT reference is STYLE ONLY: match its carefully drawn adorable chibi face, compact silhouette, rich but readable folds and white/colored pixel clusters. Do not import GPT horns, dragon anatomy, white hair or silver knots into unrelated characters. The whale-girl strip is a second STYLE/CRAFT benchmark only, do not copy the whale anatomy or blue-haired design.
+Visual medium: refined contemporary anime game PIXEL ART, deliberately coherent low-resolution flat square clusters enlarged at integer scale, crisp dark selectively colored stepped outlines, readable highlights and shadow ramps, carefully grouped hair/fur and fabric folds. Aim for about 80x80 logical sprite detail with roughly 48-64 selected colors and an appealing meticulously drawn face. No smooth vector art, soft airbrush painting, gradients, 3D plush texture, primitive geometric placeholder art, fine noisy hair strands or fake pixel filter. Make the character highly recognizable with the finish and density of the GPT design reference, using THIS character's own palette.
+Composition: exactly ONE full-body character centered, compact three-quarter view facing slightly to the viewer's left, all limbs and identifying appendages visible and connected correctly, generous transparent margins. A charming natural authored pose, not a stiff mannequin.
+Background: genuinely transparent. No floor, cast shadow, glow, particle effects, fake checkerboard, frame, labels, watermarks, written explanations, other stages, repeated views or extra characters. Any explicitly requested single-letter ornament is part of the character, not a label.
+
+Stage: ADULT FINAL EVOLUTION in Q/chibi pet form. The adult reference determines the complete long-haired character identity and developed original outfit. The juvenile reference establishes family continuity. Keep a large head, short compact limbs and readable pet silhouette rather than realistic adult anatomy. Differentiate adult from juvenile through the longer established hairstyle, fuller garment layers and composed expression. Do not merely enlarge the juvenile, or replace the identity with GPT's white dragon. Tasteful full character presentation with no glamour posing or anatomical exaggeration.
+
+Input map: image 1 actual adult identity; image 2 THIS character's juvenile for growth continuity; image 3 GPT adult chibi STYLE ONLY, do not copy dragon features; image 4 whale pixel craft only. Draw one final adult character.
+Draw the ADULT final chibi evolution of this exact community Grok girl, preserving reference 1's blonde twin-tail gothic royal identity. About 2.5-2.7 heads tall, big expressive blue-eyed face, short compact limbs, collectible desktop-pet proportion rather than a tall fashion model. Golden-blonde twin ponytails now long and flowing beside the skirt, black bat-shaped bow hair ornaments, original black crown with antique-gold rim, slightly pointed elf ears, brilliant cobalt-blue eyes and a cheeky knowing grin with one tiny fang. The grown final costume is the reference's fully developed black/crimson/antique-gold layered gothic gown, high dark-crimson inner collar, cream ruffle neckline/cuffs, shaped but non-exaggerated black torso, bell sleeves, restrained gold celestial/orbit medallions and fine chain loops, long asymmetric skirt panels with crimson ruffle underskirt, dark opaque stockings and small black ankle boots. Keep all pet art tasteful and compact, no sexualized anatomy. Holds the original X-crossed DOUBLE-AXE staff upright at one side: black blades and antique-gold edges, one clearly recognizable X over the blade opening, head around one head-width, shaft about the character height. The axe must be fully in frame and never cover the face, crown or hair; opposite hand lightly pinches the outer skirt edge in a proud friendly pose. The long twin-tails and elaborate skirt clearly differentiate the adult from the short-ponytail juvenile. No panda, actual body wings, tails or borrowed product companions.
+
+
+----------------------------------------
