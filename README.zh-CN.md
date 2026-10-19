@@ -92,6 +92,7 @@ curl -H "authorization: Bearer $T" localhost:8787/v1/pets/me
 | [分发](docs/operations/distribution.md) | 包名、渠道、平台、发版流程 |
 | [服务](docs/operations/service.md) | 运行、接口、身份、已知限制 |
 | [能力目录](packages/kodama-sdk/docs/capabilities.md) | 全部命令、结果类型与错误码（生成） |
+| [角色动作创作技能](.agents/skills/pet-animation-creator/SKILL.md) | 从零设计角色或增补任意动作；支持提示词、透明素材与目标播放器适配 |
 | [PRD-0036](docs/prd/0036-独立电子宠物.md)、[ADR-0021](docs/adr/0021-pet-service-identity-and-activity-contract.md)、[CONTEXT.md](CONTEXT.md) | 产品需求、与接入方的契约、领域术语 |
 | [docs/](docs/) | 参数、成长规则、版本策略、出生协议、素材基线、扩展玩法 |
 

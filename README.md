@@ -92,6 +92,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the toolchain, the commit and pull re
 | [Distribution](docs/operations/distribution.md) | Package names, channels, platforms, release process (Chinese) |
 | [Service](docs/operations/service.md) | Running the service, endpoints, identity, known limitations (Chinese) |
 | [Capabilities](packages/kodama-sdk/docs/capabilities.md) | Every command, result type and error code (Chinese, generated) |
+| [Character animation skill](.agents/skills/pet-animation-creator/SKILL.md) | Design characters or add arbitrary actions; prompts, transparent assets, and target-player adaptation (Chinese) |
 | [PRD-0036](docs/prd/0036-独立电子宠物.md), [ADR-0021](docs/adr/0021-pet-service-identity-and-activity-contract.md), [CONTEXT.md](CONTEXT.md) | Product requirements, the contract with integrating sites, domain terms (Chinese) |
 | [docs/](docs/) | Parameters, growth rules, versioning, birth protocol, art baseline, extensions (Chinese) |
 
