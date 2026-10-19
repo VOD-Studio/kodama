@@ -70,7 +70,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@types/node": "^26",
     "ajv": "^8",
     "fake-indexeddb": "^6",
     "json-schema-to-typescript": "^16",
