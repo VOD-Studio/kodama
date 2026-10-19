@@ -107,6 +107,7 @@ crates/service/kodama-service/src/
 
 ```
 kodama/
+├── .agents/skills/<技能>/    可复用的智能体工作流，每项以 SKILL.md 为入口
 ├── crates/<层>/<crate>/      Rust，按层分组（见上文）
 ├── packages/<包>/            npm 包：kodama-sdk 即 @violetjs/kodama
 ├── assets/                   美术及其记录：目前是 catalog/species.json

@@ -20,7 +20,7 @@ const problems: string[] = [];
 // 根目录白名单：工具约定必须在根目录的文件，以及按用途划分的顶层目录。
 const ROOT_ENTRIES = new Set([
 	// 目录
-	".github", "assets", "crates", "docker", "docs", "packages", "scripts", "tests",
+	".agents", ".github", "assets", "crates", "docker", "docs", "packages", "scripts", "tests",
 	// Rust 工具约定的位置
 	"Cargo.toml", "Cargo.lock", "rustfmt.toml", "deny.toml",
 	// 入口与说明

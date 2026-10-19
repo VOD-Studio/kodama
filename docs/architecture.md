@@ -107,6 +107,7 @@ Public paths do not depend on the internal layout: `kodama_core` re-exports ever
 
 ```
 kodama/
+├── .agents/skills/<skill>/   reusable agent workflows, each with a SKILL.md entry
 ├── crates/<layer>/<crate>/   Rust, grouped by layer (see above)
 ├── packages/<package>/       npm packages: kodama-sdk is @violetjs/kodama
 ├── assets/                   art and its records: catalog/species.json today
