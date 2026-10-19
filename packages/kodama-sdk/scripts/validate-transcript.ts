@@ -12,7 +12,7 @@ const check = (name: string) => {
 };
 
 const transcript = fs.readFileSync(new URL("../../../target/out-native.txt", import.meta.url), "utf8").trim().split("\n");
-const ops = ["birth", ...JSON.parse(fs.readFileSync(new URL("../../../tests/fixtures/steps.json", import.meta.url), "utf8")).map(() => "act"), "verify_birth", "verify_birth", "verify_birth", ...Array(5).fill("frame"), ...Array(6).fill("sprite"), "grant", "evolution_options", "act", ...Array(4).fill("act"), ...Array(5).fill("act"), ...Array(3).fill("sprite"), "frame", ...Array(6).fill("sprite"), ...Array(21).fill("sprite"), ...Array(8).fill("frame"), ...Array.from({ length: 6 }, () => ["sprite", "frame"]).flat(), "capabilities"];
+const ops: string[] = JSON.parse(fs.readFileSync(new URL("../../../target/ops-native.json", import.meta.url), "utf8"));
 if (ops.length !== transcript.length) throw new Error(`op count ${ops.length} != transcript ${transcript.length}`);
 
 let n = 0;

@@ -189,6 +189,8 @@ CAPABILITIES (kodama-core::caps) ───────────────�
 
 Generated files are committed. `make schema` regenerates them, and `make schema-check` (CI Core job) fails if they are stale, validates real responses against the schema, and compiles positive and negative type tests. A new command has to be registered in `CAPABILITIES`, or the tests fail.
 
+Run `make three-end` first to produce `target/out-native.txt` and its matching `target/ops-native.json`. Schema validation uses the operations recorded during execution to choose each response type; scenario additions do not require a separate operation-count or ordering list.
+
 Encoding rules: 64-bit integers are decimal strings (JavaScript numbers lose precision above 2^53), every response is `{ok:true,value}` or `{ok:false,code,message}`, and callers branch on `code`.
 
 ## Determinism and compatibility

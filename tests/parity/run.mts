@@ -1,11 +1,16 @@
 // 用法: node run.mts native|wasm  —— 输出完整转录,三端逐字节比较
+// native 同时记录 target/ops-native.json，供 schema 校验逐行匹配真实操作。
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 const mode = process.argv[2];
 const steps = JSON.parse(fs.readFileSync(new URL("../fixtures/steps.json", import.meta.url), "utf8"));
+const ops: string[] = [];
 let exec: (line: string) => string;
 if (mode === "native") {
-  exec = (line: string) => execFileSync("../../target/release/kodama", { input: line + "\n", cwd: new URL(".", import.meta.url).pathname }).toString().trim();
+  exec = (line: string) => {
+    ops.push(JSON.parse(line).op);
+    return execFileSync("../../target/release/kodama", { input: line + "\n", cwd: new URL(".", import.meta.url).pathname }).toString().trim();
+  };
 } else {
   const m = await import(process.argv[3]);
   exec = m.execute;
@@ -87,4 +92,5 @@ for (const stage of [0, 1, 2]) {
   }
 }
 out.push(exec(JSON.stringify({ op: "capabilities" })));
+if (mode === "native") fs.writeFileSync(new URL("../../target/ops-native.json", import.meta.url), JSON.stringify(ops));
 console.log(out.join("\n"));

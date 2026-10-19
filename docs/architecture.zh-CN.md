@@ -189,6 +189,8 @@ CAPABILITIES（kodama-core::caps）───────────────
 
 生成的文件随仓库提交。`make schema` 重新生成；`make schema-check`（CI 的 Core 作业）在生成物过期时失败，用 schema 校验真实响应，并编译正反两组类型测试。新增命令必须在 `CAPABILITIES` 登记，否则测试失败。
 
+先运行 `make three-end`，生成 `target/out-native.txt` 及其配套的 `target/ops-native.json`。schema 校验根据执行时记录的真实操作逐行选择响应类型；新增场景不需要另行维护操作数量或顺序列表。
+
 编码规则：64 位整数编码为十进制字符串（JavaScript 的 number 超过 2^53 会失去精度）；每个响应都是 `{ok:true,value}` 或 `{ok:false,code,message}`，调用方按 `code` 分支。
 
 ## 确定性与兼容
