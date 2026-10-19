@@ -44,6 +44,7 @@ make lint test       # 或：make docker-ci
 另外运行与改动相关的检查：改规则跑 `make three-end`，改线上协议跑 `make schema` 与 `make schema-check`，改服务跑 `make e2e`，改 CLI 跑 `make tty`。[docs/architecture.zh-CN.md](docs/architecture.zh-CN.md) 里有验证对照表，以及常见改动该动哪些文件。
 
 - **格式**使用 rustfmt 默认风格（`rustfmt.toml` 只设了稳定版选项）。一次性的全量格式化提交记录在 `.git-blame-ignore-revs` 里；执行 `git config blame.ignoreRevsFile .git-blame-ignore-revs` 后，`git blame` 会跳过它，GitHub 的 blame 视图已自动跳过。
+- **Clippy** 在 CI 中使用最新 Rust stable，并将警告视为错误。本机工具链较旧时，先执行 `rustup update stable` 再运行 `make clippy`；修正新增 lint 指出的代码，不要通过关闭检查绕过。
 - **生成的文件**（`packages/kodama-sdk/schema/`、`src/types.d.ts`、`docs/capabilities.md`）随仓库提交。用 `make schema` 重新生成，不要手改。
 - **架构规则**由 `make check-arch` 检查。新增 crate 或 crate 之间的依赖时，在同一个 PR 里更新 `scripts/check/check-arch.mts` 的表与 `docs/architecture.md`。
 

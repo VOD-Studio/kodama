@@ -67,7 +67,7 @@ fn clip_name(action: Action, expression: Option<Expression>) -> &'static str {
 fn decode(frame: &data::Frame) -> Vec<u8> {
     let (_, offset, length) = *frame;
     let mut pixels = Vec::with_capacity(data::WIDTH * data::HEIGHT);
-    for run in data::DATA[offset..offset + length].chunks_exact(2) {
+    for run in data::DATA[offset..offset + length].as_chunks::<2>().0 {
         pixels.extend(core::iter::repeat_n(run[1], usize::from(run[0])));
     }
     pixels
@@ -107,7 +107,9 @@ pub(super) fn render(
         }
     };
     let rows = pixels
-        .chunks_exact(data::WIDTH)
+        .as_chunks::<{ data::WIDTH }>()
+        .0
+        .iter()
         .map(|row| row.iter().map(|&i| key_of(i)).collect::<String>())
         .collect();
     let palette: BTreeMap<String, String> = data::COLORS
@@ -129,7 +131,9 @@ mod tests {
 
     fn expected_rows(frame: &data::Frame) -> Vec<String> {
         decode(frame)
-            .chunks_exact(69)
+            .as_chunks::<69>()
+            .0
+            .iter()
             .map(|row| {
                 row.iter()
                     .map(|&index| {
@@ -173,7 +177,7 @@ mod tests {
                 );
                 let mut cells = 0usize;
                 let mut visible = false;
-                for pair in data::DATA[offset..end].chunks_exact(2) {
+                for pair in data::DATA[offset..end].as_chunks::<2>().0 {
                     assert!(pair[0] > 0, "{name}: empty RLE runs are invalid");
                     assert!(
                         usize::from(pair[1]) <= data::COLORS.len(),

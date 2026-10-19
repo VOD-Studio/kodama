@@ -44,6 +44,7 @@ make lint test       # or: make docker-ci
 Run the narrower checks that match your change as well: `make three-end` for rules, `make schema` and `make schema-check` for the wire protocol, `make e2e` for the service, `make tty` for the CLI. [docs/architecture.md](docs/architecture.md) has a verification map and a table of which files to touch for common changes.
 
 - **Formatting** is plain rustfmt (`rustfmt.toml` sets only stable options). The one-time reformatting commit is listed in `.git-blame-ignore-revs`; run `git config blame.ignoreRevsFile .git-blame-ignore-revs` so that `git blame` skips it. GitHub's blame view already does.
+- **Clippy** runs on the latest Rust stable in CI with warnings treated as errors. If your local toolchain is older, run `rustup update stable` before `make clippy`; fix code flagged by new lints instead of disabling checks.
 - **Generated files** (`packages/kodama-sdk/schema/`, `src/types.d.ts`, `docs/capabilities.md`) are committed. Regenerate them with `make schema` and never edit them by hand.
 - **Architecture rules** are checked by `make check-arch`. To add a crate or a dependency between crates, update the table in `scripts/check/check-arch.mts` and `docs/architecture.md` in the same pull request.
 

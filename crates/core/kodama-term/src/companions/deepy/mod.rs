@@ -48,7 +48,7 @@ fn animation(action: Action, t: u64) -> &'static str {
 fn decode(frame: &data::Frame) -> Vec<u16> {
     let (_, offset, length) = *frame;
     let mut pixels = Vec::with_capacity(SOURCE_W * SOURCE_H);
-    for run in data::DATA[offset..offset + length].chunks_exact(3) {
+    for run in data::DATA[offset..offset + length].as_chunks::<3>().0 {
         let color = u16::from_le_bytes([run[1], run[2]]);
         pixels.extend(core::iter::repeat_n(color, usize::from(run[0])));
     }
@@ -113,7 +113,9 @@ pub(super) fn render(action: Action, t: u64) -> crate::Pixels {
         .map(|(index, &id)| (id, display_key(index + 1)))
         .collect();
     let rows = samples
-        .chunks_exact(DISPLAY_W)
+        .as_chunks::<DISPLAY_W>()
+        .0
+        .iter()
         .map(|row| {
             row.iter()
                 .map(|id| if *id == 0 { '.' } else { keys[id] as char })

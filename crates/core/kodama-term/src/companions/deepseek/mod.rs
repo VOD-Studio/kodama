@@ -87,7 +87,7 @@ fn decode(key: &str, action: Action, t: u64) -> Option<crate::Pixels> {
     }
     let (_, offset, len, _, _) = *selected;
     let mut pixels = Vec::with_capacity(W * H);
-    for run in data::DATA[offset..offset + len].chunks_exact(2) {
+    for run in data::DATA[offset..offset + len].as_chunks::<2>().0 {
         pixels.extend(core::iter::repeat_n(run[1], usize::from(run[0])));
     }
     if pixels.len() != W * H {
@@ -105,7 +105,9 @@ fn decode(key: &str, action: Action, t: u64) -> Option<crate::Pixels> {
         })
         .collect::<BTreeMap<_, _>>();
     let rows = pixels
-        .chunks_exact(W)
+        .as_chunks::<W>()
+        .0
+        .iter()
         .map(|row| {
             row.iter()
                 .map(|&id| data::KEYS[usize::from(id)] as char)
@@ -137,13 +139,17 @@ mod tests {
                 let runs = &data::DATA[offset..offset + length];
                 assert_eq!(runs.len() % 2, 0);
                 assert_eq!(
-                    runs.chunks_exact(2)
+                    runs.as_chunks::<2>()
+                        .0
+                        .iter()
                         .map(|r| usize::from(r[0]))
                         .sum::<usize>(),
                     W * H
                 );
                 assert!(runs
-                    .chunks_exact(2)
+                    .as_chunks::<2>()
+                    .0
+                    .iter()
                     .all(|r| usize::from(r[1]) < data::COLORS.len()));
             }
         }
